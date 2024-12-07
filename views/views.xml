@@ -127,7 +127,7 @@
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='detailed_type']" position="after">
-                <field name="brand_ids" 
+                <field name="sku_ids" 
                        widget="many2many_tags"
                       />
             </xpath>
@@ -144,9 +144,13 @@
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="replace">
                 <field name="filtered_product_id"/>
+                 <field name="filtered_product_ids" widget="many2many_tags" 
+                       options="{'no_create': True}" invisible="1" />
             </xpath>
         </field>
     </record>
+
+  
 
     <record id="view_purchase_order_form_inherit_brand" model="ir.ui.view">
         <field name="name">purchase.order.form.inherit.brand</field>
