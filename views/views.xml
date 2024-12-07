@@ -140,7 +140,8 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="brand_id" options="{'no_create': True}" />
+                <field name="brand_id" options="{'no_create': True}" /> 
+                <field name="sku_id" options="{'no_create': True}"  invisible="brand_id == False" /> 
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="replace">
                 <field name="filtered_product_id"/>

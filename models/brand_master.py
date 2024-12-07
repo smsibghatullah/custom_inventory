@@ -9,7 +9,7 @@ class BrandMaster(models.Model):
     printable_formats = fields.Char(string='Printable Formats')  
     email_smtp_settings = fields.Char(string='Email')
     terms_conditions = fields.Text(string='Terms & Conditions')
-    bank_account_details = fields.Char(string='Bank Account Details')
+    bank_account_details = fields.Text(string='Bank Account Details')
     address = fields.Text(string='Address') 
 
 class ProductProduct(models.Model):
@@ -35,7 +35,16 @@ class SaleOrder(models.Model):
     brand_id = fields.Many2one(
         'brand.master', 
         string='Brand',
+         required=True,
         help='Select the brand associated with this sale order'
+    )
+
+    sku_id = fields.Many2one(
+        'sku.type.master',
+        string='SKU',
+        domain="[('brand_id', '=', brand_id)]",
+         required=True,
+        help='Select the SKU associated with the selected brand'
     )
 
 
@@ -48,6 +57,7 @@ class ProductTemplate(models.Model):
         'product_id',
         'sku_id',
         string='SKUs',
+        required=True
     )
     is_brand_matched = fields.Boolean(string='Is Brand Matched', default=False)
 
@@ -79,8 +89,9 @@ class SaleOrderLine(models.Model):
         for line in self:
             if line.order_id and line.order_id.brand_id:
                 brand_id = line.order_id.brand_id.id
+                sku_id = line.order_id.sku_id.id
                 matching_products = self.env['product.template'].search([
-                    ('sku_ids.brand_id', '=', brand_id),
+                    ('sku_ids', '=', sku_id),
                 ])
                 line.filtered_product_ids = matching_products
             else:

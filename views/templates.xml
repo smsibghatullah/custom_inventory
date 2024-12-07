@@ -25,7 +25,7 @@
               <t t-if="doc.brand_id">
                 <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <div>
-                            <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 50px; max-width: 100px;" />
+                            <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 100px; max-width: 150px;" />
                         </div>
                         <div style="margin-left: 10px;">
                              <span t-field="doc.brand_id.name" />
@@ -57,7 +57,7 @@
             <t t-if="doc.brand_id">
                 <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <div>
-                            <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 50px; max-width: 100px;" />
+                            <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 100px; max-width: 150px;" />
                         </div>
                         <div style="margin-left: 10px;">
                              <span t-field="doc.brand_id.name" />
@@ -98,6 +98,10 @@
                 <div t-if="doc.user_id.name" class="col-auto col-3 mw-100 mb-2">
                     <strong>Salesperson:</strong><br/>
                     <span class="m-0" t-field="doc.user_id">Mitchell Admin</span>
+                </div>
+                 <div t-if="doc.brand_id.bank_account_details" class="col-auto col-3 mw-100 mb-2">
+                    <strong>Brand Bank Account:</strong><br/>
+                    <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
                 </div>
             </div>
 
