@@ -7,7 +7,7 @@ class BrandMaster(models.Model):
     name = fields.Char(string='Brand', required=True)
     logo = fields.Binary(string='Logo')
     printable_formats = fields.Char(string='Printable Formats')  
-    email_smtp_settings = fields.Char(string='Email')
+    email_smtp_settings = fields.Char(string='Email',required=True)
     terms_conditions = fields.Text(string='Terms & Conditions')
     bank_account_details = fields.Text(string='Bank Account Details')
     address = fields.Text(string='Address') 

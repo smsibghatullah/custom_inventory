@@ -197,6 +197,7 @@
                         </table>
                     </div>
                 </div>
+                <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
                 <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                       <strong>Terms and Conditions:</strong>
                 <div t-field="doc.brand_id.terms_conditions" />
@@ -217,7 +218,7 @@
                 </div>
             </div>
             <div>
-                <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
+               
                 <p t-if="not is_html_empty(doc.payment_term_id.note)">
                     <span t-field="doc.payment_term_id.note">The payment should also be transmitted with love</span>
                 </p>
