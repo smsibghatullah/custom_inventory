@@ -29,7 +29,11 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'depends': ['base','stock','sale','purchase','account'],
 
     'data': [
-        'views/views.xml',
+        'views/brand_view.xml',
+        'views/invoice_view.xml',
+        'views/purchase_order_view.xml',
+        'views/sale_order_view.xml',
+        'views/sku_master_view.xml',
         'views/templates.xml',
         'security/ir.model.access.csv',
     ],

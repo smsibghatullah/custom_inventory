@@ -1,0 +1,71 @@
+<odoo>
+  <data>
+   <record id="view_tree_brand_master" model="ir.ui.view">
+        <field name="name">Brand Master Tree</field>
+        <field name="model">brand.master</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="terms_conditions"/>
+                <field name="printable_formats"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_brand_master" model="ir.ui.view">
+        <field name="name">Brand Master Form</field>
+        <field name="model">brand.master</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="logo" widget="image"/>
+                        <field name="printable_formats"/>
+                        <field name="so_email"/>
+                        <field name="po_email"/>
+                        <field name="inv_email"/>
+                        <field name="terms_conditions"/>
+                        <field name="bank_account_details"/>
+                        <field name="address" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+
+    <record id="action_brand_master" model="ir.actions.act_window">
+        <field name="name">Brand</field>
+        <field name="res_model">brand.master</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem id="menu_inventory_master" name="Brand" sequence="1"/>
+
+    <menuitem id="menu_inventory_brand_master"
+              name="Brand"
+              parent="menu_inventory_master"
+              action="action_brand_master"
+              sequence="10" />
+
+  
+
+     <record id="view_product_template_form_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.brand</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='detailed_type']" position="after">
+                <field name="sku_ids" 
+                       widget="many2many_tags"
+                      />
+            </xpath>
+        </field>
+    </record>
+
+  </data>
+</odoo>

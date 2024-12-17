@@ -1,0 +1,47 @@
+ <odoo>
+  <data>
+ 
+     <record id="view_tree_sku_type_master" model="ir.ui.view">
+        <field name="name">SKU Type Master Tree</field>
+        <field name="model">sku.type.master</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sku_id"/>
+                <field name="name"/>
+                <field name="brand_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_sku_type_master" model="ir.ui.view">
+        <field name="name">SKU Type Master Form</field>
+        <field name="model">sku.type.master</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="sku_id"/>
+                        <field name="name"/>
+                        <field name="brand_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sku_type_master" model="ir.actions.act_window">
+        <field name="name">SKU Type Master</field>
+        <field name="res_model">sku.type.master</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_inventory_sku_type_master"
+            name="SKU Type Master"
+            parent="menu_inventory_master"
+            action="action_sku_type_master"
+            sequence="20" />
+
+
+
+  </data>
+</odoo>
