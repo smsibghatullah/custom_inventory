@@ -37,7 +37,7 @@ class ProductTemplate(models.Model):
         'product_sku_rel',
         'product_id',
         'sku_id',
-        string='SKUs',
+        string='Categories',
         required=True
     )
     is_brand_matched = fields.Boolean(string='Is Brand Matched', default=False)

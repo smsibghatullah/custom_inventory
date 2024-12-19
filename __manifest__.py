@@ -26,7 +26,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'category': 'Inventory',
     'version': '1.0',
 
-    'depends': ['base','stock','sale','purchase','account'],
+    'depends': ['base','stock','sale','purchase','account','purchase_stock'],
 
     'data': [
         'views/brand_view.xml',

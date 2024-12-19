@@ -16,10 +16,10 @@ class AccountMove(models.Model):
         'sku.type.master',
         'account_sku_rel',
         'product_id',
-        string='SKU',
+        string='Categories',
         domain="[('brand_id', '=', brand_id)]",
          required=True,
-        help='Select the SKU associated with the selected brand'
+        help='Select the Categories associated with the selected brand'
     )
 
     @api.onchange('brand_id')
