@@ -17,6 +17,37 @@
                 <field name="filtered_product_id"/>
                 <field name="filtered_product_ids" widget="many2many_tags" options="{'no_create': True}" invisible="1"/>
             </xpath>
+
+            <xpath expr="//field[@name='note']" position="after">
+                    <group><field name="text_fields">
+                        <tree editable="top">
+                            <field name="text_field"></field>
+                            <field name="text_value"></field>
+                        </tree>
+                        </field>
+                    </group>
+                    <group>
+                        <field name="checkbox_fields">
+                            <tree editable="top">
+                                <field name="checkbox_field"></field>
+                                <field name="checkbox_value"></field>
+                            </tree>
+                        </field>
+                    </group>
+                    <group>
+                            <field name="selection_fields">
+                                <tree editable="top">
+                                <field name="selection_field"/>
+                                <field name="selection_value" invisible="1"/>
+                                <field name="selected_value"/>
+                                <!-- Add the computed field as invisible -->
+                                <field name="selection_value_ids" invisible="1"/>
+                                </tree>
+                            </field>
+                    </group>
+            </xpath>
+
+
         </field>
     </record>
 

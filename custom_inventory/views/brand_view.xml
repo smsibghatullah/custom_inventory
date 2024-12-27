@@ -29,6 +29,29 @@
                         <field name="bank_account_details"/>
                         <field name="address" />
                     </group>
+                    <group><field name="text_fields">
+                        <tree editable="top">
+                            <field name="text_field"></field>
+                            <field name="text_value"></field>
+                        </tree>
+                        </field>
+                    </group>
+                    <group>
+                        <field name="checkbox_fields">
+                            <tree editable="top">
+                                <field name="checkbox_field"></field>
+                                <field name="checkbox_value"></field>
+                            </tree>
+                        </field>
+                    </group>
+                    <group>
+                        <field name="selection_fields">
+                            <tree editable="top">
+                                <field name="selection_field"></field>
+                                <field name="selection_value"></field>
+                            </tree>
+                        </field>
+                    </group>
                 </sheet>
             </form>
         </field>

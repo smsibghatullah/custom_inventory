@@ -4,4 +4,7 @@ access_sku_type_master,sku.type.master_access,model_sku_type_master,base.group_u
 access_sale_order_email_wizard,sale.order.email.wizard_access,model_sale_order_email_wizard,base.group_user,1,1,1,1
 access_purchase_order_email_wizard,purchase.order.email.wizard_access,model_purchase_order_email_wizard,base.group_user,1,1,1,1
 access_invoice_order_email_wizard,invoice.order.email.wizard_access,model_invoice_order_email_wizard,base.group_user,1,1,1,1
-
+access_dynamic_field_text,name_dynamic_field_text,model_dynamic_field_text,base.group_user,1,1,1,1
+access_dynamic_field_checkbox,name_dynamic_field_checkbox,model_dynamic_field_checkbox,base.group_user,1,1,1,1
+access_dynamic_field_selection_key,name_dynamic_field_selection_key,model_dynamic_field_selection_key,base.group_user,1,1,1,1
+access_dynamic_field_selection_values,name_dynamic_field_selection_values,model_dynamic_field_selection_values,base.group_user,1,1,1,1

@@ -25,6 +25,38 @@ class SaleOrder(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
+    text_fields = fields.Many2many('dynamic.field.text')
+    checkbox_fields = fields.Many2many('dynamic.field.checkbox')
+    selection_fields = fields.Many2many('dynamic.field.selection.key')
+
+
+    @api.onchange('text_fields','brand_id','checkbox_fields')
+    def _onchange_text_fields(self):
+        for line in self:
+            if line.brand_id:
+                print( line.brand_id.text_fields.ids)
+                print(line.brand_id.checkbox_fields)
+                print("00000000000000000000000000000")
+                line.text_fields = line.brand_id.text_fields.ids
+                line.checkbox_fields = line.brand_id.checkbox_fields.ids
+                line.selection_fields = line.brand_id.selection_fields.ids
+                return  {'domain': {'text_fields': line.brand_id.text_fields.ids, 'checkbox_fields': line.brand_id.checkbox_fields.ids,
+                                    'selection_fields':line.brand_id.selection_fields.ids}}
+            else:
+                return {'domain': {'text_fields': [],
+                                   'checkbox_fields': [],
+                                   'selection_fields': []}}
+
+    @api.onchange('selection_fields')
+    def _onchange_selected_value(self):
+        for line in self:
+            if line.selection_fields.selection_value:
+                return  {'domain': {'selected_value': line.selection_fields.selection_value.ids}}
+            else:
+                return {'domain': {'selected_value': []}}
+
+
+
     def _prepare_invoice(self):
         """
         Prepare the dict of values to create the new invoice for a sales order. This method may be

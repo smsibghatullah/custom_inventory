@@ -203,6 +203,27 @@
                             <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
                         </div>
                 </t>
+
+
+               <t t-foreach="doc.text_fields" t-as="text_field">
+                   <div class="mt-4">
+                    <strong t-field="text_field.text_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                    <span t-field="text_field.text_value" style="display: inline-block;"></span>
+                </div>
+               </t>
+
+               <t t-foreach="doc.checkbox_fields" t-as="checkbox_field">
+                   <div class="mt-4">
+                    <strong t-field="checkbox_field.checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                    <span t-field="checkbox_field.checkbox_value" style="display: inline-block;"></span>
+                </div>
+               </t>
+               <t t-foreach="doc.selection_fields" t-as="selection_field">
+                   <div class="mt-4">
+                    <strong t-field="selection_field.selection_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                    <span t-field="selection_field.selected_value" style="display: inline-block;"></span>
+                </div>
+               </t>
                 <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                       <strong>Terms and Conditions:</strong>
                 <div t-field="doc.brand_id.terms_conditions" />

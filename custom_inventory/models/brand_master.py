@@ -14,7 +14,11 @@ class BrandMaster(models.Model):
     inv_email = fields.Char(string='Invoice Email')
     terms_conditions = fields.Text(string='Terms & Conditions')
     bank_account_details = fields.Text(string='Bank Account Details')
-    address = fields.Text(string='Address') 
+    address = fields.Text(string='Address')
+    text_fields = fields.Many2many('dynamic.field.text')
+    checkbox_fields = fields.Many2many('dynamic.field.checkbox')
+    selection_fields = fields.Many2many('dynamic.field.selection.key')
+
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
