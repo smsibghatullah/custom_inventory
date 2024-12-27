@@ -25,9 +25,9 @@ class SaleOrder(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
-    text_fields = fields.Many2many('dynamic.field.text')
-    checkbox_fields = fields.Many2many('dynamic.field.checkbox')
-    selection_fields = fields.Many2many('dynamic.field.selection.key')
+    text_fields = fields.One2many('dynamic.field.text', 'sale_order_id' )
+    checkbox_fields = fields.One2many('dynamic.field.checkbox', 'sale_order_id')
+    selection_fields = fields.One2many('dynamic.field.selection.key', 'sale_order_id')
 
 
     @api.onchange('text_fields','brand_id','checkbox_fields')

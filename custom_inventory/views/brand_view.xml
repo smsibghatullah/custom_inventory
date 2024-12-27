@@ -30,7 +30,7 @@
                         <field name="address" />
                     </group>
                     <group><field name="text_fields">
-                        <tree editable="top">
+                        <tree editable="bottom">
                             <field name="text_field"></field>
                             <field name="text_value"></field>
                         </tree>
@@ -38,7 +38,7 @@
                     </group>
                     <group>
                         <field name="checkbox_fields">
-                            <tree editable="top">
+                            <tree editable="bottom">
                                 <field name="checkbox_field"></field>
                                 <field name="checkbox_value"></field>
                             </tree>
@@ -46,10 +46,19 @@
                     </group>
                     <group>
                         <field name="selection_fields">
-                            <tree editable="top">
-                                <field name="selection_field"></field>
-                                <field name="selection_value"></field>
+                            <tree>
+                                <field name="selection_field"/>
+                                <field name="selection_value">
+                                </field>
                             </tree>
+                            <form>
+                                <field name="selection_field"/>
+                                <field name="selection_value">
+                                    <tree editable="bottom" >
+                                        <field name="value_field"/>
+                                    </tree>
+                                </field>
+                            </form>
                         </field>
                     </group>
                 </sheet>

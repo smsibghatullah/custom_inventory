@@ -15,9 +15,10 @@ class BrandMaster(models.Model):
     terms_conditions = fields.Text(string='Terms & Conditions')
     bank_account_details = fields.Text(string='Bank Account Details')
     address = fields.Text(string='Address')
-    text_fields = fields.Many2many('dynamic.field.text')
-    checkbox_fields = fields.Many2many('dynamic.field.checkbox')
-    selection_fields = fields.Many2many('dynamic.field.selection.key')
+    text_fields = fields.One2many('dynamic.field.text', 'brand_id', string='Text Fields')
+    checkbox_fields = fields.One2many('dynamic.field.checkbox', 'brand_id', string='Checkbox Fields')
+    selection_fields = fields.One2many('dynamic.field.selection.key', 'brand_id', string='Selection Fields')
+
 
 
 class ProductProduct(models.Model):

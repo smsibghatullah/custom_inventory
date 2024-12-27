@@ -7,6 +7,9 @@ class DynamicFieldText(models.Model):
     _name = 'dynamic.field.text'
     _description = 'Dynamic field for text'
 
+    brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
+    sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
+
     text_field = fields.Char('')
     text_value = fields.Char('')
 
@@ -14,6 +17,9 @@ class DynamicFieldText(models.Model):
 class DynamicFieldCheckbox(models.Model):
     _name = 'dynamic.field.checkbox'
     _description = 'Dynamic field for checkbox'
+
+    brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
+    sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
 
     checkbox_field = fields.Char('')
     checkbox_value = fields.Boolean('')
@@ -23,6 +29,9 @@ class DynamicFieldSelection(models.Model):
     _description = 'Dynamic field for selection'
 
     selection_field = fields.Char('')
+    sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
+    brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
+
     selection_value = fields.One2many('dynamic.field.selection.values', 'key_field')
     selection_value_ids = fields.One2many('dynamic.field.selection.values', 'key_field',
                                           compute='_compute_selection_value_ids')
