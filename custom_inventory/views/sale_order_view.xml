@@ -8,9 +8,21 @@
         <field name="arch" type="xml">
             <header>
                 <button name="action_send_report_email" type="object" string="Send Email" class="btn-primary"/>
+                <button name="action_revise_order" type="object" string="Revision" class="btn-primary" invisible="state != 'draft'"/>
             </header>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        name="action_view_revisions"
+                        type="object"
+                        icon="fa-pencil-square-o"
+                        invisible="revision_number_count == 0">
+                    <field string="Revisions" name="revision_number_count" widget="statinfo"/>
+                </button>
+            </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="brand_id" options="{'no_create': True}" /> 
+                <field name="revision_number" />
+                <field name="revision_number_count" />
                 <field name="sku_ids" options="{'no_create': True}" invisible="brand_id == False"  widget="many2many_tags" /> 
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="replace">
@@ -19,32 +31,28 @@
             </xpath>
 
             <xpath expr="//field[@name='note']" position="after">
-                    <group><field name="text_fields">
+                    <field name="text_fields">
                         <tree editable="top">
                             <field name="text_field"></field>
                             <field name="text_value"></field>
                         </tree>
                         </field>
-                    </group>
-                    <group>
+                    
                         <field name="checkbox_fields">
                             <tree editable="top">
                                 <field name="checkbox_field"></field>
                                 <field name="checkbox_value"></field>
                             </tree>
                         </field>
-                    </group>
-                    <group>
-                            <field name="selection_fields">
-                                <tree editable="top">
-                                <field name="selection_field"/>
-                                <field name="selection_value" invisible="1"/>
-                                <field name="selected_value"/>
-                                <!-- Add the computed field as invisible -->
-                                <field name="selection_value_ids" invisible="1"/>
-                                </tree>
-                            </field>
-                    </group>
+<!--                            <field name="selection_fields">-->
+<!--                                <tree editable="top">-->
+<!--                                <field name="selection_field"/>-->
+<!--                                <field name="selection_value" invisible="1"/>-->
+<!--                                <field name="selected_value"/>-->
+<!--                                <field name="selection_value_ids" invisible="1"/>-->
+<!--                                </tree>-->
+<!--                            </field>-->
+                    <!-- </group> -->
             </xpath>
 
 

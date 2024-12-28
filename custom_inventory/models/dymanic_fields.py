@@ -20,16 +20,16 @@ class DynamicFieldCheckbox(models.Model):
 
     brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
     sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
-
     checkbox_field = fields.Char('')
     checkbox_value = fields.Boolean('')
+
 
 class DynamicFieldSelection(models.Model):
     _name = 'dynamic.field.selection.key'
     _description = 'Dynamic field for selection'
 
     selection_field = fields.Char('')
-    sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
+    # sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
     brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
 
     selection_value = fields.One2many('dynamic.field.selection.values', 'key_field')
@@ -38,11 +38,24 @@ class DynamicFieldSelection(models.Model):
     selected_value = fields.Many2one('dynamic.field.selection.values', domain="[('id', 'in', selection_value_ids)]")
 
 
-
     @api.depends('selection_value')
     def _compute_selection_value_ids(self):
         for record in self:
-            record.selection_value_ids = record.selection_value.ids
+            print("sssssssssssssssss")
+            if record.selection_value:
+                record.selection_value_ids = record.selection_value.ids
+            else:
+                record.selection_value_ids =  [(5,)]
+
+# class DynamicSaleOrderFieldSelection(models.Model):
+#     _name = 'dynamic.saleorder.selection.key'
+#     _description = 'Dynamic field for selection'
+#
+#     selection_field = fields.Char('Kay')
+#     sale_order_id = fields.Many2one('sale.order', string='sale')
+#     selected_value = fields.Many2one('dynamic.field.selection.values', domain="[('sale_order_options', '=', id)]")
+#
+
 
     # @api.depends('selection_value')
     # def _get_domain_for_selected_value(self):
@@ -69,3 +82,4 @@ class DynamicFieldSelectionValues(models.Model):
 
     value_field = fields.Char('')
     key_field = fields.Many2one('dynamic.field.selection.key')
+    # sale_order_options = fields.Many2one('dynamic.saleorder.selection.key')

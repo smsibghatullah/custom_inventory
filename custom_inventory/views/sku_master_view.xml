@@ -2,7 +2,7 @@
   <data>
  
      <record id="view_tree_sku_type_master" model="ir.ui.view">
-        <field name="name">SKU Type Master Tree</field>
+        <field name="name">Category form</field>
         <field name="model">sku.type.master</field>
         <field name="arch" type="xml">
             <tree>
@@ -14,7 +14,7 @@
     </record>
 
     <record id="view_form_sku_type_master" model="ir.ui.view">
-        <field name="name">SKU Type Master Form</field>
+        <field name="name">Category Form</field>
         <field name="model">sku.type.master</field>
         <field name="arch" type="xml">
             <form>
@@ -30,13 +30,13 @@
     </record>
 
     <record id="action_sku_type_master" model="ir.actions.act_window">
-        <field name="name">SKU Type Master</field>
+        <field name="name">Category</field>
         <field name="res_model">sku.type.master</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="menu_inventory_sku_type_master"
-            name="SKU Type Master"
+            name="Category"
             parent="menu_inventory_master"
             action="action_sku_type_master"
             sequence="20" />

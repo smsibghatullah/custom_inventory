@@ -27,33 +27,99 @@ class SaleOrder(models.Model):
 
     text_fields = fields.One2many('dynamic.field.text', 'sale_order_id' )
     checkbox_fields = fields.One2many('dynamic.field.checkbox', 'sale_order_id')
-    selection_fields = fields.One2many('dynamic.field.selection.key', 'sale_order_id')
+    selection_fields = fields.Many2many('dynamic.field.selection.key')
+    revision_number = fields.Char('')
+    revision_number_count = fields.Integer(compute="_compute_revision_number_count",)
 
 
-    @api.onchange('text_fields','brand_id','checkbox_fields')
+    @api.depends('revision_number')
+    def _compute_revision_number_count(self):
+        for item in self:
+            print( self.search_count([('revision_number','=',item.revision_number)]))
+            print('ssssssssssssssssssssssssssssssss')
+            if item.revision_number:
+                item.revision_number_count = self.search_count([('revision_number','=',item.revision_number)])
+            else:
+                item.revision_number_count = 0
+
+    def action_view_revisions(self):
+        self.ensure_one()
+        source_orders = self.search([('revision_number','=',self.revision_number)])
+        view_tree = self.env.ref('sale.view_quotation_tree_with_onboarding')
+        view_from = self.env.ref('sale.view_order_form')
+        return {
+            'name': _('Revision'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form,tree',
+            'domain': [('id', 'in', source_orders.ids)],
+            'res_model': 'sale.order',
+            'views': [[view_tree.id, "list"],[view_from.id, "form"]],
+            'target': 'self'
+        }
+
+
+    def action_revise_order(self):
+        for item in self:
+            if not item.revision_number:
+                item.revision_number = item.name
+            new_item = item.copy()
+            item.action_cancel()
+            
+            
+
+    @api.onchange('brand_id')
     def _onchange_text_fields(self):
         for line in self:
+            line.text_fields.unlink()
+            print('22222222222222222')
             if line.brand_id:
                 print( line.brand_id.text_fields.ids)
                 print(line.brand_id.checkbox_fields)
                 print("00000000000000000000000000000")
-                line.text_fields = line.brand_id.text_fields.ids
-                line.checkbox_fields = line.brand_id.checkbox_fields.ids
-                line.selection_fields = line.brand_id.selection_fields.ids
-                return  {'domain': {'text_fields': line.brand_id.text_fields.ids, 'checkbox_fields': line.brand_id.checkbox_fields.ids,
-                                    'selection_fields':line.brand_id.selection_fields.ids}}
+                copied_text_fields = []
+                checkbox_fields = []
+                selection_fields = []
+                for item in line.brand_id.text_fields:
+                    copied_text_fields.append(item.copy({
+                        'sale_order_id': line.id,
+                        'brand_id': False  # Clear the brand_id field
+                    }).id)
+                print(copied_text_fields, "copied_text_fields 11111111111111111111111111----")
+                for item in line.brand_id.checkbox_fields:
+                    copied_item = item.copy({
+                        'sale_order_id': line.id,
+                        'brand_id': False  # Clear the brand_id field
+                    }).id
+                    # copied_item.brand_id , "aaaaaaaaaaaaaaaaaaaaaa new "
+                    checkbox_fields.append(copied_item)
+
+                # for item in line.brand_id.selection_fields:
+                #     item_sale_item_selection = {'selection_field': item.selection_field,
+                #     'sale_order_id':line.id}
+                #     selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
+                #     for value in item.selection_field.selection_value:
+                #         options = {'sale_order_options':selection_id, '':value.value_field
+                #         }
+                #         self.env['dynamic.saleorder.selection.key'].create(options)
+                #     selection_fields.append(selection_id)
+
+                line.text_fields = copied_text_fields
+                line.checkbox_fields = checkbox_fields #line.brand_id.checkbox_fields.ids
+                line.selection_fields = selection_fields #line.brand_id.selection_fields.ids
+                return  {'domain': {'text_fields': copied_text_fields, 'checkbox_fields': checkbox_fields,
+                                    'selection_fields':selection_fields}}
             else:
                 return {'domain': {'text_fields': [],
                                    'checkbox_fields': [],
                                    'selection_fields': []}}
 
-    @api.onchange('selection_fields')
-    def _onchange_selected_value(self):
-        for line in self:
-            if line.selection_fields.selection_value:
-                return  {'domain': {'selected_value': line.selection_fields.selection_value.ids}}
-            else:
-                return {'domain': {'selected_value': []}}
+    # @api.onchange('selection_fields')
+    # def _onchange_selected_value(self):
+    #     for line in self:
+    #         if line.selection_fields:
+    #             return  {'domain': {'selected_value': line.selection_fields.selection_value.ids}}
+    #         else:
+    #             return {'domain': {'selected_value': []}}
 
 
 
