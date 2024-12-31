@@ -4,4 +4,5 @@ from . import sku_master
 from . import sale_order
 from . import purchase_order
 from . import invoice
+from . import bom_products
 

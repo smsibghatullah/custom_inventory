@@ -47,33 +47,31 @@ class DynamicFieldSelection(models.Model):
             else:
                 record.selection_value_ids =  [(5,)]
 
-# class DynamicSaleOrderFieldSelection(models.Model):
-#     _name = 'dynamic.saleorder.selection.key'
-#     _description = 'Dynamic field for selection'
-#
-#     selection_field = fields.Char('Kay')
-#     sale_order_id = fields.Many2one('sale.order', string='sale')
-#     selected_value = fields.Many2one('dynamic.field.selection.values', domain="[('sale_order_options', '=', id)]")
-#
+class DynamicSaleOrderFieldSelection(models.Model):
+    _name = 'dynamic.saleorder.selection.key'
+    _description = 'Dynamic field for selection'
+
+    selection_field = fields.Char('Kay')
+    sale_order_id = fields.Many2one('sale.order', string='sale')
+    # selected_value = fields.Many2one('dynamic.field.selection.values.sale' )
+    options_value = fields.One2many('dynamic.field.selection.values.sale', 'key_field')
+    selected_value = fields.Many2one(
+        'dynamic.field.selection.values.sale',
+        string='Selected Value',
+        domain="[('key_field_parent', '=', selection_field)]"
+    )
 
 
-    # @api.depends('selection_value')
-    # def _get_domain_for_selected_value(self):
-    #     for record in self:
-    #         if record.selection_value:
-    #             # Get the IDs from the related One2many field
-    #             selection_value_ids = record.selection_value.ids
-    #             return [('id', 'in', selection_value_ids)]
-    #         return []
-    #
-    #
-    # @api.onchange('selected_value')
-    # def _onchange_selected_value(self):
-    #     for line in self:
-    #         if line.selection_value:
-    #             return  {'domain': {'selected_value': line.selection_value.ids}}
-    #         else:
-    #             return {'domain': {'selected_value': []}}
+class DynamicFieldSelectionValuesSale(models.Model):
+    _name = 'dynamic.field.selection.values.sale'
+    _description = 'Dynamic field for selection_values'
+    _rec_name = 'value_field'
+
+    value_field = fields.Char('')
+    key_field_parent = fields.Char('')
+    sale_order_no = fields.Float()
+    key_field = fields.Many2one('dynamic.saleorder.selection.key')
+
 
 class DynamicFieldSelectionValues(models.Model):
     _name = 'dynamic.field.selection.values'

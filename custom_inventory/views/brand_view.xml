@@ -25,6 +25,7 @@
                         <field name="so_email"/>
                         <field name="po_email"/>
                         <field name="inv_email"/>
+                        <field name="is_tax_show"/>
                         <field name="bank_account_details"/>
                         <field name="address" />
                     </group>

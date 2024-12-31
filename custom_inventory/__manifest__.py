@@ -30,12 +30,14 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
 
     'data': [
         'views/brand_view.xml',
+        'views/bom_products_view.xml',
         'views/invoice_view.xml',
         'views/purchase_order_view.xml',
         'views/sale_order_view.xml',
         'views/sku_master_view.xml',
         'views/templates.xml',
         'security/ir.model.access.csv',
+       
     ],
 
     'demo': [

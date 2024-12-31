@@ -18,6 +18,11 @@ class BrandMaster(models.Model):
     text_fields = fields.One2many('dynamic.field.text', 'brand_id', string='Text Fields')
     checkbox_fields = fields.One2many('dynamic.field.checkbox', 'brand_id', string='Checkbox Fields')
     selection_fields = fields.One2many('dynamic.field.selection.key', 'brand_id', string='Selection Fields')
+    is_tax_show = fields.Boolean(
+        string="Is Tax",
+        default=False,
+        help="Indicates whether this line represents a tax-related item."
+    )
 
 
 

@@ -2,6 +2,7 @@ from odoo import models, fields, api,_
 from odoo.exceptions import UserError
 import base64
 from odoo.fields import Command
+import random
 
 
 class SaleOrder(models.Model):
@@ -27,9 +28,26 @@ class SaleOrder(models.Model):
 
     text_fields = fields.One2many('dynamic.field.text', 'sale_order_id' )
     checkbox_fields = fields.One2many('dynamic.field.checkbox', 'sale_order_id')
-    selection_fields = fields.Many2many('dynamic.field.selection.key')
+    selection_fields = fields.One2many('dynamic.saleorder.selection.key', 'sale_order_id')
     revision_number = fields.Char('')
     revision_number_count = fields.Integer(compute="_compute_revision_number_count",)
+    terms_conditions = fields.Text(string='Brand Terms & Conditions')
+    bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+
+    @api.onchange('bom_id')
+    def _onchange_bom_id(self):
+        if self.bom_id:
+            self.order_line = [(5, 0, 0)]  
+            new_lines = []
+            for line in self.bom_id.line_product_ids:
+                new_lines.append((0, 0, {
+                    'product_id': line.product_id.id,
+                    'product_uom_qty': line.product_uom_qty,
+                    'product_uom': line.product_uom.id,
+                    'name': line.product_id.name,
+                    'price_unit': line.product_id.lst_price,
+                }))
+            self.order_line = new_lines
 
 
     @api.depends('revision_number')
@@ -60,18 +78,34 @@ class SaleOrder(models.Model):
 
     def action_revise_order(self):
         for item in self:
+
             if not item.revision_number:
+                revision_number_count = 1
                 item.revision_number = item.name
+            else:
+                revision_number_count = self.search_count([('revision_number', '=', item.revision_number)])
+
             new_item = item.copy()
+            number  = 2 if revision_number_count ==2 else revision_number_count + 1
+            new_item.name = item.revision_number+'-'+str(revision_number_count)
             item.action_cancel()
-            
-            
+
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Revised Order',
+                'view_mode': 'form',
+                'res_model': self._name,  # Use the model name of the current object
+                'res_id': new_item.id,  # Pass the ID of the new record
+                'target': 'current',  # Open in the current window
+            }
 
     @api.onchange('brand_id')
     def _onchange_text_fields(self):
         for line in self:
             line.text_fields.unlink()
             print('22222222222222222')
+            random_number = random.randint(100000, 999999)
+
             if line.brand_id:
                 print( line.brand_id.text_fields.ids)
                 print(line.brand_id.checkbox_fields)
@@ -92,17 +126,21 @@ class SaleOrder(models.Model):
                     }).id
                     # copied_item.brand_id , "aaaaaaaaaaaaaaaaaaaaaa new "
                     checkbox_fields.append(copied_item)
-
-                # for item in line.brand_id.selection_fields:
-                #     item_sale_item_selection = {'selection_field': item.selection_field,
-                #     'sale_order_id':line.id}
-                #     selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
-                #     for value in item.selection_field.selection_value:
-                #         options = {'sale_order_options':selection_id, '':value.value_field
-                #         }
-                #         self.env['dynamic.saleorder.selection.key'].create(options)
-                #     selection_fields.append(selection_id)
-
+                op_key = '00000'
+                for item in line.brand_id.selection_fields:
+                    options = {}
+                    item_sale_item_selection = {'selection_field': item.selection_field,
+                    'sale_order_id':line.id}
+                    selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
+                    for value in item.selection_value:
+                        print(item.selection_field,"item.selection_field")
+                        options = {'key_field_parent':item.selection_field, 'value_field':value.value_field
+                        , 'sale_order_no': random_number,'key_field':selection_id.id}
+                        print (options,"options")
+                        self.env['dynamic.field.selection.values.sale'].create(options)
+                    selection_fields.append(selection_id.id)
+                print(checkbox_fields ,"checkbox_fields")
+                print(selection_fields, "selection_fields")
                 line.text_fields = copied_text_fields
                 line.checkbox_fields = checkbox_fields #line.brand_id.checkbox_fields.ids
                 line.selection_fields = selection_fields #line.brand_id.selection_fields.ids
@@ -112,14 +150,6 @@ class SaleOrder(models.Model):
                 return {'domain': {'text_fields': [],
                                    'checkbox_fields': [],
                                    'selection_fields': []}}
-
-    # @api.onchange('selection_fields')
-    # def _onchange_selected_value(self):
-    #     for line in self:
-    #         if line.selection_fields:
-    #             return  {'domain': {'selected_value': line.selection_fields.selection_value.ids}}
-    #         else:
-    #             return {'domain': {'selected_value': []}}
 
 
 
@@ -153,6 +183,7 @@ class SaleOrder(models.Model):
             'user_id': self.user_id.id,
             'brand_id': self.brand_id.id,
             'sku_ids': [(6, 0, self.sku_ids.ids)],  
+            'terms_conditions': self.terms_conditions,
         }
         if self.journal_id:
             values['journal_id'] = self.journal_id.id
@@ -162,7 +193,8 @@ class SaleOrder(models.Model):
     def _onchange_brand_id(self):
         if self.brand_id:
             self.sku_ids = False
-
+            self.terms_conditions = self.brand_id.terms_conditions
+       
     def action_send_report_email(self):
         self.ensure_one()
         return {
@@ -234,31 +266,38 @@ class SaleOrderLine(models.Model):
 
     filtered_product_id = fields.Many2one(
         string='Product',
-        comodel_name='product.template',
+        comodel_name='product.product',
         compute='_compute_filtered_product_id',
         readonly=False,
         domain="[('id', 'in', filtered_product_ids)]",
     )
 
     filtered_product_ids = fields.Many2many(
-        comodel_name="product.template",
+        comodel_name="product.product",
         string='.',
         compute="_compute_filtered_product_ids",
         store=False,
     )
 
+ 
     @api.depends('order_id.brand_id')
     def _compute_filtered_product_ids(self):
-         for line in self:
-            if line.order_id and line.order_id.brand_id:
-                brand_id = line.order_id.brand_id.id
-                sku_ids = line.order_id.sku_ids.ids  
-                matching_products = self.env['product.template'].search([
-                    ('sku_ids', 'in', sku_ids),  
+        """
+        Compute filtered products based on the selected brand and SKU ID.
+        """
+        for line in self:
+            if line.order_id and line.order_id.brand_id and line.order_id.sku_ids:
+                sku_ids = line.order_id.sku_ids.ids
+                matching_templates = self.env['product.template'].search([
+                    ('sku_ids', 'in', sku_ids)
+                ])
+                matching_products = self.env['product.product'].search([
+                    ('product_tmpl_id', 'in', matching_templates.ids)
                 ])
                 line.filtered_product_ids = matching_products
             else:
-                line.filtered_product_ids = self.env['product.template']
+                line.filtered_product_ids = self.env['product.product']
+
 
 
     @api.depends('filtered_product_ids')
@@ -267,8 +306,8 @@ class SaleOrderLine(models.Model):
         Set `filtered_product_id` if it matches the filtered products.
         """
         for line in self:
-            if line.filtered_product_ids and line.product_id.product_tmpl_id in line.filtered_product_ids:
-                line.filtered_product_id = line.product_id.product_tmpl_id
+            if line.filtered_product_ids and line.product_id in line.filtered_product_ids:
+                line.filtered_product_id = line.product_id.id
             else:
                 line.filtered_product_id = False
 
@@ -280,11 +319,11 @@ class SaleOrderLine(models.Model):
         """
         for line in self:
             if line.filtered_product_id:
-                product = line.filtered_product_id.product_variant_id
+                product = line.filtered_product_id
                 line.product_id = product
                 line.name = product.display_name
                 line.price_unit = product.list_price
-                line.tax_id = product.taxes_id
+                line.tax_id = product.tax_id
             else:
                 line.product_id = False
                 line.name = False
@@ -298,13 +337,12 @@ class SaleOrderLine(models.Model):
         Ensure `filtered_product_id` updates `product_id` and other fields.
         """
         if 'filtered_product_id' in vals and vals['filtered_product_id']:
-            product_tmpl = self.env['product.template'].browse(vals['filtered_product_id'])
-            product_variant = product_tmpl.product_variant_id
+            product_tmpl = self.env['product.product'].browse(vals['filtered_product_id'])
             vals.update({
-                'product_id': product_variant.id,
-                'name': product_variant.display_name,
-                'price_unit': product_variant.list_price,
-                'tax_id': [(6, 0, product_variant.taxes_id.ids)],
+                'product_id': product_tmpl.id,
+                'name': product_tmpl.display_name,
+                'price_unit': product_tmpl.list_price,
+                'tax_id': [(6, 0, product_tmpl.tax_id.id)],
             })
         return super(SaleOrderLine, self).create(vals)
 
@@ -315,11 +353,10 @@ class SaleOrderLine(models.Model):
         """
         if 'filtered_product_id' in vals and vals['filtered_product_id']:
             product_tmpl = self.env['product.template'].browse(vals['filtered_product_id'])
-            product_variant = product_tmpl.product_variant_id
             vals.update({
-                'product_id': product_variant.id,
-                'name': product_variant.display_name,
-                'price_unit': product_variant.list_price,
-                'tax_id': [(6, 0, product_variant.taxes_id.ids)],
+                'product_id': product_tmpl.id,
+                'name': product_tmpl.display_name,
+                'price_unit': product_tmpl.list_price,
+                'taxes_id': [(6, 0, product_tmpl.tax_id.id)],
             })
         return super(SaleOrderLine, self).write(vals)

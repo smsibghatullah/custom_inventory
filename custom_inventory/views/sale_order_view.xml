@@ -23,14 +23,17 @@
                 <field name="brand_id" options="{'no_create': True}" /> 
                 <field name="revision_number" />
                 <field name="revision_number_count" />
+                <field name="bom_id" options="{'no_create': True}"/> 
                 <field name="sku_ids" options="{'no_create': True}" invisible="brand_id == False"  widget="many2many_tags" /> 
             </xpath>
-            <xpath expr="//field[@name='product_template_id']" position="replace">
-                <field name="filtered_product_id"/>
-                <field name="filtered_product_ids" widget="many2many_tags" options="{'no_create': True}" invisible="1"/>
+            <xpath expr="//field[@name='product_id']" position="replace">
+                    <field name="filtered_product_id"/>
+                    <field name="filtered_product_ids" widget="many2many_tags" options="{'no_create': True}" invisible="1"/>
+                    <field name="product_id" invisible="1"/>
             </xpath>
 
             <xpath expr="//field[@name='note']" position="after">
+                    <field name="terms_conditions" />
                     <field name="text_fields">
                         <tree editable="top">
                             <field name="text_field"></field>
@@ -44,15 +47,15 @@
                                 <field name="checkbox_value"></field>
                             </tree>
                         </field>
-<!--                            <field name="selection_fields">-->
-<!--                                <tree editable="top">-->
-<!--                                <field name="selection_field"/>-->
-<!--                                <field name="selection_value" invisible="1"/>-->
+                            <field name="selection_fields">
+                                <tree editable="top">
+                                <field name="selection_field"/>
+                                <field name="selected_value"/>
 <!--                                <field name="selected_value"/>-->
 <!--                                <field name="selection_value_ids" invisible="1"/>-->
-<!--                                </tree>-->
-<!--                            </field>-->
-                    <!-- </group> -->
+                                </tree>
+                            </field>
+
             </xpath>
 
 
@@ -82,6 +85,22 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
+
+
+      <record id="action_sale_order_revision" model="ir.actions.act_window">
+        <field name="name">Revised Sale Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('revision_number', '!=', False)]</field>
+        <field name="context">{'group_by': 'revision_number'}</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_sale_order_revision"
+              name="Revised Sale Orders"
+              parent="sale.sale_order_menu"
+              action="action_sale_order_revision"
+              sequence="10"/>
 
   </data>
 </odoo>

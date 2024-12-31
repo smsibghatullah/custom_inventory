@@ -21,11 +21,32 @@ class AccountMove(models.Model):
          required=True,
         help='Select the Categories associated with the selected brand'
     )
+    terms_conditions = fields.Text(string='Brand Terms & Conditions')
+    bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+
+    @api.onchange('bom_id')
+    def _onchange_bom_id(self):
+        if self.bom_id:
+            self.invoice_line_ids = [(5, 0, 0)]  
+            new_lines = []
+            for line in self.bom_id.line_product_ids:
+                 new_lines.append((0, 0, {
+                    'filtered_product_ids': [(6, 0, [line.product_id.id])],  
+                    'filtered_product_id': line.product_id, 
+                    'product_id': line.product_id.id,
+                    'quantity': line.product_uom_qty,
+                    'product_uom_id': line.product_uom.id,
+                    'name': line.product_id.name,
+                    'price_unit': line.product_id.lst_price,
+                }))
+            
+            self.invoice_line_ids = new_lines
 
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
             self.sku_ids = False
+            self.terms_conditions = self.brand_id.terms_conditions
 
     def action_send_report_email(self):
         self.ensure_one()
@@ -118,18 +139,21 @@ class AccountMoveLine(models.Model):
         Compute filtered products based on the selected brand and SKU ID.
         """
         for line in self:
-            if line.move_id and line.move_id.brand_id and line.move_id.sku_ids:
-                sku_ids = line.move_id.sku_ids.ids
-                matching_templates = self.env['product.template'].search([
-                    ('sku_ids', 'in', sku_ids)
-                ])
-                matching_products = self.env['product.product'].search([
-                    ('product_tmpl_id', 'in', matching_templates.ids)
-                ])
-                line.filtered_product_ids = matching_products
+            if not line.move_id.bom_id:
+                if line.move_id and line.move_id.brand_id and line.move_id.sku_ids:
+                    print('oooooooooooooooooooooooooooooo')
+                    sku_ids = line.move_id.sku_ids.ids
+                    matching_templates = self.env['product.template'].search([
+                        ('sku_ids', 'in', sku_ids)
+                    ])
+                    matching_products = self.env['product.product'].search([
+                        ('product_tmpl_id', 'in', matching_templates.ids)
+                    ])
+                    line.filtered_product_ids = matching_products
+                else:
+                    line.filtered_product_ids = self.env['product.product']
             else:
-                line.filtered_product_ids = self.env['product.product']
-
+                 line.filtered_product_ids = self.env['product.product'].search([])
 
     @api.depends('filtered_product_ids')
     def _compute_filtered_product_id(self):
@@ -137,10 +161,11 @@ class AccountMoveLine(models.Model):
         Set `filtered_product_id` if it matches the filtered products.
         """
         for line in self:
-            if line.filtered_product_ids and line.product_id in line.filtered_product_ids:
-                line.filtered_product_id = line.product_id.id
-            else:
-                line.filtered_product_id = False
+            if not line.move_id.bom_id:
+                if line.filtered_product_ids and line.product_id in line.filtered_product_ids:
+                    line.filtered_product_id = line.product_id.id
+                else:
+                    line.filtered_product_id = False
 
     @api.onchange('filtered_product_id')
     def _onchange_filtered_product_id(self):
