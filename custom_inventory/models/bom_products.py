@@ -14,4 +14,4 @@ class BomProductLine(models.Model):
     bom_id = fields.Many2one('bom.products', string='BOM')
     product_id = fields.Many2one('product.product', string='Product', required=True)
     product_uom_qty = fields.Float(string='Quantity', required=True)
-    product_uom = fields.Many2one('uom.uom', string='UOM', required=True)
+    product_uom = fields.Many2one('uom.uom', string='UOM')
