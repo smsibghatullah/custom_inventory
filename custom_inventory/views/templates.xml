@@ -222,13 +222,15 @@
 
                <t t-foreach="doc.checkbox_fields" t-as="checkbox_field">
                    <div class="mt-4">
-                    <strong t-field="checkbox_field.checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                    <span t-field="checkbox_field.checkbox_value" style="display: inline-block;"></span>
+                    <strong t-field="checkbox_field.checkbox_field" style="display: inline-block; margin-right: 10px;">:</strong>
+                       <t t-if="checkbox_field.checkbox_value"> YES</t>
+                       <t t-if="not checkbox_field.checkbox_value"> NO</t>
+<!--                    <span t-field="checkbox_field.checkbox_value" style="display: inline-block;"></span>-->
                 </div>
                </t>
                <t t-foreach="doc.selection_fields" t-as="selection_field">
                    <div class="mt-4">
-                    <strong t-field="selection_field.selection_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                    <strong t-field="selection_field.selection_field" style="display: inline-block; margin-right: 10px;">:</strong>
                     <span t-field="selection_field.selected_value" style="display: inline-block;"></span>
                 </div>
                </t>
