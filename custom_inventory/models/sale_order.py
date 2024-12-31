@@ -42,8 +42,8 @@ class SaleOrder(models.Model):
             for line in self.bom_id.line_product_ids:
                 new_lines.append((0, 0, {
                     'product_id': line.product_id.id,
+                    'product_template_id': line.product_id.product_tmpl_id,
                     'product_uom_qty': line.product_uom_qty,
-                    'product_uom': line.product_uom.id,
                     'name': line.product_id.name,
                     'price_unit': line.product_id.lst_price,
                 }))
@@ -53,8 +53,8 @@ class SaleOrder(models.Model):
     @api.depends('revision_number')
     def _compute_revision_number_count(self):
         for item in self:
-            print( self.search_count([('revision_number','=',item.revision_number)]))
-            print('ssssssssssssssssssssssssssssssss')
+            # print( self.search_count([('revision_number','=',item.revision_number)]))
+            # print('ssssssssssssssssssssssssssssssss')
             if item.revision_number:
                 item.revision_number_count = self.search_count([('revision_number','=',item.revision_number)])
             else:
@@ -102,12 +102,15 @@ class SaleOrder(models.Model):
     @api.onchange('brand_id')
     def _onchange_text_fields(self):
         for line in self:
+            line.sku_ids = False
+            line.terms_conditions = line.brand_id.terms_conditions
             line.text_fields.unlink()
             print('22222222222222222')
             random_number = random.randint(100000, 999999)
 
             if line.brand_id:
-                print( line.brand_id.text_fields.ids)
+
+                print( line.brand_id)
                 print(line.brand_id.checkbox_fields)
                 print("00000000000000000000000000000")
                 copied_text_fields = []
@@ -183,17 +186,16 @@ class SaleOrder(models.Model):
             'user_id': self.user_id.id,
             'brand_id': self.brand_id.id,
             'sku_ids': [(6, 0, self.sku_ids.ids)],  
-            'terms_conditions': self.terms_conditions,
+            'terms_conditions': self.brand_id.terms_conditions_invoice,
         }
         if self.journal_id:
             values['journal_id'] = self.journal_id.id
         return values
 
-    @api.onchange('brand_id')
-    def _onchange_brand_id(self):
-        if self.brand_id:
-            self.sku_ids = False
-            self.terms_conditions = self.brand_id.terms_conditions
+    # @api.onchange('brand_id')
+    # def _onchange_brand_id(self):
+    #     if self.brand_id:
+
        
     def action_send_report_email(self):
         self.ensure_one()
@@ -264,99 +266,41 @@ class SaleOrderEmailWizard(models.TransientModel):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    filtered_product_id = fields.Many2one(
-        string='Product',
-        comodel_name='product.product',
-        compute='_compute_filtered_product_id',
-        readonly=False,
-        domain="[('id', 'in', filtered_product_ids)]",
+    sku_ids = fields.Many2many(
+        'sku.type.master',
+        'sale_line_sku_rel',
+        'product_id',
+        'sku_id',
+        string=' ',
+        compute='_compute_product_sku_id',
+        required=True,
+        help='Select the Categories associated with the selected brand'
     )
 
-    filtered_product_ids = fields.Many2many(
-        comodel_name="product.product",
-        string='.',
-        compute="_compute_filtered_product_ids",
-        store=False,
-    )
-
- 
-    @api.depends('order_id.brand_id')
-    def _compute_filtered_product_ids(self):
+    # @api.depends('order_id.sku_ids')
+    def _compute_product_sku_id(self):
         """
-        Compute filtered products based on the selected brand and SKU ID.
+        Compute the product template based on sku_ids from the order.
+        This is just an example; this method may also involve other logic.
         """
         for line in self:
-            if line.order_id and line.order_id.brand_id and line.order_id.sku_ids:
-                sku_ids = line.order_id.sku_ids.ids
-                matching_templates = self.env['product.template'].search([
-                    ('sku_ids', 'in', sku_ids)
-                ])
-                matching_products = self.env['product.product'].search([
-                    ('product_tmpl_id', 'in', matching_templates.ids)
-                ])
-                line.filtered_product_ids = matching_products
+            if not line.order_id.bom_id:
+                if line.order_id and line.order_id.sku_ids:
+                    self.sku_ids = line.order_id.sku_ids.ids
             else:
-                line.filtered_product_ids = self.env['product.product']
+                sku_ids = self.env['sku.type.master'].search([]) 
+                line.sku_ids = sku_ids
 
-
-
-    @api.depends('filtered_product_ids')
-    def _compute_filtered_product_id(self):
-        """
-        Set `filtered_product_id` if it matches the filtered products.
-        """
+    @api.depends('product_id')
+    def _compute_product_template_id(self):
+        print('kkkkkkkkkkkkkkkkkkkkk')
         for line in self:
-            if line.filtered_product_ids and line.product_id in line.filtered_product_ids:
-                line.filtered_product_id = line.product_id.id
+            if not line.order_id.bom_id:
+                if line.order_id and line.order_id.sku_ids:
+                    self.sku_ids = line.order_id.sku_ids.ids
             else:
-                line.filtered_product_id = False
-
-
-    @api.onchange('filtered_product_id')
-    def _onchange_filtered_product_id(self):
-        """
-        Update sale order line details when filtered product changes.
-        """
-        for line in self:
-            if line.filtered_product_id:
-                product = line.filtered_product_id
-                line.product_id = product
-                line.name = product.display_name
-                line.price_unit = product.list_price
-                line.tax_id = product.tax_id
-            else:
-                line.product_id = False
-                line.name = False
-                line.price_unit = 0.0
-                line.tax_id = [(5, 0, 0)]
-
-
-    @api.model
-    def create(self, vals):
-        """
-        Ensure `filtered_product_id` updates `product_id` and other fields.
-        """
-        if 'filtered_product_id' in vals and vals['filtered_product_id']:
-            product_tmpl = self.env['product.product'].browse(vals['filtered_product_id'])
-            vals.update({
-                'product_id': product_tmpl.id,
-                'name': product_tmpl.display_name,
-                'price_unit': product_tmpl.list_price,
-                'tax_id': [(6, 0, product_tmpl.tax_id.id)],
-            })
-        return super(SaleOrderLine, self).create(vals)
-
-
-    def write(self, vals):
-        """
-        Ensure `filtered_product_id` updates `product_id` and other fields.
-        """
-        if 'filtered_product_id' in vals and vals['filtered_product_id']:
-            product_tmpl = self.env['product.template'].browse(vals['filtered_product_id'])
-            vals.update({
-                'product_id': product_tmpl.id,
-                'name': product_tmpl.display_name,
-                'price_unit': product_tmpl.list_price,
-                'taxes_id': [(6, 0, product_tmpl.tax_id.id)],
-            })
-        return super(SaleOrderLine, self).write(vals)
+                sku_ids = self.env['sku.type.master'].search([]) 
+                line.sku_ids = sku_ids
+            line.product_template_id = line.product_id.product_tmpl_id
+              
+    

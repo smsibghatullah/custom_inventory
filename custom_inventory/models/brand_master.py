@@ -13,6 +13,7 @@ class BrandMaster(models.Model):
     po_email = fields.Char(string='Purchase Order Email')
     inv_email = fields.Char(string='Invoice Email')
     terms_conditions = fields.Text(string='Terms & Conditions')
+    terms_conditions_invoice = fields.Text(string='Terms & Conditions')
     bank_account_details = fields.Text(string='Bank Account Details')
     address = fields.Text(string='Address')
     text_fields = fields.One2many('dynamic.field.text', 'brand_id', string='Text Fields')

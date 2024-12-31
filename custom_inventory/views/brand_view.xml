@@ -20,7 +20,7 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="logo" widget="image" style="width:200px;height:200"/>
+                        <field name="logo" widget="image" style="width:200px;height:200" required="1"/>
                         <field name="printable_formats"/>
                         <field name="so_email"/>
                         <field name="po_email"/>
@@ -62,7 +62,8 @@
                         </field>
                     </group>
                     <group>
-                        <field name="terms_conditions"/>
+                        <field name="terms_conditions" string="Terms and Condition (Sale)"/>
+                        <field name="terms_conditions_invoice" string="Terms and Condition (Invoice)" />
                     </group>
                 </sheet>
             </form>

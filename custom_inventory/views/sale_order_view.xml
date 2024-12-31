@@ -20,18 +20,18 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="brand_id" options="{'no_create': True}" /> 
-                <field name="revision_number"  invisible="1" />
-                <field name="revision_number_count" invisible="1" />
-                <field name="bom_id" options="{'no_create': True}"/> 
+                <field name="brand_id" options="{'no_create': True}" />
                 <field name="sku_ids" options="{'no_create': True}" invisible="brand_id == False"  widget="many2many_tags" /> 
+                <field name="revision_number" invisible="1"/>
+                <field name="revision_number_count" invisible="1"/>
+                <field name="bom_id" options="{'no_create': True}"/>
             </xpath>
-            <xpath expr="//field[@name='product_id']" position="replace">
-                    <field name="filtered_product_id"/>
-                    <field name="filtered_product_ids" widget="many2many_tags" options="{'no_create': True}" invisible="1"/>
-                    <field name="product_id" invisible="1"/>
+            <xpath expr="//field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('sku_ids', 'in', sku_ids),('sale_ok', '=', True)]</attribute>
             </xpath>
-
+            <xpath expr="//field[@name='product_template_id']" position="after">
+                 <field name="sku_ids" invisible="1" />
+            </xpath>
             <xpath expr="//field[@name='note']" position="after">
                     <field name="terms_conditions" />
                     <field name="text_fields">
@@ -40,7 +40,6 @@
                             <field name="text_value"></field>
                         </tree>
                         </field>
-                    
                         <field name="checkbox_fields">
                             <tree editable="top">
                                 <field name="checkbox_field"></field>
@@ -51,8 +50,6 @@
                                 <tree editable="top">
                                 <field name="selection_field"/>
                                 <field name="selected_value"/>
-<!--                                <field name="selected_value"/>-->
-<!--                                <field name="selection_value_ids" invisible="1"/>-->
                                 </tree>
                             </field>
 

@@ -11,14 +11,20 @@
             </header>
             <xpath expr="//field[@name='invoice_date']" position="after">
                 <field name="brand_id" string="Brand" options="{'no_create': True}" /> 
-                <field name="bom_id" string="BOM" options="{'no_create': True}" />
                 <field name="sku_ids" string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                <field name="bom_id" string="BOM" options="{'no_create': True}" />
             </xpath>
-            <xpath expr="//field[@name='product_id']" position="replace">
-                 <field name="filtered_product_id"/>
-                 <field name="filtered_product_ids" widget="many2many_tags" 
-                       options="{'no_create': True}" invisible="1" />
-                <!-- <field name="product_id" invisible="1"/>  -->
+             <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="domain">[('sku_ids', 'in', sku_ids)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                 <field name="sku_ids" invisible="1" />
+            </xpath>
+<!--            <xpath>-->
+<!--                <field name="terms_conditions" />-->
+<!--            </xpath>-->
+            <xpath expr="//field[@name='narration']" position="after">
+                 <field name="terms_conditions"  />
             </xpath>
         </field>
     </record>

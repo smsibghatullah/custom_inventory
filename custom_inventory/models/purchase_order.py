@@ -96,99 +96,40 @@ class PurchaseOrderEmailWizard(models.TransientModel):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    filtered_product_id = fields.Many2one(
-        string='Product',
-        comodel_name='product.product',
-        compute='_compute_filtered_product_id',
-        readonly=False,
-        domain="[('id', 'in', filtered_product_ids)]",
+    sku_ids = fields.Many2many(
+        'sku.type.master',
+        'purchase_line_sku_rel',
+        'product_id',
+        'sku_id',
+        string=' ',
+        compute='_compute_product_sku_id',
+        required=True,
+        help='Select the Categories associated with the selected brand'
     )
 
-    filtered_product_ids = fields.Many2many(
-        comodel_name="product.product",
-        string='.',
-        compute="_compute_filtered_product_ids",
-        store=False,
-    )
-
-
-    @api.depends('order_id.brand_id')
-    def _compute_filtered_product_ids(self):
+    @api.depends('order_id.sku_ids')
+    def _compute_product_sku_id(self):
         """
-        Compute filtered products based on the selected brand and SKU ID.
+        Compute the product template based on sku_ids from the order.
+        This is just an example; this method may also involve other logic.
         """
         for line in self:
-            if line.order_id and line.order_id.brand_id and line.order_id.sku_ids:
-                sku_ids = line.order_id.sku_ids.ids
-                matching_templates = self.env['product.template'].search([
-                    ('sku_ids', 'in', sku_ids)
-                ])
-                matching_products = self.env['product.product'].search([
-                    ('product_tmpl_id', 'in', matching_templates.ids)
-                ])
-                line.filtered_product_ids = matching_products
-            else:
-                line.filtered_product_ids = self.env['product.product']
+                if line.order_id and line.order_id.sku_ids:
+                    self.sku_ids = line.order_id.sku_ids.ids
+                else:
+                    sku_ids = self.env['sku.type.master'].search([]) 
+                    line.sku_ids = sku_ids
+            
+    
+            
 
-
-
-    @api.depends('filtered_product_ids')
-    def _compute_filtered_product_id(self):
-        """
-        Set `filtered_product_id` if it matches the filtered products.
-        """
+    @api.onchange('product_id')
+    def _compute_product_template_id(self):
         for line in self:
-            if line.filtered_product_ids and line.product_id in line.filtered_product_ids:
-                line.filtered_product_id = line.product_id.id
-            else:
-                line.filtered_product_id = False
-
-
-    @api.onchange('filtered_product_id')
-    def _onchange_filtered_product_id(self):
-        """
-        Update sale order line details when filtered product changes.
-        """
-        for line in self:
-            if line.filtered_product_id:
-                product = line.filtered_product_id
-                line.product_id = product
-                line.name = product.display_name
-                line.price_unit = product.list_price
-                line.taxes_id = product.taxes_id
-            else:
-                line.product_id = False
-                line.name = False
-                line.price_unit = 0.0
-                line.taxes_id = [(5, 0, 0)]
-
-
-    @api.model
-    def create(self, vals):
-        """
-        Ensure `filtered_product_id` updates `product_id` and other fields.
-        """
-        if 'filtered_product_id' in vals and vals['filtered_product_id']:
-            product_tmpl = self.env['product.product'].browse(vals['filtered_product_id'])
-            vals.update({
-                'product_id': product_tmpl.id,
-                'name': product_tmpl.display_name,
-                'price_unit': product_tmpl.list_price,
-                'taxes_id': [(6, 0, product_tmpl.taxes_id.ids)],
-            })
-        return super(PurchaseOrderLine, self).create(vals)
-
-
-    def write(self, vals):
-        """
-        Ensure `filtered_product_id` updates `product_id` and other fields.
-        """
-        if 'filtered_product_id' in vals and vals['filtered_product_id']:
-            product_tmpl = self.env['product.template'].browse(vals['filtered_product_id'])
-            vals.update({
-                'product_id': product_tmpl.id,
-                'name': product_tmpl.display_name,
-                'price_unit': product_tmpl.list_price,
-                'taxes_id': [(6, 0, product_tmpl.taxes_id.ids)],
-            })
-        return super(PurchaseOrderLine, self).write(vals)
+                if line.order_id and line.order_id.sku_ids:
+                    self.sku_ids = line.order_id.sku_ids.ids
+                else:
+                    sku_ids = self.env['sku.type.master'].search([]) 
+                    line.sku_ids = sku_ids
+            
+    
