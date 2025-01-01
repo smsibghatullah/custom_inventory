@@ -1,0 +1,40 @@
+<odoo>
+    <data>
+
+        <record id="quick_create_opportunity_form" model="ir.ui.view">
+            <field name="name">crm.lead.kanban.lead.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='phone']" position="after">
+                    <div>
+                        <field name="brand_id"  string="Brand" />
+                        <field name="sku_ids" string="Category" widget="many2many_tags" />
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="quick_create_opportunity_form" model="ir.ui.view">
+            <field name="name">crm.lead.kanban.lead.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='phone']" position="before">
+                    <label for="brand_id"></label>
+                    <div>
+                        <field name="brand_id"  />
+<!--                        <field name="sku_ids" string="Category" widget="many2many_tags" />-->
+                    </div>
+                    <label for="sku_ids"></label>
+                    <div>
+                        <field name="sku_ids" string="Category" widget="many2many_tags" />
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+
+
+

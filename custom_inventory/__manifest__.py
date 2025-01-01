@@ -26,7 +26,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'category': 'Inventory',
     'version': '1.0',
 
-    'depends': ['base','stock','sale','purchase','account','purchase_stock'],
+    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm'],
 
     'data': [
         'views/brand_view.xml',
@@ -36,6 +36,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/sale_order_view.xml',
         'views/sku_master_view.xml',
         'views/templates.xml',
+        'views/crm.xml',
         'security/ir.model.access.csv',
        
     ],
