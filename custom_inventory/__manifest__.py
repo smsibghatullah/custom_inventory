@@ -37,6 +37,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/sku_master_view.xml',
         'views/templates.xml',
         'views/crm.xml',
+        'views/stock_picking_view.xml',
         'security/ir.model.access.csv',
        
     ],

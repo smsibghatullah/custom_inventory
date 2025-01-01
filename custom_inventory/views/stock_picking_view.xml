@@ -1,0 +1,28 @@
+<odoo>
+  <data>
+    <record id="view_picking_form_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_picking" 
+                        type="object" 
+                        string="Picking" 
+                        class="btn-primary"
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_picked_up" 
+                        type="object" 
+                        string="Picked Up" 
+                        class="btn-success"
+                        invisible="picking_type_code != 'outgoing'"
+                       />
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,confirmed,assigned,picking,picked_up,done</attribute>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</odoo>
+
