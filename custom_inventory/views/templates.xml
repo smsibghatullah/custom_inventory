@@ -155,13 +155,13 @@
                                     <span t-field="line.discount">-</span>
                                 </td>
                                  <t t-if="doc.brand_id.is_tax_show">
-                                   sssssss222 <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
+                                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
                                     
                                     <td name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                                         <span t-out="taxes">Tax 15%</span>
                                     </td>
                                   </t>  
-eeeeeeeeee
+
                                 <td t-if="not line.is_downpayment" name="td_subtotal" class="text-end o_price_total">
                                     <span t-field="line.price_subtotal">27.00</span>
                                 </td>
@@ -171,7 +171,7 @@ eeeeeeeeee
                                     <span t-field="line.name">A section title</span>
                                 </td>
                                 <t t-set="current_section" t-value="line"/>
-                                <t t-set="current_subtotal" t-value="0"/>sss
+                                <t t-set="current_subtotal" t-value="0"/>
                             </t>
                             <t t-elif="line.display_type == 'line_note'">
                                 <td name="td_note_line" colspan="99">
@@ -183,7 +183,7 @@ eeeeeeeeee
                         <t t-if="current_section and (line_last or lines_to_report[line_index+1].display_type == 'line_section') and not line.is_downpayment">
                             <tr class="is-subtotal text-end">
                                 <td name="td_section_subtotal" colspan="99">
-                                    <strong class="mr16">Subtotal</strong>ttttttssssss
+                                    <strong class="mr16">Subtotal</strong>
                                     <span
                                         t-out="current_subtotal"
                                         t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
