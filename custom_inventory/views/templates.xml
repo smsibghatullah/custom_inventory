@@ -440,7 +440,7 @@ eeeeeeeeee
             </t>
             <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                       <strong>Terms and Conditions:</strong>
-                <div t-field="o.brand_id.terms_conditions" />
+                <div t-field="o.terms_conditions" />
             </div>
             <div class="oe_structure"/>
         </div>
@@ -858,7 +858,7 @@ eeeeeeeeee
                     
                    <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                             <strong>Terms and Conditions:</strong>
-                        <div t-field="o.brand_id.terms_conditions" />
+                        <div t-field="o.terms_conditions" />
                         </div>
                     <div class="oe_structure"/>
                 </div>
