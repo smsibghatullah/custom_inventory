@@ -393,12 +393,11 @@ class AccountTax(models.Model):
     @api.model
     def _compute_taxes_for_single_line(self, base_line, handle_price_include=True, include_caba_tags=False,
                                        early_pay_discount_computation=None, early_pay_discount_percentage=None):
-
-
+        
         if base_line['record']._name == 'sale.order.line':
             if not base_line['record'][0].order_id.brand_id.is_tax_show:
                 base_line['taxes'] = self.env['account.tax'].search([('id','=',0)])
-
+        
         orig_price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
         price_unit_after_discount = orig_price_unit_after_discount
         taxes = base_line['taxes']._origin
