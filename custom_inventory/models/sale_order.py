@@ -1,3 +1,5 @@
+from unicodedata import category
+
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
 import base64
@@ -21,16 +23,15 @@ class SaleOrder(models.Model):
         'product_id',
         'sku_id',
         string='Categories',
-        domain="[('brand_id', '=', brand_id)]",
          required=True,
         help='Select the Categories associated with the selected brand'
     )
 
-    text_fields = fields.One2many('dynamic.field.text', 'sale_order_id' )
-    checkbox_fields = fields.One2many('dynamic.field.checkbox', 'sale_order_id')
-    selection_fields = fields.One2many('dynamic.saleorder.selection.key', 'sale_order_id')
+    text_fields = fields.One2many('dynamic.field.text', 'sale_order_id', compute="_compute_text_field", inverse="_inverse_text_field", store=True )
+    checkbox_fields = fields.One2many('dynamic.field.checkbox', 'sale_order_id', compute="_compute_checkbox_field", inverse="_inverse_checkbox_field", store=True)
+    selection_fields = fields.One2many('dynamic.saleorder.selection.key', 'sale_order_id', compute="_compute_selection_field", inverse="_inverse_selection_field", store=True)
     revision_number = fields.Char('')
-    revision_number_count = fields.Integer(compute="_compute_revision_number_count",)
+    revision_number_count = fields.Integer(compute="_compute_revision_number_count")
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
 
@@ -49,6 +50,88 @@ class SaleOrder(models.Model):
                 }))
             self.order_line = new_lines
 
+    def _inverse_text_field(self):
+        for line in self:
+            for item in line.text_fields:
+                # Update the sale_order_id on the corresponding text field
+                item.sale_order_id = line.id
+
+    def _inverse_checkbox_field(self):
+        for line in self:
+            for item in line.checkbox_fields:
+                # Update the sale_order_id on the corresponding text field
+                item.sale_order_id = line.id
+
+    def _inverse_selection_field(self):
+        for line in self:
+            for item in line.selection_fields:
+                # Update the sale_order_id on the corresponding text field
+                item.sale_order_id = line.id
+
+    @api.depends('brand_id')
+    def _compute_text_field(self):
+        for line in self:
+            if line.brand_id:
+                # _logger.info("Computing text fields for Sale Order %s", line.id)
+                copied_text_fields = []
+                if line.brand_id.text_fields:
+                    for item in line.brand_id.text_fields:
+                        copied_item = item.copy({
+                            'sale_order_id': line.id,
+                            'brand_id': False
+                        })
+                        copied_text_fields.append(copied_item.id)
+                line.text_fields = [(6, 0, copied_text_fields)]
+                # _logger.info("Copied Text Fields: %s", copied_text_fields)
+            else:
+                line.text_fields = [(5, 0, 0)]
+                line.sku_ids  = [(6, 0, [])]
+
+    @api.depends('brand_id')
+    def _compute_checkbox_field(self):
+        for line in self:
+            if line.brand_id:
+                copied_checkbox_fields = []
+
+                for item in line.brand_id.checkbox_fields:
+                    copied_checkbox_fields.append(item.copy({
+                        'sale_order_id': line.id,
+                        'brand_id': False  # Clear the brand_id field
+                    }).id)
+                line.checkbox_fields = [(6, 0, copied_checkbox_fields)]
+                # line.sku_ids  = [(6, 0, [])]
+
+
+
+    @api.depends('brand_id')
+    def _compute_selection_field(self):
+        selection_fields = []
+        random_number = random.randint(100000, 999999)
+        for line in self:
+            if line.brand_id:
+                for item in line.brand_id.selection_fields:
+                    options = {}
+                    if line.id:
+                        selection_id = self.env['dynamic.saleorder.selection.key'].search([('sale_order_id','=',line.id)])
+                        if not selection_id:
+                            item_sale_item_selection = {'selection_field': item.selection_field,
+                                                        'sale_order_id': line.id,'sale_random_key': random_number}
+                            selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
+                    else:
+                        item_sale_item_selection = {'selection_field': item.selection_field,
+                        'sale_order_id':line.id}
+                        selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
+
+                    # selection_value = self.env['dynamic.field.selection.values.sale'].search([('sale_random_key','=',selection_id.random_number)])
+                    # if selection_value:
+                    for value in item.selection_value:
+                        # print(item.selection_field,"item.selection_field")
+                        options = {'key_field_parent':item.selection_field, 'value_field':value.value_field
+                        , 'sale_random_key': random_number,'key_field':selection_id.id}
+                        # print (options,"options")
+                        self.env['dynamic.field.selection.values.sale'].create(options)
+                    selection_fields.append(selection_id.id)
+            line.selection_fields = [(6, 0, selection_fields)]
 
     @api.depends('revision_number')
     def _compute_revision_number_count(self):
@@ -99,60 +182,61 @@ class SaleOrder(models.Model):
                 'target': 'current',  # Open in the current window
             }
 
-    @api.onchange('brand_id')
-    def _onchange_text_fields(self):
-        for line in self:
-            line.sku_ids = False
-            line.terms_conditions = line.brand_id.terms_conditions
-            line.text_fields.unlink()
-            print('22222222222222222')
-            random_number = random.randint(100000, 999999)
-
-            if line.brand_id:
-
-                print( line.brand_id)
-                print(line.brand_id.checkbox_fields)
-                print("00000000000000000000000000000")
-                copied_text_fields = []
-                checkbox_fields = []
-                selection_fields = []
-                for item in line.brand_id.text_fields:
-                    copied_text_fields.append(item.copy({
-                        'sale_order_id': line.id,
-                        'brand_id': False  # Clear the brand_id field
-                    }).id)
-                print(copied_text_fields, "copied_text_fields 11111111111111111111111111----")
-                for item in line.brand_id.checkbox_fields:
-                    copied_item = item.copy({
-                        'sale_order_id': line.id,
-                        'brand_id': False  # Clear the brand_id field
-                    }).id
-                    # copied_item.brand_id , "aaaaaaaaaaaaaaaaaaaaaa new "
-                    checkbox_fields.append(copied_item)
-                op_key = '00000'
-                for item in line.brand_id.selection_fields:
-                    options = {}
-                    item_sale_item_selection = {'selection_field': item.selection_field,
-                    'sale_order_id':line.id}
-                    selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
-                    for value in item.selection_value:
-                        print(item.selection_field,"item.selection_field")
-                        options = {'key_field_parent':item.selection_field, 'value_field':value.value_field
-                        , 'sale_order_no': random_number,'key_field':selection_id.id}
-                        print (options,"options")
-                        self.env['dynamic.field.selection.values.sale'].create(options)
-                    selection_fields.append(selection_id.id)
-                print(checkbox_fields ,"checkbox_fields")
-                print(selection_fields, "selection_fields")
-                line.text_fields = copied_text_fields
-                line.checkbox_fields = checkbox_fields #line.brand_id.checkbox_fields.ids
-                line.selection_fields = selection_fields #line.brand_id.selection_fields.ids
-                return  {'domain': {'text_fields': copied_text_fields, 'checkbox_fields': checkbox_fields,
-                                    'selection_fields':selection_fields}}
-            else:
-                return {'domain': {'text_fields': [],
-                                   'checkbox_fields': [],
-                                   'selection_fields': []}}
+    # @api.onchange('brand_id')
+    # def _onchange_text_fields(self):
+    #     for line in self:
+    #         line.sku_ids = False
+    #         line.terms_conditions = line.brand_id.terms_conditions
+    #         line.text_fields.unlink()
+    #         # print('22222222222222222')
+    #         random_number = random.randint(100000, 999999)
+    #         if line.brand_id:
+    #             print( line.brand_id)
+    #             # category_ids = self.env['sku.type.master'].search([('brand_id','=',line.brand_id.id)]).ids
+                # print(category_ids,"category_ids")
+                # print(line.brand_id.checkbox_fields)
+                # print("00000000000000000000000000000")
+                # copied_text_fields = []
+                # checkbox_fields = []
+                # selection_fields = []
+                # for item in line.brand_id.text_fields:
+                #     copied_text_fields.append(item.copy({
+                #         'sale_order_id': line.id,
+                #         'brand_id': False  # Clear the brand_id field
+                #     }).id)
+                # # print(copied_text_fields, "copied_text_fields 11111111111111111111111111----")
+                # for item in line.brand_id.checkbox_fields:
+                #     copied_item = item.copy({
+                #         'sale_order_id': line.id,
+                #         'brand_id': False  # Clear the brand_id field
+                #     }).id
+                #     # copied_item.brand_id , "aaaaaaaaaaaaaaaaaaaaaa new "
+                #     checkbox_fields.append(copied_item)
+                # op_key = '00000'
+                # for item in line.brand_id.selection_fields:
+                #     options = {}
+                #     item_sale_item_selection = {'selection_field': item.selection_field,
+                #     'sale_order_id':line.id}
+                #     selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
+                #     for value in item.selection_value:
+                #         # print(item.selection_field,"item.selection_field")
+                #         options = {'key_field_parent':item.selection_field, 'value_field':value.value_field
+                #         , 'sale_order_no': random_number,'key_field':selection_id.id}
+                #         # print (options,"options")
+                #         self.env['dynamic.field.selection.values.sale'].create(options)
+                #     selection_fields.append(selection_id.id)
+                # print(checkbox_fields ,"checkbox_fields")
+                # print(selection_fields, "selection_fields")
+                # line.text_fields = copied_text_fields
+                # line.checkbox_fields = checkbox_fields #line.brand_id.checkbox_fields.ids
+                # line.selection_fields = selection_fields #line.brand_id.selection_fields.ids
+                # line.sku_ids = [(6, 0, category_ids)]
+            #     return  {'domain': {'text_fields': copied_text_fields, 'checkbox_fields': checkbox_fields,
+            #                         'selection_fields':selection_fields }}
+            # else:
+            #     return {'domain': {'text_fields': [], 'sku_ids': [],
+            #                        'checkbox_fields': [],
+            #                        'selection_fields': []}}
 
 
 
@@ -309,16 +393,12 @@ class AccountTax(models.Model):
     @api.model
     def _compute_taxes_for_single_line(self, base_line, handle_price_include=True, include_caba_tags=False,
                                        early_pay_discount_computation=None, early_pay_discount_percentage=None):
-        print("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa45454")
-        print(self)
-        print("assss")
-        print(base_line)
-        print("aaa")
-        if not base_line['record'].order_id.brand_id.is_tax_show:
-            base_line['taxes'] = self.env['account.tax'].search([('id','=',0)])
-        print(base_line['record'].order_id.brand_id.is_tax_show)
-        print("assssssa22aa")
-        print(base_line)
+
+
+        if base_line['record']._name == 'sale.order.line':
+            if not base_line['record'][0].order_id.brand_id.is_tax_show:
+                base_line['taxes'] = self.env['account.tax'].search([('id','=',0)])
+
         orig_price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
         price_unit_after_discount = orig_price_unit_after_discount
         taxes = base_line['taxes']._origin

@@ -21,7 +21,7 @@
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="brand_id" options="{'no_create': True}" />
-                <field name="sku_ids" options="{'no_create': True}" invisible="brand_id == False"  widget="many2many_tags" /> 
+                <field name="sku_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id)]"  invisible="brand_id == False"  widget="many2many_tags" />
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
                 <field name="bom_id" options="{'no_create': True}"/>

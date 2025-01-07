@@ -55,10 +55,11 @@ class DynamicSaleOrderFieldSelection(models.Model):
     sale_order_id = fields.Many2one('sale.order', string='sale')
     # selected_value = fields.Many2one('dynamic.field.selection.values.sale' )
     options_value = fields.One2many('dynamic.field.selection.values.sale', 'key_field')
+    sale_random_key = fields.Float()
     selected_value = fields.Many2one(
         'dynamic.field.selection.values.sale',
         string='Selected Value',
-        domain="[('key_field_parent', '=', selection_field)]"
+        domain="[('key_field_parent', '=', selection_field),('key_field','=',id)]"
     )
 
 
@@ -69,7 +70,7 @@ class DynamicFieldSelectionValuesSale(models.Model):
 
     value_field = fields.Char('')
     key_field_parent = fields.Char('')
-    sale_order_no = fields.Float()
+    sale_random_key = fields.Float()
     key_field = fields.Many2one('dynamic.saleorder.selection.key')
 
 
