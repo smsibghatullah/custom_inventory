@@ -177,9 +177,9 @@ class SaleOrder(models.Model):
                 'type': 'ir.actions.act_window',
                 'name': 'Revised Order',
                 'view_mode': 'form',
-                'res_model': self._name,  # Use the model name of the current object
-                'res_id': new_item.id,  # Pass the ID of the new record
-                'target': 'current',  # Open in the current window
+                'res_model': self._name,  
+                'res_id': new_item.id,  
+                'target': 'current', 
             }
 
     # @api.onchange('brand_id')
@@ -276,9 +276,10 @@ class SaleOrder(models.Model):
             values['journal_id'] = self.journal_id.id
         return values
 
-    # @api.onchange('brand_id')
-    # def _onchange_brand_id(self):
-    #     if self.brand_id:
+    @api.onchange('brand_id')
+    def _onchange_brand_id(self):
+        if self.brand_id:
+            self.sku_ids  = [(6, 0, [])]
 
        
     def action_send_report_email(self):
@@ -352,28 +353,27 @@ class SaleOrderLine(models.Model):
 
     sku_ids = fields.Many2many(
         'sku.type.master',
-        'sale_line_sku_rel',
+        'sale_line_sku_rel_we',
         'product_id',
         'sku_id',
         string=' ',
-        compute='_compute_product_sku_id',
         required=True,
         help='Select the Categories associated with the selected brand'
     )
 
     # @api.depends('order_id.sku_ids')
-    def _compute_product_sku_id(self):
-        """
-        Compute the product template based on sku_ids from the order.
-        This is just an example; this method may also involve other logic.
-        """
-        for line in self:
-            if not line.order_id.bom_id:
-                if line.order_id and line.order_id.sku_ids:
-                    self.sku_ids = line.order_id.sku_ids.ids
-            else:
-                sku_ids = self.env['sku.type.master'].search([]) 
-                line.sku_ids = sku_ids
+    # def _compute_product_sku_id(self):
+    #     """
+    #     Compute the product template based on sku_ids from the order.
+    #     This is just an example; this method may also involve other logic.
+    #     """
+    #     for line in self:
+    #         if not line.order_id.bom_id:
+    #             if line.order_id and line.order_id.sku_ids:
+    #                 self.sku_ids = line.order_id.sku_ids.ids
+    #         else:
+    #             sku_ids = self.env['sku.type.master'].search([]) 
+    #             line.sku_ids = sku_ids
 
     @api.depends('product_id')
     def _compute_product_template_id(self):
@@ -386,6 +386,7 @@ class SaleOrderLine(models.Model):
                 sku_ids = self.env['sku.type.master'].search([]) 
                 line.sku_ids = sku_ids
             line.product_template_id = line.product_id.product_tmpl_id
+            print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
