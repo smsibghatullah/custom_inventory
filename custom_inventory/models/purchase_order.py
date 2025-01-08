@@ -22,10 +22,14 @@ class PurchaseOrder(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
+    terms_conditions = fields.Text(string='Brand Terms & Conditions')
+
+
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
             self.sku_ids = False
+            self.terms_conditions = self.brand_id.terms_conditions
 
     def action_send_report_email(self):
         self.ensure_one()
