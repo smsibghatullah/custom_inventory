@@ -12,3 +12,4 @@ access_bom_products,name_bom_products,model_bom_products,base.group_user,1,1,1,1
 access_bom_product_line,name_bom_product_line,model_bom_product_line,base.group_user,1,1,1,1
 access_dynamic_saleorder_selection_key,name_dynamic_saleorder_selection_key,model_dynamic_saleorder_selection_key,base.group_user,1,1,1,1
 access_dynamic_field_selection_values_sale,name_dynamic_field_selection_values_sale,model_dynamic_field_selection_values_sale,base.group_user,1,1,1,1
+access_product_cost_wizard,product.cost.wizard_access,model_product_cost_wizard,base.group_user,1,1,1,1
