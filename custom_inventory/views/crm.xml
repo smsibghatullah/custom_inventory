@@ -33,6 +33,21 @@
                 </xpath>
             </field>
         </record>
+
+        <record id="quick_create_opportunity_kanban" model="ir.ui.view">
+            <field name="name">crm.lead.quick.create.form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_kanban_details']" position="after">
+                    <div>
+                        <field name="brand_id"/>
+                        <field name="sku_ids" string="Category" widget="many2many_tags"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </odoo>
 

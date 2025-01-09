@@ -23,6 +23,7 @@ class AccountMove(models.Model):
     )
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+    payment_link = fields.Text(string='Payment Link')
 
     @api.onchange('bom_id')
     def _onchange_bom_id(self):

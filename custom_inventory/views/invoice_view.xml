@@ -13,6 +13,7 @@
                 <field name="brand_id" string="Brand" options="{'no_create': True}" /> 
                 <field name="sku_ids" string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
                 <field name="bom_id" string="BOM" options="{'no_create': True}" />
+                <field name="payment_link" string="Payment Link"  />
             </xpath>
              <xpath expr="//field[@name='product_id']" position="attributes">
                 <attribute name="domain">[('sku_ids', 'in', sku_ids)]</attribute>
