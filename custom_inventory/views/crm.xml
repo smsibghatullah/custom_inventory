@@ -47,6 +47,18 @@
                 </xpath>
             </field>
         </record>
+        <record id="quick_create_opportunity_form_view" model="ir.ui.view">
+            <field name="name">crm.lead.quick.create.form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+            <field name="priority">2000</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='email_from']" position="after">
+                        <field name="brand_id"/>
+                        <field name="sku_ids" string="Category" widget="many2many_tags"/>
+                </xpath>
+            </field>
+        </record>
 
     </data>
 </odoo>
