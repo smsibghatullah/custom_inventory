@@ -298,6 +298,16 @@ class SaleOrder(models.Model):
             },
         }
 
+    @api.onchange('pricelist_id')
+    def _onchange_pricelist_id(self):
+        """
+        Update all order lines when the pricelist is changed.
+        """
+        for order in self:
+            for line in order.order_line:
+                line._update_price_from_pricelist()
+
+
 class SaleOrderEmailWizard(models.TransientModel):
     _name = 'sale.order.email.wizard'
     _description = 'Sale Order Email Wizard'
@@ -361,6 +371,40 @@ class SaleOrderLine(models.Model):
         required=True,
         help='Select the Categories associated with the selected brand'
     )
+    pricelist_id = fields.Many2one(
+        'product.pricelist', 
+        string="Pricelist", 
+        related='order_id.pricelist_id', 
+        store=True, 
+        readonly=False
+    )
+
+    @api.onchange('product_id', 'pricelist_id')
+    def _onchange_product_pricelist(self):
+        """
+        Update price_unit based on the selected pricelist and product.
+        """
+        for line in self:
+            line._update_price_from_pricelist()
+
+    def _update_price_from_pricelist(self):
+        """
+        Helper method to update price_unit from the pricelist.
+        """
+        for line in self:
+            if line.product_id and line.pricelist_id:
+                for item in line.pricelist_id.item_ids:
+                    if line.product_template_id == item.product_tmpl_id:
+                       line.price_unit = item.fixed_price
+
+    @api.model
+    def create(self, vals):
+        """
+        Ensure price is set based on pricelist at creation.
+        """
+        record = super(SaleOrderLine, self).create(vals)
+        record._update_price_from_pricelist()
+        return record
 
     # @api.depends('order_id.sku_ids')
     # def _compute_product_sku_id(self):

@@ -10,8 +10,8 @@
                 <button name="action_send_report_email" type="object" string="Send Email" class="btn-primary"/>
             </header>
             <xpath expr="//field[@name='invoice_date']" position="after">
-                <field name="brand_id" string="Brand" options="{'no_create': True}" /> 
-                <field name="sku_ids" string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                <field name="brand_id" required='1' string="Brand" options="{'no_create': True}" /> 
+                <field name="sku_ids" required='1' string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
                 <field name="bom_id" string="BOM" options="{'no_create': True}" />
                 <field name="payment_link" string="Payment Link"  />
             </xpath>

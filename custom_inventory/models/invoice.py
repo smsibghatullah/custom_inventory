@@ -8,7 +8,6 @@ class AccountMove(models.Model):
     brand_id = fields.Many2one(
         'brand.master', 
         string='Brand',
-         required=True,
         help='Select the brand associated with this sale order'
     )
 
@@ -18,7 +17,6 @@ class AccountMove(models.Model):
         'product_id',
         string='Categories',
         domain="[('brand_id', '=', brand_id)]",
-         required=True,
         help='Select the Categories associated with the selected brand'
     )
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
