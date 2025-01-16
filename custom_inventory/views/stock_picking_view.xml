@@ -6,23 +6,41 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_picking" 
+                <button name="action_pick_pack" 
                         type="object" 
-                        string="Picking" 
+                        string="Pick / Pack" 
                         class="btn-primary"
                         invisible="picking_type_code != 'outgoing'"/>
-                <button name="action_picked_up" 
+                <button name="action_ready_for_pickup" 
                         type="object" 
-                        string="Picked Up" 
+                        string="Ready for Pickup" 
+                        class="btn-warning"
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_picked_up_by_logistic" 
+                        type="object" 
+                        string="Picked Up by Logistic Car" 
                         class="btn-success"
-                        invisible="picking_type_code != 'outgoing'"
-                       />
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_in_transit" 
+                        type="object" 
+                        string="In Transit" 
+                        class="btn-info"
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_delivered" 
+                        type="object" 
+                        string="Delivered" 
+                        class="btn-success"
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_pickup_by_buyer" 
+                        type="object" 
+                        string="Pickup by Buyer" 
+                        class="btn-secondary"
+                        invisible="picking_type_code != 'outgoing'"/>
             </xpath>
             <xpath expr="//field[@name='state']" position="attributes">
-                <attribute name="statusbar_visible">draft,confirmed,assigned,picking,picked_up,done</attribute>
+                <attribute name="statusbar_visible">draft,pick_pack,ready_for_pickup,picked_up_by_logistic,in_transit,delivered,pickup_by_buyer</attribute>
             </xpath>
         </field>
     </record>
   </data>
 </odoo>
-
