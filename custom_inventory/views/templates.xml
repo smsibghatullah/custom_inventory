@@ -214,28 +214,71 @@
                         </div>
                 </t>
 
+               <table class="table table-bordered">
+                    <t t-set="text_count" t-value="len(doc.text_fields)" />
+                    <t t-foreach="range(0, text_count, 2)" t-as="index">
+                        <tr>
+                            <td t-if="index &lt; text_count">
+                                <strong t-esc="doc.text_fields[index].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                                <span t-esc="doc.text_fields[index].text_value" style="display: inline-block;"></span>
+                            </td>
 
-               <t t-foreach="doc.text_fields" t-as="text_field">
-                   <div class="mt-4">
-                    <strong t-field="text_field.text_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                    <span t-field="text_field.text_value" style="display: inline-block;"></span>
-                </div>
-               </t>
+                            <td t-if="index + 1 &lt; text_count">
+                                <strong t-esc="doc.text_fields[index + 1].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                                <span t-esc="doc.text_fields[index + 1].text_value" style="display: inline-block;"></span>
+                            </td>
 
-               <t t-foreach="doc.checkbox_fields" t-as="checkbox_field">
-                   <div class="mt-4">
-                    <strong t-field="checkbox_field.checkbox_field" style="display: inline-block; margin-right: 10px;">:</strong>
-                       <t t-if="checkbox_field.checkbox_value"> YES</t>
-                       <t t-if="not checkbox_field.checkbox_value"> NO</t>
-<!--                    <span t-field="checkbox_field.checkbox_value" style="display: inline-block;"></span>-->
-                </div>
-               </t>
-               <t t-foreach="doc.selection_fields" t-as="selection_field">
-                   <div class="mt-4">
-                    <strong t-field="selection_field.selection_field" style="display: inline-block; margin-right: 10px;">:</strong>
-                    <span t-field="selection_field.selected_value" style="display: inline-block;"></span>
-                </div>
-               </t>
+                            <td t-if="index + 1 &gt;= text_count"></td>
+                        </tr>
+                    </t>
+               </table>
+
+               <br/>
+
+               <table class="table table-bordered">
+                    <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
+                    <t t-set="selection_count" t-value="len(doc.selection_fields)" />
+                    <t t-set="total_count" t-value="max(checkbox_count, selection_count)" />
+
+                    <t t-foreach="range(0, total_count, 2)" t-as="index">
+                        <tr>
+                            <td t-if="index &gt;= checkbox_count"></td>
+                            <td t-if="index &lt; checkbox_count">
+                                <label>
+                                    <strong t-esc="doc.checkbox_fields[index].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                                    <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
+                                    <t t-if="not doc.checkbox_fields[index].checkbox_value">NO</t>
+                                </label>
+                            </td>
+
+                            <td t-if="index + 1 &gt;= checkbox_count"></td>
+                            <td t-if="index + 1 &lt; checkbox_count">
+                                <label>
+                                    <strong t-esc="doc.checkbox_fields[index + 1].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
+                                    <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
+                                    <t t-if="not doc.checkbox_fields[index + 1].checkbox_value">NO</t>
+                                </label>
+                            </td>
+
+                            <td t-if="index &gt;= selection_count"></td>
+                            <td t-if="index &lt; selection_count">
+                                <label>
+                                    <strong t-esc="doc.selection_fields[index].selection_field" style="margin-right: 10px;"></strong>:
+                                    <span t-esc="doc.selection_fields[index].selected_value.value_field"></span>
+                                </label>
+                            </td>
+
+                            <td t-if="index + 1 &gt;= selection_count"></td>
+                            <td t-if="index + 1 &lt; selection_count">
+                                <label>
+                                    <strong t-esc="doc.selection_fields[index + 1].selection_field" style="margin-right: 10px;"></strong>:
+                                    <span t-esc="doc.selection_fields[index + 1].selected_value.value_field"></span>
+                                </label>
+                            </td>
+                        </tr>
+                    </t>
+                </table>
+              
                 <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                       <strong>Terms and Conditions:</strong>
                         <t t-if="doc.state == 'draft'">
