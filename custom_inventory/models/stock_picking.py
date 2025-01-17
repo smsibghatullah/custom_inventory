@@ -22,6 +22,36 @@ class StockPicking(models.Model):
              " * Delivered: The transfer has been delivered.\n"
              " * Pickup by Buyer: The buyer picked up the transfer.\n"
              " * Cancelled: The transfer has been cancelled.")
+    courier_fields = fields.Boolean(string="Courier Fields")
+    standard_delivery_fields = fields.Boolean(string="Standard Delivery Fields")
+    readonly_fields = fields.Boolean(string="Readonly Fields", compute="_compute_field_readonly")
+
+    @api.onchange('carrier_id')
+    def _compute_carrier_fields(self):
+        for record in self:
+            if record.carrier_id:
+                record.courier_fields = record.carrier_id.code == 'courier'
+                record.standard_delivery_fields = record.carrier_id.code == 'standard_delivery'
+            else:
+                record.courier_fields = False
+                record.standard_delivery_fields = False
+                
+            if record.carrier_id.code == 'courier' and record.state in ['in_transit','picked_up_by_logistic','delivered','done','cancel']:
+                record.readonly_fields = True
+            elif record.carrier_id.code == 'standard_delivery' and record.state in ['done', 'pickup_by_buyer','cancel']:
+                record.readonly_fields = True
+            else:
+                record.readonly_fields = False
+
+    @api.depends('state')
+    def _compute_field_readonly(self):
+        for record in self:
+            if record.carrier_id.code == 'courier' and record.state in ['in_transit','picked_up_by_logistic','delivered','done','cancel']:
+                record.readonly_fields = True
+            elif record.carrier_id.code == 'standard_delivery' and record.state in ['done', 'pickup_by_buyer','cancel']:
+                record.readonly_fields = True
+            else:
+                record.readonly_fields = False
 
     def action_pick_pack(self):
         for record in self:
@@ -46,3 +76,9 @@ class StockPicking(models.Model):
     def action_pickup_by_buyer(self):
         for record in self:
             record.state = 'pickup_by_buyer'
+        
+
+class DeliveryCarrier(models.Model):
+    _inherit = 'delivery.carrier'
+
+    code = fields.Char(string="Code", help="Enter the unique code for the delivery carrier.")

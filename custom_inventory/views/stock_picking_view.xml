@@ -4,43 +4,65 @@
         <field name="name">stock.picking.form.inherit</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="priority" eval="20"/> 
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_pick_pack" 
+               <button name="action_pick_pack" 
                         type="object" 
                         string="Pick / Pack" 
                         class="btn-primary"
-                        invisible="state not in ['draft', 'pick_pack'] or picking_type_code != 'outgoing'"/>
+                        invisible="not courier_fields or state not in ['draft']"/>
                 <button name="action_ready_for_pickup" 
                         type="object" 
                         string="Ready for Pickup" 
                         class="btn-warning"
-                        invisible="state != 'pick_pack' or picking_type_code != 'outgoing'"/>
+                        invisible="not courier_fields or state != 'pick_pack'"/>
                 <button name="action_picked_up_by_logistic" 
                         type="object" 
                         string="Picked Up by Logistic Car" 
                         class="btn-success"
-                        invisible="state != 'ready_for_pickup' or picking_type_code != 'outgoing'"/>
+                        invisible="not courier_fields or state != 'ready_for_pickup'"/>
                 <button name="action_in_transit" 
                         type="object" 
                         string="In Transit" 
                         class="btn-info"
-                        invisible="state != 'picked_up_by_logistic' or picking_type_code != 'outgoing'"/>
+                        invisible="not courier_fields or state != 'picked_up_by_logistic'"/>
                 <button name="action_delivered" 
                         type="object" 
                         string="Delivered" 
                         class="btn-success"
-                        invisible="state != 'in_transit' or picking_type_code != 'outgoing'"/>
+                        invisible="not courier_fields or state != 'in_transit'"/>
                 <button name="action_pickup_by_buyer" 
                         type="object" 
                         string="Pickup by Buyer" 
                         class="btn-secondary"
-                        invisible="state != 'delivered' or picking_type_code != 'outgoing'"/>
+                        invisible="not standard_delivery_fields or state != 'ready_for_pickup'"/>
             </xpath>
             <xpath expr="//field[@name='state']" position="attributes">
                 <attribute name="statusbar_visible">draft,pick_pack,ready_for_pickup,picked_up_by_logistic,in_transit,delivered,pickup_by_buyer</attribute>
             </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+               <field name="courier_fields" invisible="1"/>
+               <field name="standard_delivery_fields" invisible="1"/>
+                <field name="readonly_fields" invisible="1"/>
+            </xpath>
+            <!-- <xpath expr="//field[@name='carrier_id']" position="replace">
+                <field name="carrier_id" readonly="readonly_fields == True" options="{'no_create': True, 'no_open': True}"/>
+            </xpath> -->
+
         </field>
     </record>
+
+    <record id="view_delivery_carrier_form_inherit" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.inherit</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']"  position="after">
+                <field name="code" placeholder="Enter unique carrier code"/>
+            </xpath>
+        </field>
+    </record>
+
   </data>
 </odoo>
