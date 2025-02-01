@@ -430,6 +430,7 @@ class SaleOrderLine(models.Model):
             else:
                 sku_ids = self.env['sku.type.master'].search([]) 
                 line.sku_ids = sku_ids
+
             line.product_template_id = line.product_id.product_tmpl_id
             print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
 

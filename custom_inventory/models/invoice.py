@@ -135,7 +135,9 @@ class AccountMoveLine(models.Model):
             for line in self:
                 if not line.move_id.bom_id:
                     if line.move_id and line.move_id.sku_ids:
-                        self.sku_ids = line.move_id.sku_ids.ids
+                        line.sku_ids = line.move_id.sku_ids.ids
+                    else:
+                        line.sku_ids = []
                 else:
                     sku_ids = self.env['sku.type.master'].search([]) 
                     line.sku_ids = sku_ids
@@ -149,6 +151,8 @@ class AccountMoveLine(models.Model):
             if not line.move_id.bom_id:
                 if line.move_id and line.move_id.sku_ids:
                     self.sku_ids = line.move_id.sku_ids.ids
+                else:
+                    line.sku_ids = []
             else:
                 sku_ids = self.env['sku.type.master'].search([]) 
                 line.sku_ids = sku_ids

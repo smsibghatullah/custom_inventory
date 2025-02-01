@@ -119,19 +119,16 @@ class PurchaseOrderLine(models.Model):
         """
         for line in self:
                 if line.order_id and line.order_id.sku_ids:
-                    self.sku_ids = line.order_id.sku_ids.ids
+                    line.sku_ids = line.order_id.sku_ids.ids
                 else:
                     sku_ids = self.env['sku.type.master'].search([]) 
                     line.sku_ids = sku_ids
-            
-    
-            
 
     @api.onchange('product_id')
     def _compute_product_template_id(self):
         for line in self:
                 if line.order_id and line.order_id.sku_ids:
-                    self.sku_ids = line.order_id.sku_ids.ids
+                    line.sku_ids = line.order_id.sku_ids.ids
                 else:
                     sku_ids = self.env['sku.type.master'].search([]) 
                     line.sku_ids = sku_ids
