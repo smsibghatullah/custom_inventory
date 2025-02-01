@@ -5,12 +5,16 @@ class StockPicking(models.Model):
 
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('waiting', 'Waiting Another Operation'),
+        ('confirmed', 'Waiting'),
         ('pick_pack', 'Pick & Pack'),
         ('ready_for_pickup', 'Ready for Pickup'),
+        ('assigned', 'Ready'),
         ('picked_up_by_logistic', 'Picked Up by Logistic Car'),
         ('in_transit', 'In Transit'),
         ('delivered', 'Delivered'),
         ('pickup_by_buyer', 'Pickup by Buyer'),
+        ('done', 'Done'),
         ('cancel', 'Cancelled'),
     ], string='Status', compute='_compute_state',
         copy=False, index=True, readonly=True, store=True, tracking=True,
@@ -26,6 +30,8 @@ class StockPicking(models.Model):
     standard_delivery_fields = fields.Boolean(string="Standard Delivery Fields", compute="_compute_carrier_fields")
     readonly_fields = fields.Boolean(string="Readonly Fields", compute="_compute_field_readonly")
     courier_and_standard_fields = fields.Boolean(string="Both Fields", compute="_compute_carrier_fields")
+
+
 
     @api.onchange('carrier_id')
     def _compute_carrier_fields(self):
