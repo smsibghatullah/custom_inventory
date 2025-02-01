@@ -11,12 +11,12 @@
                         type="object" 
                         string="Pick / Pack" 
                         class="btn-primary"
-                        invisible="not courier_fields or state not in ['draft']"/>
+                        invisible="not courier_and_standard_fields or state not in ['draft']"/>
                 <button name="action_ready_for_pickup" 
                         type="object" 
                         string="Ready for Pickup" 
                         class="btn-warning"
-                        invisible="not courier_fields or state != 'pick_pack'"/>
+                        invisible="not courier_and_standard_fields or state != 'pick_pack'"/>
                 <button name="action_picked_up_by_logistic" 
                         type="object" 
                         string="Picked Up by Logistic Car" 
@@ -45,6 +45,7 @@
                <field name="courier_fields" invisible="1"/>
                <field name="standard_delivery_fields" invisible="1"/>
                 <field name="readonly_fields" invisible="1"/>
+                <field name="courier_and_standard_fields" invisible="1" />
             </xpath>
             <!-- <xpath expr="//field[@name='carrier_id']" position="replace">
                 <field name="carrier_id" readonly="readonly_fields == True" options="{'no_create': True, 'no_open': True}"/>

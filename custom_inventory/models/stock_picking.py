@@ -22,19 +22,24 @@ class StockPicking(models.Model):
              " * Delivered: The transfer has been delivered.\n"
              " * Pickup by Buyer: The buyer picked up the transfer.\n"
              " * Cancelled: The transfer has been cancelled.")
-    courier_fields = fields.Boolean(string="Courier Fields")
-    standard_delivery_fields = fields.Boolean(string="Standard Delivery Fields")
+    courier_fields = fields.Boolean(string="Courier Fields", compute="_compute_carrier_fields")
+    standard_delivery_fields = fields.Boolean(string="Standard Delivery Fields", compute="_compute_carrier_fields")
     readonly_fields = fields.Boolean(string="Readonly Fields", compute="_compute_field_readonly")
+    courier_and_standard_fields = fields.Boolean(string="Both Fields", compute="_compute_carrier_fields")
 
     @api.onchange('carrier_id')
     def _compute_carrier_fields(self):
         for record in self:
+            print("oooooooooooooooooooooooooooooooooooooooooooooooo")
             if record.carrier_id:
                 record.courier_fields = record.carrier_id.code == 'courier'
                 record.standard_delivery_fields = record.carrier_id.code == 'standard_delivery'
+                record.courier_and_standard_fields = record.carrier_id.code == 'courier' or record.carrier_id.code == 'standard_delivery'
+                print(record.courier_fields,"kkkkkkkkkkkkkkkkkkkkkkk",record.standard_delivery_fields)
             else:
                 record.courier_fields = False
                 record.standard_delivery_fields = False
+                record.courier_and_standard_fields = False
                 
             if record.carrier_id.code == 'courier' and record.state in ['in_transit','picked_up_by_logistic','delivered','done','cancel']:
                 record.readonly_fields = True
