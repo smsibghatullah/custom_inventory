@@ -59,10 +59,12 @@
         <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']"  position="after">
-                <field name="code" placeholder="Enter unique carrier code"/>
+                <label for="code"/>
+                <field name="code" placeholder="Enter unique carrier code" string="Code"/>
             </xpath>
         </field>
     </record>
+
 
   </data>
 </odoo>
