@@ -269,7 +269,8 @@ class SaleOrder(models.Model):
             'invoice_line_ids': [],
             'user_id': self.user_id.id,
             'brand_id': self.brand_id.id,
-            'sku_ids': [(6, 0, self.sku_ids.ids)],  
+            'sku_ids': [(6, 0, self.sku_ids.ids)],
+            'bom_id': self.bom_id.id,
             'terms_conditions': self.brand_id.terms_conditions_invoice,
         }
         if self.journal_id:
