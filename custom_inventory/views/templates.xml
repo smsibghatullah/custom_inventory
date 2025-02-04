@@ -209,8 +209,8 @@
                         <td colspan="2" style="border-top: 1px solid black;"></td>
                     </tr>
                     <tr>
-                        <td style="padding: 5px;"><strong>Total</strong></td>
-                        <td style="padding: 5px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="border-bottom: 1px solid black;"></td>
@@ -586,8 +586,8 @@
                         <td colspan="2" style="border-top: 1px solid black;"></td>
                     </tr>
                     <tr>
-                        <td style="padding: 5px;"><strong>Total</strong></td>
-                        <td style="padding: 5px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="border-bottom: 1px solid black;"></td>
