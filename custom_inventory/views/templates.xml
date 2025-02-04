@@ -436,6 +436,8 @@
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
+                <div class="page">
+                <div class="oe_structure"/>
                 <div style="position: fixed; top: 0; left: 0; padding: 10px;">
                         <t t-if="o.brand_id">
                             <div style="display: flex; align-items: center; margin-bottom: 20px;">
@@ -626,6 +628,8 @@
        <div id="right-elements" t-attf-class="#{'col-5' if report_type != 'html' else 'col-12 col-md-5'} ms-5 d-inline-block float-end">
                               
                             </div>
+
+        </div>
                 
             </t>
         </template>
