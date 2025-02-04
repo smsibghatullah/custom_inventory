@@ -437,7 +437,7 @@
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
                 <div class="page">
-                <h2></h2>
+                <h2 style="display:none"></h2>
                 <div class="oe_structure"/>
                 <div style="position: fixed; top: 0; left: 0; padding: 10px;">
                         <t t-if="o.brand_id">
