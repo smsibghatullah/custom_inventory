@@ -199,7 +199,7 @@
                         <td style="padding: 5px;">Shipping</td>
                         <td style="padding: 5px;"><span t-field="doc.carrier_id.fixed_price">0.00</span></td>
                     </tr>
-                    <tr t-if="o.brand_id.is_tax_show">
+                    <tr t-if="doc.brand_id.is_tax_show">
                         <td style="padding: 5px;">Total Tax (<span t-field="doc.amount_tax">0.00</span>)</td>
                         <td style="padding: 5px;">
                             <span t-field="doc.amount_tax">0.00</span>
