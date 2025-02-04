@@ -67,7 +67,7 @@
             <field name="binding_type">report</field>
             <field name="groups_id" eval="[(4, ref('account.group_account_invoice')),
  (4, ref('account.group_account_readonly'))]"/>
-            <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+            <!-- <field name="paperformat_id" ref="paperformat_scrap_reports"/> -->
         </record>
 
         <record id="account.account_invoices_without_payment" model="ir.actions.report">
@@ -80,7 +80,7 @@
             <field name="attachment"/>
             <field name="binding_model_id" ref="model_account_move"/>
             <field name="binding_type">report</field>
-            <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+            <!-- <field name="paperformat_id" ref="paperformat_scrap_reports"/> -->
         </record>
 
   </data>
