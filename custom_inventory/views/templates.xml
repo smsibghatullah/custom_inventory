@@ -437,7 +437,7 @@
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
                 <div class="page">
-                <h2 style="display:none"></h2>
+                
                 <div class="oe_structure"/>
                 <div style="position: fixed; top: 0; left: 0; padding: 10px;">
                         <t t-if="o.brand_id">
@@ -465,6 +465,7 @@
                         <span style="font-weight: bold; font-size: 30px;">INVOICE</span>
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
                     </div>
+                    <!-- <h2 style="display:none"></h2> -->
                 <!-- Customer details -->
                     <div style="font-size: 15px; margin-bottom: 10px;">
                         <div style="font-weight: bold;">Bill To</div>
