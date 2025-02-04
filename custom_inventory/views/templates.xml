@@ -636,7 +636,7 @@
             </t>
         </template>
 
-            <template id="l10n_au.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+            <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
         <xpath expr="//div[hasclass('page')]/h2" position="replace">
             <h2>
                

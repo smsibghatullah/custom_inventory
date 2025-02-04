@@ -26,9 +26,10 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'category': 'Inventory',
     'version': '1.0',
 
-    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery'],
+    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery','l10n_au','l10n_nz'],
 
     'data': [
+         'data/data.xml',
         'views/brand_view.xml',
         'views/bom_products_view.xml',
         'views/invoice_view.xml',
@@ -40,7 +41,6 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/stock_picking_view.xml',
         'views/expense_cost_wizard_view.xml',
         'security/ir.model.access.csv',
-        'data/data.xml',
        
     ],
 
