@@ -465,9 +465,7 @@
                         <span style="font-weight: bold; font-size: 30px;">INVOICE</span>
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
                     </div>
-                    <br/>
                     <h2 style="display:none"></h2>
-                    <br/>
                 <!-- Customer details -->
                     <div style="font-size: 15px; margin-bottom: 10px;">
                         <div style="font-weight: bold;">Bill To</div>
@@ -637,6 +635,14 @@
                 
             </t>
         </template>
+
+            <template id="l10n_au.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+        <xpath expr="//div[hasclass('page')]/h2" position="replace">
+            <h2>
+               
+            </h2>
+        </xpath>
+    </template>
 
 
 <template id="purchase.report_purchasequotation_document">
