@@ -11,15 +11,16 @@
             </header>
             <xpath expr="//field[@name='invoice_date']" position="after">
                 <field name="brand_id" required='1' string="Brand" options="{'no_create': True}" /> 
-                <field name="sku_ids" required='1' string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                <field name="category_ids" required='1' string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
                 <field name="bom_id" string="BOM" options="{'no_create': True}" />
+                 <field name="reference" />
                 <field name="payment_link" string="Payment Link"  />
             </xpath>
              <xpath expr="//field[@name='product_id']" position="attributes">
-                <attribute name="domain">[('sku_ids', 'in', sku_ids)]</attribute>
+                <attribute name="domain">[('category_ids', 'in', category_ids)]</attribute>
             </xpath>
             <xpath expr="//field[@name='product_id']" position="after">
-                 <field name="sku_ids" invisible="1" />
+                 <field name="category_ids" invisible="1" />
             </xpath>
 <!--            <xpath>-->
 <!--                <field name="terms_conditions" />-->
@@ -53,6 +54,34 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
+
+     <record id="account.account_invoices" model="ir.actions.report">
+            <field name="name">Invoices</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account.report_invoice_with_payments</field>
+            <field name="report_file">account.report_invoice_with_payments</field>
+            <field name="print_report_name">(object._get_report_base_filename())</field>
+            <field name="attachment"/>
+            <field name="binding_model_id" ref="model_account_move"/>
+            <field name="binding_type">report</field>
+            <field name="groups_id" eval="[(4, ref('account.group_account_invoice')),
+ (4, ref('account.group_account_readonly'))]"/>
+            <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+        </record>
+
+        <record id="account.account_invoices_without_payment" model="ir.actions.report">
+            <field name="name">Invoices without Payment</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account.report_invoice</field>
+            <field name="report_file">account.report_invoice</field>
+            <field name="print_report_name">(object._get_report_base_filename())</field>
+            <field name="attachment"/>
+            <field name="binding_model_id" ref="model_account_move"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+        </record>
 
   </data>
 </odoo>

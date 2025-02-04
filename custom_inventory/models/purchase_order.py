@@ -12,9 +12,9 @@ class PurchaseOrder(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'purchase_sku_rel',
+        'purchase_category_rel',
         'product_id',
         string='Categories',
         domain="[('brand_id', '=', brand_id)]",
@@ -45,7 +45,7 @@ class PurchaseOrder(models.Model):
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
             'brand_id': self.brand_id.id,
-            'sku_ids': [(6, 0, self.sku_ids.ids)],
+            'categoryids': [(6, 0, self.category_ids.ids)],
             'terms_conditions': self.brand_id.terms_conditions_invoice,
             'invoice_line_ids': [],
             'company_id': self.company_id.id,
@@ -55,7 +55,7 @@ class PurchaseOrder(models.Model):
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
-            self.sku_ids = False
+            self.category_ids = False
             self.terms_conditions = self.brand_id.terms_conditions
 
     def action_send_report_email(self):
@@ -127,37 +127,37 @@ class PurchaseOrderEmailWizard(models.TransientModel):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'purchase_line_sku_rel',
+        'purchase_line_category_rel',
         'product_id',
-        'sku_id',
+        'category_id',
         string=' ',
         compute='_compute_product_sku_id',
         required=True,
         help='Select the Categories associated with the selected brand'
     )
 
-    @api.depends('order_id.sku_ids')
+    @api.depends('order_id.category_ids')
     def _compute_product_sku_id(self):
         """
         Compute the product template based on sku_ids from the order.
         This is just an example; this method may also involve other logic.
         """
         for line in self:
-                if line.order_id and line.order_id.sku_ids:
-                    line.sku_ids = line.order_id.sku_ids.ids
+                if line.order_id and line.order_id.category_ids:
+                    line.category_ids = line.order_id.category_ids.ids
                 else:
-                    sku_ids = self.env['sku.type.master'].search([]) 
-                    line.sku_ids = sku_ids
+                    category_ids = self.env['sku.type.master'].search([]) 
+                    line.category_ids = category_ids
 
     @api.onchange('product_id')
     def _compute_product_template_id(self):
         for line in self:
-                if line.order_id and line.order_id.sku_ids:
-                    line.sku_ids = line.order_id.sku_ids.ids
+                if line.order_id and line.order_id.category_ids:
+                    line.category_ids = line.order_id.category_ids.ids
                 else:
-                    sku_ids = self.env['sku.type.master'].search([]) 
-                    line.sku_ids = sku_ids
+                    category_ids = self.env['sku.type.master'].search([]) 
+                    line.category_ids = category_ids
             
     

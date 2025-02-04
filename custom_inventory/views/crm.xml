@@ -1,7 +1,7 @@
 <odoo>
     <data>
 
-        <record id="quick_create_opportunity_form" model="ir.ui.view">
+        <record id="quick_create_opportunity_form_inherit" model="ir.ui.view">
             <field name="name">crm.lead.kanban.lead.inherit</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
@@ -9,13 +9,13 @@
                 <xpath expr="//field[@name='phone']" position="after">
                     <div>
                         <field name="brand_id"  string="Brand" />
-                        <field name="sku_ids" string="Category" widget="many2many_tags" />
+                        <field name="category_ids" string="Category" widget="many2many_tags" />
                     </div>
                 </xpath>
             </field>
         </record>
 
-        <record id="quick_create_opportunity_form" model="ir.ui.view">
+        <record id="quick_create_opportunity_form_kanban" model="ir.ui.view">
             <field name="name">crm.lead.kanban.lead.inherit</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_lead_view_form"/>
@@ -24,11 +24,11 @@
                     <label for="brand_id"></label>
                     <div>
                         <field name="brand_id"  />
-<!--                        <field name="sku_ids" string="Category" widget="many2many_tags" />-->
+<!--                        <field name="category_ids" string="Category" widget="many2many_tags" />-->
                     </div>
-                    <label for="sku_ids"></label>
+                    <label for="category_ids"></label>
                     <div>
-                        <field name="sku_ids" string="Category" widget="many2many_tags" />
+                        <field name="category_ids" string="Category" widget="many2many_tags" />
                     </div>
                 </xpath>
             </field>
@@ -42,7 +42,7 @@
                 <xpath expr="//div[@class='oe_kanban_details']" position="after">
                     <div>
                         <field name="brand_id"/>
-                        <field name="sku_ids" string="Category" widget="many2many_tags"/>
+                        <field name="category_ids" string="Category" widget="many2many_tags"/>
                     </div>
                 </xpath>
             </field>
@@ -55,7 +55,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='email_from']" position="after">
                         <field name="brand_id"/>
-                        <field name="sku_ids" string="Category" widget="many2many_tags"/>
+                        <field name="category_ids" string="Category" widget="many2many_tags"/>
                 </xpath>
             </field>
         </record>

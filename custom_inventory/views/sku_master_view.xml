@@ -6,7 +6,7 @@
         <field name="model">sku.type.master</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="sku_id"/>
+                <field name="category_id"/>
                 <field name="name"/>
                 <field name="brand_id"/>
             </tree>
@@ -20,7 +20,7 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="sku_id"/>
+                        <field name="category_id"/>
                         <field name="name"/>
                         <field name="brand_id"/>
                     </group>
@@ -39,10 +39,7 @@
             name="Category"
             parent="menu_inventory_master"
             action="action_sku_type_master"
-            sequence="20" />
-
-            
-
+            sequence="20" /> 
 
 
   </data>

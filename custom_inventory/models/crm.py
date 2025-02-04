@@ -14,15 +14,16 @@ class CrmLead(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'crm_sku_rel',
+        'crm_category_rel',
         'product_id',
-        'sku_id',
+        'category_id',
         string='Categories',
         domain="[('brand_id', '=', brand_id)]",
         help='Select the Categories associated with the selected brand'
     )
+    sku_ids = fields.Many2many('product.template', string="SKU")
 
 
     def _prepare_opportunity_quotation_context(self):
@@ -32,7 +33,7 @@ class CrmLead(models.Model):
 
         context.update({
             'default_brand_id': self.brand_id.id,
-            'default_sku_ids': [(6, 0, self.sku_ids.ids)],
+            'default_category_ids': [(6, 0, self.category_ids.ids)],
         })
         print("aaaaaaaaaaaaaaaaaaa")
         print(context)

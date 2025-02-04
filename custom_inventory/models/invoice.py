@@ -11,9 +11,9 @@ class AccountMove(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'account_sku_rel',
+        'account_category_rel',
         'product_id',
         string='Categories',
         domain="[('brand_id', '=', brand_id)]",
@@ -22,6 +22,49 @@ class AccountMove(models.Model):
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
     payment_link = fields.Text(string='Payment Link')
+    reference = fields.Char(string='Reference')
+    discount_amount = fields.Monetary(
+        string="Total Discount",
+        compute="_compute_discount_amount",
+        store=True,
+        currency_field="currency_id"
+    )
+    sku_ids = fields.Many2many('product.template', string="SKU")
+
+
+    @api.depends("invoice_line_ids.price_subtotal", "invoice_line_ids.discount")
+    def _compute_discount_amount(self):
+        for move in self:
+            total_discount = sum(
+                (line.price_unit * line.quantity * line.discount / 100)
+                for line in move.invoice_line_ids
+            )
+            move.discount_amount = total_discount
+    
+    @api.model
+    def create(self, vals):
+        user = self.env.user
+        order = super(AccountMove, self).create(vals)
+        if 'reference' in vals:
+            order.message_post(
+                body=f"Invoice with Reference: {order.reference}",
+                message_type='notification',
+                author_id=user.partner_id.id
+            )
+        return order
+
+    def write(self, vals):
+        user = self.env.user
+        result = super(AccountMove, self).write(vals)
+        for order in self:
+            if 'reference' in vals:
+                    order.message_post(
+                        body=f"Invoice with Reference: {order.reference}",
+                        message_type='notification',
+                        author_id=user.partner_id.id
+                    )
+               
+        return result
 
     @api.onchange('bom_id')
     def _onchange_bom_id(self):
@@ -41,7 +84,7 @@ class AccountMove(models.Model):
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
-            self.sku_ids = False
+            self.category_ids = False
             self.terms_conditions = self.brand_id.terms_conditions_invoice
 
     def action_send_report_email(self):
@@ -114,18 +157,18 @@ class InvoiceOrderEmailWizard(models.TransientModel):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'purchase_line_sku_rel',
+        'purchase_line_category_rel',
         'product_id',
-        'sku_id',
+        'category_id',
         string=' ',
         compute='_compute_product_sku_id',
         required=True,
         help='Select the Categories associated with the selected brand'
     )
 
-    @api.depends('move_id.sku_ids')
+    @api.depends('move_id.category_ids')
     def _compute_product_sku_id(self):
         """
         Compute the product template based on sku_ids from the order.
@@ -134,13 +177,13 @@ class AccountMoveLine(models.Model):
         for line in self:
             for line in self:
                 if not line.move_id.bom_id:
-                    if line.move_id and line.move_id.sku_ids:
-                        line.sku_ids = line.move_id.sku_ids.ids
+                    if line.move_id and line.move_id.category_ids:
+                        line.category_ids = line.move_id.category_ids.ids
                     else:
-                        line.sku_ids = []
+                        line.category_ids = []
                 else:
-                    sku_ids = self.env['sku.type.master'].search([]) 
-                    line.sku_ids = sku_ids
+                    category_ids = self.env['.type.master'].search([]) 
+                    line.category_ids = category_ids
             
     
             
@@ -149,13 +192,13 @@ class AccountMoveLine(models.Model):
     def _compute_product_template_id(self):
         for line in self:
             if not line.move_id.bom_id:
-                if line.move_id and line.move_id.sku_ids:
-                    self.sku_ids = line.move_id.sku_ids.ids
+                if line.move_id and line.move_id.category_ids:
+                    self.category_ids = line.move_id.category_ids.ids
                 else:
-                    line.sku_ids = []
+                    line.category_ids = []
             else:
-                sku_ids = self.env['sku.type.master'].search([]) 
-                line.sku_ids = sku_ids
+                category_ids = self.env['sku.type.master'].search([]) 
+                line.category_ids = category_ids
     
             
     

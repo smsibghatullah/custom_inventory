@@ -40,12 +40,11 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/stock_picking_view.xml',
         'views/expense_cost_wizard_view.xml',
         'security/ir.model.access.csv',
+        'data/data.xml',
        
     ],
 
-    'demo': [
-        'demo/demo.xml',
-    ],
+  
 
     'installable': True,
     'application': False,

@@ -17,11 +17,11 @@ class SaleOrder(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'sale_sku_rel',
+        'sale_category_rel',
         'product_id',
-        'sku_id',
+        'category_id',
         string='Categories',
          required=True,
         help='Select the Categories associated with the selected brand'
@@ -34,6 +34,42 @@ class SaleOrder(models.Model):
     revision_number_count = fields.Integer(compute="_compute_revision_number_count")
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+    reference = fields.Char(string='Reference')
+    amount_without_shipping = fields.Float(
+        string="Subtotal (Excluding Shipping)",
+        compute="_compute_amount_without_shipping",
+        store=True
+    )
+
+    @api.depends("amount_untaxed", "carrier_id.fixed_price")
+    def _compute_amount_without_shipping(self):
+        for order in self:
+            order.amount_without_shipping = order.amount_untaxed - (order.carrier_id.fixed_price or 0.0)
+
+    @api.model
+    def create(self, vals):
+        user = self.env.user
+        order = super(SaleOrder, self).create(vals)
+        if 'reference' in vals:
+            order.message_post(
+                body=f"Sale Order with Reference: {order.reference}",
+                message_type='notification',
+                author_id=user.partner_id.id
+            )
+        return order
+
+    def write(self, vals):
+        user = self.env.user
+        result = super(SaleOrder, self).write(vals)
+        for order in self:
+            if 'reference' in vals:
+                    order.message_post(
+                        body=f"Sale Order with Reference: {order.reference}",
+                        message_type='notification',
+                        author_id=user.partner_id.id
+                    )
+               
+        return result
 
     @api.onchange('bom_id')
     def _onchange_bom_id(self):
@@ -85,7 +121,7 @@ class SaleOrder(models.Model):
                 # _logger.info("Copied Text Fields: %s", copied_text_fields)
             else:
                 line.text_fields = [(5, 0, 0)]
-                line.sku_ids  = [(6, 0, [])]
+                line.category_ids  = [(6, 0, [])]
 
     @api.depends('brand_id')
     def _compute_checkbox_field(self):
@@ -269,7 +305,7 @@ class SaleOrder(models.Model):
             'invoice_line_ids': [],
             'user_id': self.user_id.id,
             'brand_id': self.brand_id.id,
-            'sku_ids': [(6, 0, self.sku_ids.ids)],
+            'category_ids': [(6, 0, self.category_ids.ids)],
             'bom_id': self.bom_id.id,
             'terms_conditions': self.brand_id.terms_conditions_invoice,
         }
@@ -280,7 +316,7 @@ class SaleOrder(models.Model):
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
-            self.sku_ids  = [(6, 0, [])]
+            self.category_ids  = [(6, 0, [])]
             self.terms_conditions = self.brand_id.terms_conditions
 
        
@@ -363,11 +399,11 @@ class SaleOrderEmailWizard(models.TransientModel):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'sale_line_sku_rel_we',
+        'sale_line_category_rel_we',
         'product_id',
-        'sku_id',
+        'category_id',
         string=' ',
         required=True,
         help='Select the Categories associated with the selected brand'
@@ -426,11 +462,11 @@ class SaleOrderLine(models.Model):
         print('kkkkkkkkkkkkkkkkkkkkk')
         for line in self:
             if not line.order_id.bom_id:
-                if line.order_id and line.order_id.sku_ids:
-                    self.sku_ids = line.order_id.sku_ids.ids
+                if line.order_id and line.order_id.category_ids:
+                    self.category_ids = line.order_id.category_ids.ids
             else:
-                sku_ids = self.env['sku.type.master'].search([]) 
-                line.sku_ids = sku_ids
+                category_ids = self.env['sku.type.master'].search([]) 
+                line.category_ids = category_ids
 
             line.product_template_id = line.product_id.product_tmpl_id
             print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")

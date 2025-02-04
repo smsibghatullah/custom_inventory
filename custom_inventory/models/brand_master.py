@@ -43,11 +43,11 @@ class ProductProduct(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    sku_ids = fields.Many2many(
+    category_ids = fields.Many2many(
         'sku.type.master',
-        'product_sku_rel',
+        'product_category_rel',
         'product_id',
-        'sku_id',
+        'category_id',
         string='Categories',
         required=True
     )

@@ -21,16 +21,17 @@
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="brand_id" options="{'no_create': True}" />
-                <field name="sku_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id)]"  invisible="brand_id == False"  widget="many2many_tags" />
+                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id)]"  invisible="brand_id == False"  widget="many2many_tags" />
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
                 <field name="bom_id" options="{'no_create': True}"/>
+                <field name="reference" />
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="attributes">
-                <attribute name="domain">[('sku_ids', 'in', sku_ids),('sale_ok', '=', True)]</attribute>
+                <attribute name="domain">[('category_ids', 'in', category_ids),('sale_ok', '=', True)]</attribute>
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="after">
-                 <field name="sku_ids" invisible="1" />
+                 <field name="category_ids" invisible="1" />
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="after">
                 <field name="pricelist_id" />
@@ -94,6 +95,31 @@
         <field name="domain">[('revision_number', '!=', False)]</field>
         <field name="context">{'group_by': 'revision_number'}</field>
     </record>
+
+    <record id="sale_pdf_quote_builder.action_report_saleorder_raw" model="ir.actions.report">
+        <field name="name">Quotation / Order</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale.report_saleorder_raw</field>
+        <field name="report_file">sale.report_saleorder_raw</field>
+        <field name="print_report_name">(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or 'Order - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+    </record>  
+
+    <record id="sale.action_report_pro_forma_invoice" model="ir.actions.report">
+        <field name="name">PRO-FORMA Invoice</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale.report_saleorder_pro_forma</field>
+        <field name="report_file">sale.report_saleorder_pro_forma</field>
+        <field name="print_report_name">'PRO-FORMA - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="groups_id" eval="[(4, ref('sale.group_proforma_sales'))]"/>
+        <field name="paperformat_id" ref="paperformat_scrap_reports"/>
+    </record>  
 
     <!-- Menu Item -->
     <menuitem id="menu_sale_order_revision"
