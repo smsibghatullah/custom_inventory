@@ -117,7 +117,7 @@
             <div style="width: 35%;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                     <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO#</td>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
                     <tr>
@@ -127,7 +127,7 @@
                         </td>
                     </tr>
                      <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
-                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiration Date</td>
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
                         <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
                             <div name="expiration_date">
                             <span class="m-0" t-field="doc.validity_date">2023-12-31</span>
@@ -135,7 +135,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref#</td>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
                     </tr>
                 </table>
@@ -148,7 +148,8 @@
         <table style="width: 100%;">
         <thead>
             <tr>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product #</th>
+                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product</th>
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="doc.brand_id.is_tax_show">
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
@@ -165,6 +166,7 @@
                 <tr>
                     <td style="border: 1px solid black; padding: 5px;"><t t-out="index"/></td>
                     <td style="border: 1px solid black; padding: 5px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.name'>Bacon Burger</span></td>
                     <t t-if="doc.brand_id.is_tax_show">
                     <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
                     <td style="border: 1px solid black; padding: 5px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
@@ -512,8 +514,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref#</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">SO0000</span></td>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.purchase_id.name">PO0000</span></td>
                     </tr>
                 </table>
             </div>
@@ -524,7 +526,8 @@
         <table style="width: 100%;">
         <thead>
             <tr>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product #</th>
+                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product</th>
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="o.brand_id.is_tax_show">
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
@@ -542,6 +545,7 @@
                 <tr>
                     <td style="border: 1px solid black; padding: 5px;"><t t-out="index"/></td>
                     <td style="border: 1px solid black; padding: 5px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.name'>Bacon Burger</span></td>
                     <t t-if="o.brand_id.is_tax_show">
                                                 <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
                                                 <td name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
