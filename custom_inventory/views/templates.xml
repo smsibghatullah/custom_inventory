@@ -465,7 +465,7 @@
                         <span style="font-weight: bold; font-size: 30px;">INVOICE</span>
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
                     </div>
-                    <!-- <h2 style="display:none"></h2> -->
+                    <h2 style="display:none"></h2>
                 <!-- Customer details -->
                     <div style="font-size: 15px; margin-bottom: 10px;">
                         <div style="font-weight: bold;">Bill To</div>
