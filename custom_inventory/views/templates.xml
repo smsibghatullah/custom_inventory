@@ -166,6 +166,9 @@
                 <t t-if="doc.brand_id.is_tax_show">
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
                 </t>
+                 <t t-if="doc.discount_amount">
+                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount</td>
+                </t>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
@@ -185,6 +188,9 @@
                             <span t-out="taxes">Tax 15%</span>
                     </td>
                     </t> 
+                    <t t-if="line.discount">
+                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                    </t>
                     <td style="border: 1px solid black; padding: 10px;">
                             <span t-field="line.product_uom_qty">3</span>
                             <span t-field="line.product_uom">units</span>
