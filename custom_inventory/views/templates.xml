@@ -167,7 +167,7 @@
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
                 </t>
                  <t t-if="doc.discount_amount">
-                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount</td>
+                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
                 </t>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
