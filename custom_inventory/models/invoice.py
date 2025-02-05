@@ -30,6 +30,23 @@ class AccountMove(models.Model):
         currency_field="currency_id"
     )
     sku_ids = fields.Many2many('product.template', string="SKU")
+    formatted_invoice_date = fields.Char(
+        string="Formatted Invoice Date",
+        compute="_compute_formatted_dates",
+        store=True
+    )
+
+    formatted_due_date = fields.Char(
+        string="Formatted Due Date",
+        compute="_compute_formatted_dates",
+        store=True
+    )
+
+    def _compute_formatted_dates(self):
+        for move in self:
+            move.formatted_invoice_date = move.invoice_date.strftime("%d-%b-%Y") if move.invoice_date else ""
+            move.formatted_due_date = move.invoice_date_due.strftime("%d-%b-%Y") if move.invoice_date_due else ""
+
 
 
     @api.depends("invoice_line_ids.price_subtotal", "invoice_line_ids.discount")
