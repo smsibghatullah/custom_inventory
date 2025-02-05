@@ -31,7 +31,7 @@
         <br/>
         <br/>
         <br/>
-        <t t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+        <t t-if="doc.state in ['draft', 'sent']">
         <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
             <span style="font-weight: bold; font-size: 30px;">&#160;&#160; Quotation / ESTIMATE &#160;&#160;</span>
@@ -124,21 +124,21 @@
             <!-- Right Side: Sale Order Details -->
             <div style="width: 35%;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                    <tr t-if="doc.state in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
-                    <tr t-if="doc.validity_date and doc.state not in ['draft', 'sent']">
+                    <tr t-if=" doc.state not in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
-                    <tr t-if="doc.formatted_date_order and doc.validity_date and doc.state not in ['draft', 'sent']">
+                    <tr t-if="doc.date_order and doc.state not in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
                             <span t-field="doc.formatted_date_order" >21-Jan-2025</span>
                         </td>
                     </tr>
-                    <tr t-if="doc.formatted_date_order and doc.validity_date and doc.state in ['draft', 'sent']">
+                    <tr t-if="doc.date_order and  doc.state in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
                             <span t-field="doc.formatted_date_order" >20-Feb-2025</span>

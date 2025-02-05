@@ -47,6 +47,12 @@ class AccountMove(models.Model):
             move.formatted_invoice_date = move.invoice_date.strftime("%d-%b-%Y") if move.invoice_date else ""
             move.formatted_due_date = move.invoice_date_due.strftime("%d-%b-%Y") if move.invoice_date_due else ""
 
+    @api.onchange('invoice_date','invoice_date_due')
+    def _compute_formatted_dates_onchange(self):
+        for move in self:
+            move.formatted_invoice_date = move.invoice_date.strftime("%d-%b-%Y") if move.invoice_date else ""
+            move.formatted_due_date = move.invoice_date_due.strftime("%d-%b-%Y") if move.invoice_date_due else ""
+
 
 
     @api.depends("invoice_line_ids.price_subtotal", "invoice_line_ids.discount")
