@@ -160,15 +160,15 @@
         <table style="width: 100%;text-align: center;">
         <thead>
             <tr>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="doc.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
                 </t>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Qty</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Rate</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Amount</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
             </tr>
         </thead>
         <tbody class="sale_tbody">
@@ -176,21 +176,21 @@
            <t t-foreach="lines_to_report" t-as="line">
            <t t-set="index" t-value="index + 1"/>
                 <tr>
-                    <td style="border: 1px solid black; padding: 5px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
                     <t t-if="doc.brand_id.is_tax_show">
                     <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
-                    <td style="border: 1px solid black; padding: 5px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                             <span t-out="taxes">Tax 15%</span>
                     </td>
                     </t> 
-                    <td style="border: 1px solid black; padding: 5px;">
+                    <td style="border: 1px solid black; padding: 10px;">
                             <span t-field="line.product_uom_qty">3</span>
                             <span t-field="line.product_uom">units</span>
                     </td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field="line.price_unit">3</span></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field="line.price_subtotal">27.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">3</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">27.00</span></td>
                 </tr>
             </t>
         </tbody>
@@ -219,7 +219,10 @@
                             <span t-field="doc.amount_tax">0.00</span>
                         </td>
                     </tr>
-                  
+                   <tr t-if="doc.discount_amount">
+                        <td style="padding: 5px;">Discount</td>
+                        <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
+                    </tr>
                     <tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
                         <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
@@ -534,15 +537,15 @@
         <table style="width: 100%;; text-align: center;">
         <thead>
             <tr>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Product</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="o.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
                 </t>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Qty</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Rate</th>
-                <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Amount</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
             </tr>
         </thead>
         <tbody class="sale_tbody">
@@ -551,21 +554,21 @@
            <t t-foreach="lines" t-as="line">
            <t t-set="index" t-value="index + 1"/>
                 <tr>
-                    <td style="border: 1px solid black; padding: 5px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field='line.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
                     <t t-if="o.brand_id.is_tax_show">
                                                 <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
                                                 <td name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                                                     <span t-out="taxes" id="line_tax_ids">Tax 15%</span>
                                                 </td>
                     </t>
-                    <td style="border: 1px solid black; padding: 5px;">
+                    <td style="border: 1px solid black; padding: 10px;">
                             <span t-field="line.quantity">3</span>
                             <span t-field="line.product_uom_id">units</span>
                     </td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field="line.price_unit">3</span></td>
-                    <td style="border: 1px solid black; padding: 5px;"><span t-field="line.price_subtotal">27.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">3</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">27.00</span></td>
                 </tr>
             </t>
         </tbody>

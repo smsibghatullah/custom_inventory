@@ -48,6 +48,20 @@ class SaleOrder(models.Model):
         string="Formatted Expiry Date",
         compute="_compute_formatted_dates",
     )
+    discount_amount = fields.Monetary(
+        string="Total Discount",
+        compute="_compute_discount_amount",
+        currency_field="currency_id"
+    )
+
+    @api.depends("order_line.price_subtotal", "order_line.discount")
+    def _compute_discount_amount(self):
+        for order in self:
+            total_discount = 0
+            for line in order.order_line:
+                total_discount += (line.price_unit * line.product_uom_qty * line.discount / 100)
+            
+            order.discount_amount = total_discount
 
     def _compute_formatted_dates(self):
         for order in self:
