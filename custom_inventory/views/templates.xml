@@ -128,7 +128,7 @@
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
-                    <tr t-if="">
+                    <tr t-if="doc.state not in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
