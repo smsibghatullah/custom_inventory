@@ -26,20 +26,17 @@ class AccountMove(models.Model):
     discount_amount = fields.Monetary(
         string="Total Discount",
         compute="_compute_discount_amount",
-        store=True,
         currency_field="currency_id"
     )
     sku_ids = fields.Many2many('product.template', string="SKU")
     formatted_invoice_date = fields.Char(
         string="Formatted Invoice Date",
         compute="_compute_formatted_dates",
-        store=True
     )
 
     formatted_due_date = fields.Char(
         string="Formatted Due Date",
         compute="_compute_formatted_dates",
-        store=True
     )
 
     def _compute_formatted_dates(self):

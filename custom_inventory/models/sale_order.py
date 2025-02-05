@@ -38,30 +38,31 @@ class SaleOrder(models.Model):
     amount_without_shipping = fields.Float(
         string="Subtotal (Excluding Shipping)",
         compute="_compute_amount_without_shipping",
-        store=True
     )
     formatted_date_order = fields.Char(
         string="Formatted Order Date",
         compute="_compute_formatted_dates",
-        store=True
     )
     
     formatted_validity_date = fields.Char(
         string="Formatted Expiry Date",
         compute="_compute_formatted_dates",
-        store=True
     )
 
     def _compute_formatted_dates(self):
         for order in self:
+            print('ppppppppppppppppppppppppppppppppppppppp')
             order.formatted_date_order = order.date_order.strftime("%d-%b-%Y") if order.date_order else ""
             order.formatted_validity_date = order.validity_date.strftime("%d-%b-%Y") if order.validity_date else ""
+            print(order.formatted_validity_date,order.formatted_date_order,"mmmmmmmmmmmmmmmmmmmmmmmnnnnnnnnnnnnnnnnnnmmmmmmmmmmmmmmm")
 
     @api.onchange('date_order','validity_date')
     def _compute_formatted_dates_onchange(self):
         for order in self:
+            print('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
             order.formatted_date_order = order.date_order.strftime("%d-%b-%Y") if order.date_order else ""
             order.formatted_validity_date = order.validity_date.strftime("%d-%b-%Y") if order.validity_date else ""
+            print(order.formatted_validity_date,order.formatted_date_order,"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
 
     @api.depends("amount_untaxed", "carrier_id.fixed_price")
     def _compute_amount_without_shipping(self):
