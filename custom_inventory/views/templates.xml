@@ -24,19 +24,27 @@
             </t>
         </div>
 
-        <div style="position: fixed; top: 35px; right: 0; padding: 10px; text-align: right;">
+        <div style="position: fixed; top: 35px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
             <span t-field="doc.brand_id.address" />
         </div>
         <br/>
         <br/>
         <br/>
         <br/>
-
-        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;">
-            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
-            <span style="font-weight: bold; font-size: 30px;">SALES ORDER</span>
-            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
+        <t t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; Quotation / ESTIMATE &#160;&#160;</span>
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
         </div>
+        </t>
+        <t t-else="">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; SALES ORDER &#160;&#160;</span>
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+        </div>
+        </t>
        <!-- Customer details -->
         <div style="font-size: 15px; margin-bottom: 10px;">
             <div style="font-weight: bold;">Bill To</div>
@@ -115,8 +123,12 @@
 
             <!-- Right Side: Sale Order Details -->
             <div style="width: 35%;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <tr>
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.validity_date and doc.state not in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
@@ -145,7 +157,7 @@
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
         <!-- Product and Order line table -->
-        <table style="width: 100%;">
+        <table style="width: 100%;text-align: center;">
         <thead>
             <tr>
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
@@ -207,16 +219,12 @@
                             <span t-field="doc.amount_tax">0.00</span>
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="2" style="border-top: 1px solid black;"></td>
-                    </tr>
-                    <tr>
+                  
+                    <tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
                         <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
                     </tr>
-                    <tr>
-                        <td colspan="2" style="border-bottom: 1px solid black;"></td>
-                    </tr>
+                   
                 </table>
             </div>
         </div>
@@ -462,10 +470,10 @@
                     <br/>
                     <br/>
 
-                    <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;">
-                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
-                        <span style="font-weight: bold; font-size: 30px;">INVOICE</span>
-                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 12px;"></span>
+                    <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                        <span style="font-weight: bold; font-size: 30px;">&#160;&#160; INVOICE &#160;&#160;</span>
+                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     </div>
                     <h2 style="display:none"></h2>
                 <!-- Customer details -->
@@ -490,7 +498,7 @@
 
             <!-- Right Side: Sale Order Details -->
             <div style="width: 35%;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_origin">SO0000</span></td>
@@ -515,7 +523,7 @@
                     </tr>
                     <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.purchase_id.name">PO0000</span></td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
                     </tr>
                 </table>
             </div>
@@ -523,7 +531,7 @@
 
         <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
         <!-- Product and Order line table -->
-        <table style="width: 100%;">
+        <table style="width: 100%;; text-align: center;">
         <thead>
             <tr>
                 <th  style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">#</th>
@@ -576,26 +584,21 @@
                         <td style="padding: 5px;">Sub Total</td>
                         <td style="padding: 5px;"><span t-field="o.amount_untaxed">0.00</span></td>
                     </tr>
-                     <tr>
+                     <tr t-if="o.discount_amount">
                         <td style="padding: 5px;">Discount</td>
                         <td style="padding: 5px;"><span t-field="o.discount_amount">0.00</span></td>
                     </tr>
-                    <tr t-if="o.brand_id.is_tax_show">
+                    <tr t-if="o.brand_id.is_tax_show and o.amount_tax">
                         <td style="padding: 5px;">Total Tax (<span t-field="o.amount_tax">0.00</span>)</td>
                         <td style="padding: 5px;">
                             <span t-field="o.amount_tax">0.00</span>
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="2" style="border-top: 1px solid black;"></td>
-                    </tr>
-                    <tr>
+                    <tr style="border-top: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
                         <td style="padding: 1px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
                     </tr>
-                    <tr>
-                        <td colspan="2" style="border-bottom: 1px solid black;"></td>
-                    </tr>
+                  
                 </table>
             </div>
         </div>

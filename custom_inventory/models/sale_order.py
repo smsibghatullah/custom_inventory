@@ -308,6 +308,7 @@ class SaleOrder(models.Model):
             'category_ids': [(6, 0, self.category_ids.ids)],
             'bom_id': self.bom_id.id,
             'terms_conditions': self.brand_id.terms_conditions_invoice,
+            'reference': self.reference
         }
         if self.journal_id:
             values['journal_id'] = self.journal_id.id
