@@ -128,18 +128,12 @@
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
-                    <tr t-if=" doc.state not in ['draft', 'sent']">
+                    <tr t-if="">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
                     </tr>
-                    <tr t-if="doc.date_order and doc.state not in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Date</td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="doc.formatted_date_order" >21-Jan-2025</span>
-                        </td>
-                    </tr>
-                    <tr t-if="doc.date_order and  doc.state in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate Date</td>
+                    <tr t-if="doc.date_order">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
                             <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
                         </td>
