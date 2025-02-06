@@ -26,7 +26,7 @@
             </t>
         </div>
 
-        <div style="position: fixed; top: 35px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
+        <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
             <span t-field="doc.brand_id.address" />
         </div>
         <br/>
@@ -469,7 +469,7 @@
                         </t>
                     </div>
 
-                    <div style="position: fixed; top: 35px; right: 0; padding: 10px; text-align: right;">
+                    <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;">
                         <span t-field="o.brand_id.address" />
                     </div>
                     <br/>
