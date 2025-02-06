@@ -202,7 +202,7 @@ class AccountMoveLine(models.Model):
                     else:
                         line.category_ids = []
                 else:
-                    category_ids = self.env['.type.master'].search([]) 
+                    category_ids = self.env['sku.type.master'].search([]) 
                     line.category_ids = category_ids
             
     
