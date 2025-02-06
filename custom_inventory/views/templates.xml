@@ -34,7 +34,7 @@
         <t t-if="doc.state in ['draft', 'sent']">
         <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
-            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; Quotation / ESTIMATE &#160;&#160;</span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; QUOTATION / ESTIMATE &#160;&#160;</span>
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
         </div>
         </t>
@@ -63,31 +63,30 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
             <div style="width: 60%;">
             <!-- Dynamic fields -->
-                <table class="table table-bordered">
+                <table style="margin-bottom:10px" >
                     <t t-set="text_count" t-value="len(doc.text_fields)" />
                     <t t-foreach="range(0, text_count, 2)" t-as="index">
                         <tr>
-                            <td t-if="index &lt; text_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; text_count">
                                 <strong t-esc="doc.text_fields[index].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
                                 <span t-esc="doc.text_fields[index].text_value" style="display: inline-block;"></span>
                             </td>
 
-                            <td t-if="index + 1 &lt; text_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; text_count">
                                 <strong t-esc="doc.text_fields[index + 1].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
                                 <span t-esc="doc.text_fields[index + 1].text_value" style="display: inline-block;"></span>
                             </td>
                         </tr>
                     </t>
                 </table>
-
-                <table class="table table-bordered">
+                <table>
                     <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
                     <t t-set="selection_count" t-value="len(doc.selection_fields)" />
                     <t t-set="total_count" t-value="max(checkbox_count, selection_count)" />
 
                     <t t-foreach="range(0, total_count, 2)" t-as="index">
                         <tr>
-                            <td t-if="index &lt; checkbox_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; checkbox_count">
                                 <label>
                                     <strong t-esc="doc.checkbox_fields[index].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
                                     <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
@@ -95,7 +94,7 @@
                                 </label>
                             </td>
 
-                            <td t-if="index + 1 &lt; checkbox_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; checkbox_count">
                                 <label>
                                     <strong t-esc="doc.checkbox_fields[index + 1].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
                                     <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
@@ -103,14 +102,14 @@
                                 </label>
                             </td>
 
-                            <td t-if="index &lt; selection_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; selection_count">
                                 <label>
                                     <strong t-esc="doc.selection_fields[index].selection_field" style="margin-right: 10px;"></strong>:
                                     <span t-esc="doc.selection_fields[index].selected_value.value_field"></span>
                                 </label>
                             </td>
 
-                            <td t-if="index + 1 &lt; selection_count">
+                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; selection_count">
                                 <label>
                                     <strong t-esc="doc.selection_fields[index + 1].selection_field" style="margin-right: 10px;"></strong>:
                                     <span t-esc="doc.selection_fields[index + 1].selected_value.value_field"></span>
@@ -164,11 +163,9 @@
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="doc.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
                 </t>
-                 <t t-if="doc.discount_amount">
                  <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
-                </t>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
@@ -188,9 +185,7 @@
                             <span t-out="taxes">Tax 15%</span>
                     </td>
                     </t> 
-                    <t t-if="line.discount">
-                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
-                    </t>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
                     <td style="border: 1px solid black; padding: 10px;">
                             <span t-field="line.product_uom_qty">3</span>
                             <span t-field="line.product_uom">units</span>
@@ -547,7 +542,7 @@
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
                 <t t-if="o.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Disc and tax if applicable</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
                 </t>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
