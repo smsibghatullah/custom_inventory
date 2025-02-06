@@ -47,11 +47,11 @@
         </t>
        <!-- Customer details -->
         <div style="font-size: 15px; margin-bottom: 10px;">
-            <div style="font-weight: bold;">Bill To</div>
-            <p t-field="doc.partner_id"
+            <div style="font-weight: bold;">Bill To : </div>
+            <span t-field="doc.partner_id"
                 t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' 
                 style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
-            </p>
+            </div>
 
         <p t-if="doc.partner_id.vat" style="margin-top: 5px;">
             <t t-if="doc.company_id.account_fiscal_country_id.vat_label" 
@@ -482,11 +482,11 @@
                     <h2 style="display:none"></h2>
                 <!-- Customer details -->
                     <div style="font-size: 15px; margin-bottom: 10px;">
-                        <div style="font-weight: bold;">Bill To</div>
-                        <p t-field="o.partner_id"
+                        <div style="font-weight: bold;">Bill To : </div>
+                        <span t-field="o.partner_id"
                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' 
                             style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
-                        </p>
+                        </div>
 
                     <p t-if="o.partner_id.vat" style="margin-top: 5px;">
                         <t t-if="o.company_id.account_fiscal_country_id.vat_label" 
