@@ -2,6 +2,7 @@
     <data>
 
 <template id="sale.report_saleorder_document">
+<t t-call="web.html_container">
     <t t-call="web.external_layout">
 
 
@@ -9,6 +10,7 @@
 
         <t t-set="forced_vat" t-value="doc.fiscal_position_id.foreign_vat"/>          
        <div class="page">
+       <Link rel="stylesheet" href="/custom_inventory/static/src/css/style.css" />
        <div class="oe_structure"/>
        <!-- Brand Logo and name -->
        <div style="position: fixed; top: 0; left: 0; padding: 10px;">
@@ -273,6 +275,7 @@
               x        <span t-field="doc.signed_by">Oscar Morgan</span>
                 </div>
             </div>
+    </t>
     </t>
 </template>
 
