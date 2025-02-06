@@ -9,7 +9,7 @@
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
 
         <t t-set="forced_vat" t-value="doc.fiscal_position_id.foreign_vat"/>          
-       <div class="page" style="font-size: 18pt;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+       <div class="page" style="font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
        <div class="oe_structure"/>
        <!-- Brand Logo and name -->
        <div style="position: fixed; top: 0; left: 0; padding: 10px;">
@@ -452,7 +452,7 @@
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
-                <div class="page" style="font-size: 18pt;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+                <div class="page" style="font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
                 
                 <div class="oe_structure"/>
                 <div style="position: fixed; top: 0; left: 0; padding: 10px;">
