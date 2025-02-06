@@ -544,6 +544,7 @@
                 <t t-if="o.brand_id.is_tax_show">
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
                 </t>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
@@ -560,10 +561,11 @@
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
                     <t t-if="o.brand_id.is_tax_show">
                                                 <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
-                                                <td name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                                                <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                                                     <span t-out="taxes" id="line_tax_ids">Tax 15%</span>
                                                 </td>
                     </t>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
                     <td style="border: 1px solid black; padding: 10px;">
                             <span t-field="line.quantity">3</span>
                             <span t-field="line.product_uom_id">units</span>
