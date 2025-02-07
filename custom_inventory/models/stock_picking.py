@@ -7,13 +7,13 @@ class StockPicking(models.Model):
         ('draft', 'Draft'),
         ('waiting', 'Waiting Another Operation'),
         ('confirmed', 'Waiting'),
+        ('assigned', 'Ready'),
         ('pick_pack', 'Pick & Pack'),
         ('ready_for_pickup', 'Ready for Pickup'),
-        ('assigned', 'Ready'),
         ('picked_up_by_logistic', 'Picked Up by Logistic Car'),
+        ('pickup_by_buyer', 'Pickup by Buyer'),
         ('in_transit', 'In Transit'),
         ('delivered', 'Delivered'),
-        ('pickup_by_buyer', 'Pickup by Buyer'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
     ], string='Status', compute='_compute_state',
@@ -30,14 +30,18 @@ class StockPicking(models.Model):
     standard_delivery_fields = fields.Boolean(string="Standard Delivery Fields", compute="_compute_carrier_fields")
     readonly_fields = fields.Boolean(string="Readonly Fields", compute="_compute_field_readonly")
     courier_and_standard_fields = fields.Boolean(string="Both Fields", compute="_compute_carrier_fields")
+    show_statusbar = fields.Boolean(compute="_compute_show_statusbar")
 
-
+    @api.depends('sale_id')
+    def _compute_show_statusbar(self):
+        for record in self:
+            record.show_statusbar = bool(record.sale_id)  
 
     @api.onchange('carrier_id')
     def _compute_carrier_fields(self):
         for record in self:
             print("oooooooooooooooooooooooooooooooooooooooooooooooo")
-            if record.carrier_id:
+            if record.carrier_id and record.sale_id:
                 record.courier_fields = record.carrier_id.code == 'courier'
                 record.standard_delivery_fields = record.carrier_id.code == 'standard_delivery'
                 record.courier_and_standard_fields = record.carrier_id.code == 'courier' or record.carrier_id.code == 'standard_delivery'

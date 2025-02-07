@@ -45,7 +45,7 @@ class PurchaseOrder(models.Model):
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
             'brand_id': self.brand_id.id,
-            'categoryids': [(6, 0, self.category_ids.ids)],
+            'category_ids': [(6, 0, self.category_ids.ids)],
             'terms_conditions': self.brand_id.terms_conditions_invoice,
             'invoice_line_ids': [],
             'company_id': self.company_id.id,

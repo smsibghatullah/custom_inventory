@@ -6,12 +6,23 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="priority" eval="20"/> 
         <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
+            <xpath expr="//header" position="replace">
+             <header>
+                <button name="action_confirm" invisible="state != 'draft'" string="Mark as Todo" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="q"/>
+                <button name="action_assign" invisible="not show_check_availability" string="Check Availability" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="w"/>
+                <button name="button_validate" invisible="state in ('draft', 'confirmed', 'done', 'cancel')" string="Validate" type="object" class="oe_highlight" groups="stock.group_stock_user" data-hotkey="v"/>
+                <button name="button_validate" invisible="state in ('waiting', 'assigned', 'done', 'cancel')" string="Validate" type="object" groups="stock.group_stock_user" class="o_btn_validate" data-hotkey="v"/>
+                <widget name="signature" string="Sign" highlight="1"
+                        invisible="not id or picking_type_code != 'outgoing' or state != 'done'"
+                        full_name="partner_id" groups="stock.group_stock_sign_delivery"/>
+                <widget name="signature" string="Sign"
+                        invisible="not id or picking_type_code != 'outgoing' or state == 'done'"
+                        full_name="partner_id" groups="stock.group_stock_sign_delivery"/>
                <button name="action_pick_pack" 
                         type="object" 
                         string="Pick / Pack" 
                         class="btn-primary"
-                        invisible="not courier_and_standard_fields or state not in ['draft']"/>
+                        invisible="not courier_and_standard_fields or state not in ['draft','confirmed','assigned']"/>
                 <button name="action_ready_for_pickup" 
                         type="object" 
                         string="Ready for Pickup" 
@@ -37,10 +48,16 @@
                         string="Pickup by Buyer" 
                         class="btn-secondary"
                         invisible="not standard_delivery_fields or state != 'ready_for_pickup'"/>
+                <button name="do_print_picking" string="Print" groups="stock.group_stock_user" type="object" invisible="state != 'assigned'" data-hotkey="o"/>
+                <button string="Print Labels" type="object" name="action_open_label_type"/>
+                <button name="%(stock.action_report_delivery)d" string="Print" invisible="state != 'done'" type="action" groups="base.group_user" data-hotkey="o"/>
+                <button name="%(stock.act_stock_return_picking)d" string="Return" invisible="state != 'done'" type="action" groups="base.group_user" data-hotkey="k"/>
+                <field name="show_statusbar" invisible="1" />
+                <field name="state" widget="statusbar" invisible="picking_type_code == 'incoming'" statusbar_visible="draft,assigned,pick_pack,ready_for_pickup,picked_up_by_logistic,pickup_by_buyer,in_transit,delivered,done"/>
+                <field name="state" widget="statusbar" invisible="picking_type_code != 'incoming'" statusbar_visible="draft,confirmed,assigned,done"/>
+            </header>
             </xpath>
-            <xpath expr="//field[@name='state']" position="attributes">
-                <attribute name="statusbar_visible">draft,pick_pack,ready_for_pickup,picked_up_by_logistic,in_transit,delivered,pickup_by_buyer</attribute>
-            </xpath>
+            
             <xpath expr="//field[@name='origin']" position="after">
                <field name="courier_fields" invisible="1"/>
                <field name="standard_delivery_fields" invisible="1"/>
