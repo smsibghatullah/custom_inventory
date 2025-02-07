@@ -565,9 +565,9 @@
                     <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
-                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) if (tax.invoice_label or tax.name) else - for tax in line.tax_ids])"/>
+                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
                     <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
-                        <span t-out="taxes" id="line_tax_ids">Tax 15%</span>
+                        <span t-out="taxes if taxes else 'N/A'" id="line_tax_ids">Tax 15%</span>
                     </td>
                     <t t-if="o.discount_amount">
                     <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
