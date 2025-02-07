@@ -600,7 +600,7 @@
                         <td style="padding: 5px;">Discount</td>
                         <td style="padding: 5px;"><span t-field="o.discount_amount">0.00</span></td>
                     </tr>
-                    <tr t-if="o.brand_id.is_tax_show and o.amount_tax">
+                    <tr t-if="o.amount_tax">
                         <td style="padding: 5px;">Total Tax (<span t-field="o.amount_tax">0.00</span>)</td>
                         <td style="padding: 5px;">
                             <span t-field="o.amount_tax">0.00</span>
