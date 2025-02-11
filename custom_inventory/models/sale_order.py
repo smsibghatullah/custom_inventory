@@ -194,15 +194,19 @@ class SaleOrder(models.Model):
                         item_sale_item_selection = {'selection_field': item.selection_field,
                         'sale_order_id':line.id}
                         selection_id = self.env['dynamic.saleorder.selection.key'].create(item_sale_item_selection)
-
                     # selection_value = self.env['dynamic.field.selection.values.sale'].search([('sale_random_key','=',selection_id.random_number)])
                     # if selection_value:
                     for value in item.selection_value:
-                        # print(item.selection_field,"item.selection_field")
-                        options = {'key_field_parent':item.selection_field, 'value_field':value.value_field
-                        , 'sale_random_key': random_number,'key_field':selection_id.id}
-                        # print (options,"options")
-                        self.env['dynamic.field.selection.values.sale'].create(options)
+                       options = {
+                        'value_field': value.value_field,
+                        'key_field': selection_id.id,
+                        'key_field_parent': item.selection_field  # Isko properly set karo
+                    }
+                    
+                    new_option = self.env['dynamic.field.selection.values.sale'].create(options)
+                    
+                    if not selection_id.selected_value:
+                        selection_id.selected_value = new_option
                     selection_fields.append(selection_id.id)
             line.selection_fields = [(6, 0, selection_fields)]
 

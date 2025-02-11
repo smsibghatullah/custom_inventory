@@ -63,62 +63,8 @@
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
             <div style="width: 60%;">
-            <!-- Dynamic fields -->
-                <table style="margin-bottom:10px" >
-                    <t t-set="text_count" t-value="len(doc.text_fields)" />
-                    <t t-foreach="range(0, text_count, 2)" t-as="index">
-                        <tr>
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; text_count and doc.text_fields[index].text_value">
-                                <strong t-esc="doc.text_fields[index].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                                <span t-esc="doc.text_fields[index].text_value" style="display: inline-block;"></span>
-                            </td>
 
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; text_count and doc.text_fields[index + 1].text_value">
-                                <strong t-esc="doc.text_fields[index + 1].text_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                                <span t-esc="doc.text_fields[index + 1].text_value" style="display: inline-block;"></span>
-                            </td>
-                        </tr>
-                    </t>
-                </table>
-                <table>
-                    <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
-                    <t t-set="selection_count" t-value="len(doc.selection_fields)" />
-                    <t t-set="total_count" t-value="max(checkbox_count, selection_count)" />
-
-                    <t t-foreach="range(0, total_count, 2)" t-as="index">
-                        <tr>
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; checkbox_count">
-                                <label>
-                                    <strong t-esc="doc.checkbox_fields[index].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                                    <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
-                                    <t t-if="not doc.checkbox_fields[index].checkbox_value">NO</t>
-                                </label>
-                            </td>
-
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; checkbox_count">
-                                <label>
-                                    <strong t-esc="doc.checkbox_fields[index + 1].checkbox_field" style="display: inline-block; margin-right: 10px;"></strong>:
-                                    <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
-                                    <t t-if="not doc.checkbox_fields[index + 1].checkbox_value">NO</t>
-                                </label>
-                            </td>
-
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
-                                <label>
-                                    <strong t-esc="doc.selection_fields[index].selection_field" style="margin-right: 10px;"></strong>:
-                                    <span t-esc="doc.selection_fields[index].selected_value.value_field"></span>
-                                </label>
-                            </td>
-
-                            <td style="border: 1px solid black; padding: 10px;" t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
-                                <label>
-                                    <strong t-esc="doc.selection_fields[index + 1].selection_field" style="margin-right: 10px;"></strong>:
-                                    <span t-esc="doc.selection_fields[index + 1].selected_value.value_field"></span>
-                                </label>
-                            </td>
-                        </tr>
-                    </t>
-                </table>
+           
             </div>
 
             <!-- Right Side: Sale Order Details -->
@@ -254,6 +200,130 @@
             </div>
         <hr/>
         </t>
+<br/>
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div style="width: 60%;">
+
+                <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+                        <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
+                        <t t-set="text_count" t-value="len(valid_fields)" />
+                        
+                        <t t-foreach="range(0, text_count, 4)" t-as="index">
+                            <tr>
+                                <t t-if="index &lt; text_count">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="valid_fields[index].text_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; text_count">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="valid_fields[index + 1].text_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; text_count">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="valid_fields[index + 2].text_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; text_count">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="valid_fields[index + 3].text_field" />
+                                    </td>
+                                </t>
+                            </tr>
+
+                            <tr>
+                                <t t-if="index &lt; text_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="valid_fields[index].text_value" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; text_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="valid_fields[index + 1].text_value" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; text_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="valid_fields[index + 2].text_value" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; text_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="valid_fields[index + 3].text_value" />
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+
+                <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+                        <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
+                        <t t-set="selection_count" t-value="len(doc.selection_fields)" />
+                        <t t-set="total_count" t-value="max(checkbox_count, selection_count)" />
+
+                        <t t-foreach="range(0, total_count, 4)" t-as="index">
+                            <!-- First Row: Labels -->
+                            <tr>
+                                <t t-if="index &lt; checkbox_count and doc.checkbox_fields[index].checkbox_field">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count and doc.checkbox_fields[index + 1].checkbox_field">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.selection_fields[index].selection_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.selection_fields[index + 1].selection_field" />
+                                    </td>
+                                </t>
+                            </tr>
+
+                            <!-- Second Row: Values -->
+                            <tr>
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
+                                        <t t-if="not doc.checkbox_fields[index].checkbox_value">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
+                                        <t t-if="not doc.checkbox_fields[index + 1].checkbox_value">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="doc.selection_fields[index].selected_value.value_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
+                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                        <t t-esc="doc.selection_fields[index + 1].selected_value.value_field" />
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+
+                </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+               
+            </div>
+        </div>
+
         <!-- Terms & conditions -->
         <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                       <strong>Terms and Conditions:</strong>
