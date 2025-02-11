@@ -63,149 +63,7 @@
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
             <div style="width: 60%;">
-
-           
-            </div>
-
-            <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
-                <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <tr t-if="doc.state in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.state not in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.date_order">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
-                        </td>
-                    </tr>
-                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
-                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
-                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
-                            <div name="expiration_date">
-                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
-        <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
-        <!-- Product and Order line table -->
-        <table style="width: 100%;text-align: center;">
-        <thead>
-            <tr>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
-                <t t-if="doc.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
-                </t>
-                 <t t-if="doc.discount_amount">
-                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
-                 </t>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
-            </tr>
-        </thead>
-        <tbody class="sale_tbody">
-           <t t-set="index" t-value="0"/> 
-           <t t-foreach="lines_to_report" t-as="line">
-           <t t-set="index" t-value="index + 1"/>
-                <tr>
-                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
-                    <t t-if="doc.brand_id.is_tax_show">
-                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
-                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
-                            <span t-out="taxes">Tax 15%</span>
-                    </td>
-                    </t> 
-                    <t t-if="doc.discount_amount">
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
-                    </t>
-                    <td style="border: 1px solid black; padding: 10px;">
-                            <span t-field="line.product_uom_qty">3</span>
-                            <span t-field="line.product_uom">units</span>
-                    </td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">3</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">27.00</span></td>
-                </tr>
-            </t>
-        </tbody>
-        </table>
-
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-        <!-- Left side -->
-            <div>
-                <p style="font-size: 15px;">Thank you for your business!</p>
-            </div>
-
-            <!-- Right side (Total Calculation) -->
-            <div style="text-align: right;">
-                <table style="border-collapse: collapse; font-size: 15px;">
-                    <tr>
-                        <td style="padding: 5px;">Sub Total</td>
-                        <td style="padding: 5px;"><span t-field="doc.amount_without_shipping">0.00</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 5px;">Shipping</td>
-                        <td style="padding: 5px;"><span t-field="doc.carrier_id.fixed_price">0.00</span></td>
-                    </tr>
-                    <tr t-if="doc.brand_id.is_tax_show">
-                        <td style="padding: 5px;">Total Tax (<span t-field="doc.amount_tax">0.00</span>)</td>
-                        <td style="padding: 5px;">
-                            <span t-field="doc.amount_tax">0.00</span>
-                        </td>
-                    </tr>
-                   <tr t-if="doc.discount_amount">
-                        <td style="padding: 5px;">Discount</td>
-                        <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
-                    </tr>
-                    <tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
-                        <td style="padding: 1px;"><strong>Total</strong></td>
-                        <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
-                    </tr>
-                   
-                </table>
-            </div>
-        </div>
-        <!-- Bank Details -->
-        <div style="margin-top: 20px;">
-            <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
-            <p style="font-size: 15px;">Bank Deposit</p>
-
-            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
-              <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
-            </div>
-        </div>
-        <!-- Special Notes -->
-         <t t-if="doc.note">
-            <div class="mt-4">
-                <strong>Special Note:</strong>
-                <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
-            </div>
-        <hr/>
-        </t>
-<br/>
-
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                <div style="width: 60%;">
-
-                <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+             <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
                         <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
                         <t t-set="text_count" t-value="len(valid_fields)" />
                         
@@ -316,13 +174,148 @@
                         </t>
                     </table>
 
-                </div>
+           
+            </div>
 
             <!-- Right Side: Sale Order Details -->
             <div style="width: 35%;">
-               
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="doc.state in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.state not in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.date_order">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
+                        </td>
+                    </tr>
+                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
+                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
+                            <div name="expiration_date">
+                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
+                    </tr>
+                </table>
             </div>
         </div>
+
+        <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+        <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
+        <!-- Product and Order line table -->
+        <table style="width: 100%;text-align: center;">
+        <thead>
+            <tr>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <t t-if="doc.brand_id.is_tax_show">
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                </t>
+                 <t t-if="doc.discount_amount">
+                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
+                 </t>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
+            </tr>
+        </thead>
+        <tbody class="sale_tbody">
+           <t t-set="index" t-value="0"/> 
+           <t t-foreach="lines_to_report" t-as="line">
+           <t t-set="index" t-value="index + 1"/>
+                <tr>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
+                    <t t-if="doc.brand_id.is_tax_show">
+                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
+                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                            <span t-out="taxes">Tax 15%</span>
+                    </td>
+                    </t> 
+                    <t t-if="doc.discount_amount">
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                    </t>
+                    <td style="border: 1px solid black; padding: 10px;">
+                            <span t-field="line.product_uom_qty">3</span>
+                            <span t-field="line.product_uom">units</span>
+                    </td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">3</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">27.00</span></td>
+                </tr>
+            </t>
+        </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <!-- Left side -->
+            <div>
+                <p style="font-size: 15px;">Thank you for your business!</p>
+            </div>
+
+            <!-- Right side (Total Calculation) -->
+            <div style="text-align: right;">
+                <table style="border-collapse: collapse; font-size: 15px;">
+                    <tr>
+                        <td style="padding: 5px;">Sub Total</td>
+                        <td style="padding: 5px;"><span t-field="doc.amount_without_shipping">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;">Shipping</td>
+                        <td style="padding: 5px;"><span t-field="doc.carrier_id.fixed_price">0.00</span></td>
+                    </tr>
+                    <tr t-if="doc.brand_id.is_tax_show">
+                        <td style="padding: 5px;">Total Tax (<span t-field="doc.amount_tax">0.00</span>)</td>
+                        <td style="padding: 5px;">
+                            <span t-field="doc.amount_tax">0.00</span>
+                        </td>
+                    </tr>
+                   <tr t-if="doc.discount_amount">
+                        <td style="padding: 5px;">Discount</td>(taxes_res['base_tags'])],
+                'price_subtotal': taxes_res['total_excluded'],
+                'price_total': taxes_res['total_included'],
+            }
+
+                        <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
+                    </tr>
+                    <tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
+                    </tr>
+                   
+                </table>
+            </div>
+        </div>
+        <!-- Bank Details -->
+        <div style="margin-top: 20px;">
+            <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
+            <p style="font-size: 15px;">Bank Deposit</p>
+
+            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+              <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
+            </div>
+        </div>
+        <!-- Special Notes -->
+         <t t-if="doc.note">
+            <div class="mt-4">
+                <strong>Special Note:</strong>
+                <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
+            </div>
+        <hr/>
+        </t>
+<br/>
+
 
         <!-- Terms & conditions -->
         <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
