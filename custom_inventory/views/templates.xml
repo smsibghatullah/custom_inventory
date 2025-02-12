@@ -282,11 +282,7 @@
                         </td>
                     </tr>
                    <tr t-if="doc.discount_amount">
-                        <td style="padding: 5px;">Discount</td>(taxes_res['base_tags'])],
-                'price_subtotal': taxes_res['total_excluded'],
-                'price_total': taxes_res['total_included'],
-            }
-
+                        <td style="padding: 5px;">Discount</td>
                         <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
                     </tr>
                     <tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
