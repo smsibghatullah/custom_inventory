@@ -200,10 +200,10 @@ class SaleOrder(models.Model):
                        options = {
                         'value_field': value.value_field,
                         'key_field': selection_id.id,
-                        'key_field_parent': item.selection_field  # Isko properly set karo
-                    }
-                    
-                    new_option = self.env['dynamic.field.selection.values.sale'].create(options)
+                        'key_field_parent': item.selection_field  
+                        }
+                      
+                       new_option = self.env['dynamic.field.selection.values.sale'].create(options)
                     
                     if not selection_id.selected_value:
                         selection_id.selected_value = new_option

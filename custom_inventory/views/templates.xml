@@ -63,7 +63,45 @@
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
             <div style="width: 60%;">
-             <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+            
+
+           
+            </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="doc.state in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.state not in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.date_order">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
+                        </td>
+                    </tr>
+                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
+                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
+                            <div name="expiration_date">
+                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+<br/>
+         <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
                         <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
                         <t t-set="text_count" t-value="len(valid_fields)" />
                         
@@ -116,99 +154,99 @@
                         </t>
                     </table>
 
-                <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
-                        <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
-                        <t t-set="selection_count" t-value="len(doc.selection_fields)" />
-                        <t t-set="total_count" t-value="max(checkbox_count, selection_count)" />
+              <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+    <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
+    <t t-set="selection_count" t-value="len(doc.selection_fields)" />
+    <t t-set="max_count" t-value="max(checkbox_count, selection_count)" />
 
-                        <t t-foreach="range(0, total_count, 4)" t-as="index">
-                            <!-- First Row: Labels -->
-                            <tr>
-                                <t t-if="index &lt; checkbox_count and doc.checkbox_fields[index].checkbox_field">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
-                                        <t t-esc="doc.checkbox_fields[index].checkbox_field" />
-                                    </td>
-                                </t>
-                                <t t-if="index + 1 &lt; checkbox_count and doc.checkbox_fields[index + 1].checkbox_field">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
-                                        <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
-                                    </td>
-                                </t>
-                                <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
-                                        <t t-esc="doc.selection_fields[index].selection_field" />
-                                    </td>
-                                </t>
-                                <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
-                                        <t t-esc="doc.selection_fields[index + 1].selection_field" />
-                                    </td>
-                                </t>
-                            </tr>
+    <t t-foreach="range(0, max_count, 2)" t-as="index">
+        <tr>
+            <!-- First Column (Checkbox) -->
+            <t t-if="index &lt; checkbox_count">
+                <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                    <t t-esc="doc.checkbox_fields[index].checkbox_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
 
-                            <!-- Second Row: Values -->
-                            <tr>
-                                <t t-if="index &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
-                                        <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
-                                        <t t-if="not doc.checkbox_fields[index].checkbox_value">NO</t>
-                                    </td>
-                                </t>
-                                <t t-if="index + 1 &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
-                                        <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
-                                        <t t-if="not doc.checkbox_fields[index + 1].checkbox_value">NO</t>
-                                    </td>
-                                </t>
-                                <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
-                                        <t t-esc="doc.selection_fields[index].selected_value.value_field" />
-                                    </td>
-                                </t>
-                                <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
-                                        <t t-esc="doc.selection_fields[index + 1].selected_value.value_field" />
-                                    </td>
-                                </t>
-                            </tr>
-                        </t>
-                    </table>
+            <!-- Second Column (Checkbox) -->
+            <t t-if="index + 1 &lt; checkbox_count">
+                <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                    <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
 
-           
-            </div>
+            <!-- Third Column (Selection Field) -->
+            <t t-if="index &lt; selection_count">
+                <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                    <t t-esc="doc.selection_fields[index].selection_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
 
-            <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
-                <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <tr t-if="doc.state in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.state not in ['draft', 'sent']">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.date_order">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
-                        </td>
-                    </tr>
-                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
-                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
-                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
-                            <div name="expiration_date">
-                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+            <!-- Fourth Column (Selection Field) -->
+            <t t-if="index + 1 &lt; selection_count">
+                <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                    <t t-esc="doc.selection_fields[index + 1].selection_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
+        </tr>
+
+        <!-- Values Row -->
+        <tr>
+            <!-- Checkbox Values -->
+            <t t-if="index &lt; checkbox_count">
+                <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                    <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
+                    <t t-else="">NO</t>
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
+
+            <t t-if="index + 1 &lt; checkbox_count">
+                <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                    <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
+                    <t t-else="">NO</t>
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
+
+            <!-- Selection Values -->
+            <t t-if="index &lt; selection_count">
+                <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                    <t t-esc="doc.selection_fields[index].selected_value.value_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
+
+            <t t-if="index + 1 &lt; selection_count">
+                <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                    <t t-esc="doc.selection_fields[index + 1].selected_value.value_field" />
+                </td>
+            </t>
+            <t t-else="">
+                <td style="border: 1px solid black; padding: 10px;"></td>
+            </t>
+        </tr>
+    </t>
+</table>
+
 
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
