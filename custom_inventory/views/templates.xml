@@ -103,7 +103,7 @@
         <br/>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="width: 60%;">
+            <div style="width: 50%;">
             
             <table style="margin-bottom: 10px; border-collapse: collapse; width: 50%;">
                 <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
@@ -114,7 +114,7 @@
                             <t t-esc="field.text_field" />
                         </td>
 
-                       <td style="width: 70%; max-width: 300px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word; white-space: pre-wrap;">
+                       <td style="width: 70%; max-width: 300px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word; ">
                             <t t-esc="field.text_value" />
                         </td>
                     </tr>
@@ -124,7 +124,7 @@
            
             </div>
 
-            <div style="width: 35%;">
+            <div style="width: 50%;">
                 <t t-if="doc.checkbox_fields">
                     <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
                         <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
@@ -184,7 +184,7 @@
                 </t>
 
                 <t t-if="doc.selection_fields">
-                    <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+                    <table style="margin-bottom:10px; border-collapse: collapse; width: 50%;">
                         <t t-set="selection_count" t-value="len(doc.selection_fields)" />
                                 <t t-foreach="range(0, selection_count, 4)" t-as="index">
                                     <tr>
@@ -211,22 +211,22 @@
                                     </tr>
                                     <tr>
                                         <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
-                                            <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                                 <t t-esc="doc.selection_fields[index].selected_value.value_field" />
                                             </td>
                                         </t>
                                         <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
-                                            <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                                 <t t-esc="doc.selection_fields[index + 1].selected_value.value_field" />
                                             </td>
                                         </t>
                                         <t t-if="index + 2 &lt; selection_count and doc.selection_fields[index + 2].selected_value.value_field">
-                                            <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                                 <t t-esc="doc.selection_fields[index + 2].selected_value.value_field" />
                                             </td>
                                         </t>
                                         <t t-if="index + 3 &lt; selection_count and doc.selection_fields[index + 3].selected_value.value_field">
-                                            <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                                 <t t-esc="doc.selection_fields[index + 3].selected_value.value_field" />
                                             </td>
                                         </t>
