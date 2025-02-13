@@ -51,7 +51,7 @@ class DynamicSaleOrderFieldSelection(models.Model):
     _name = 'dynamic.saleorder.selection.key'
     _description = 'Dynamic field for selection'
 
-    selection_field = fields.Char('Kay')
+    selection_field = fields.Char('Key')
     sale_order_id = fields.Many2one('sale.order', string='sale')
     # selected_value = fields.Many2one('dynamic.field.selection.values.sale' )
     options_value = fields.One2many('dynamic.field.selection.values.sale', 'key_field')
