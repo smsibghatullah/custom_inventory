@@ -105,7 +105,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
             <div style="width: 50%;">
             
-          <table style="margin-bottom: 10px; border-collapse: collapse; width: 60%;">
+            <table style="margin-bottom: 10px;  width: 60%;">
                 <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
                 
                 <t t-foreach="valid_fields" t-as="field">
@@ -120,14 +120,12 @@
                     </tr>
                 </t>
             </table>
-
-
            
             </div>
 
             <div style="width: 50%;">
                 <t t-if="doc.checkbox_fields">
-                    <table style="margin-bottom:10px; border-collapse: collapse; width: 100%;">
+                    <table style="margin-bottom:10px;  width: 100%;">
                         <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
 
                         <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
@@ -185,7 +183,7 @@
                 </t>
 
                 <t t-if="doc.selection_fields">
-                    <table style="margin-bottom:10px; border-collapse: collapse; width: 50%;">
+                    <table style="margin-bottom:10px;  width: 50%;">
                         <t t-set="selection_count" t-value="len(doc.selection_fields)" />
                                 <t t-foreach="range(0, selection_count, 4)" t-as="index">
                                     <tr>
