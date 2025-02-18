@@ -101,30 +101,23 @@
             </div>
         </div>
         <br/>
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="width: 50%;">
-            
-            <table style="margin-bottom: 10px;  width: 60%;">
+           <table style="margin-bottom: 10px;  width: 100%;">
                 <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
                 
                 <t t-foreach="valid_fields" t-as="field">
                     <tr>
-                        <td style="width: 60%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: center;">
+                        <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
                             <t t-esc="field.text_field" />
                         </td>
 
-                        <td style="width: 40%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
+                        <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
                             <t t-esc="field.text_value" />
                         </td>
                     </tr>
                 </t>
             </table>
-           
-            </div>
 
-            <div style="width: 50%;">
-                <t t-if="doc.checkbox_fields">
+        <t t-if="doc.checkbox_fields">
                     <table style="margin-bottom:10px;  width: 100%;">
                         <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
 
@@ -183,7 +176,7 @@
                 </t>
 
                 <t t-if="doc.selection_fields">
-                    <table style="margin-bottom:10px;  width: 50%;">
+                    <table style="margin-bottom:10px; width: 100%;">
                         <t t-set="selection_count" t-value="len(doc.selection_fields)" />
                                 <t t-foreach="range(0, selection_count, 4)" t-as="index">
                                     <tr>
@@ -233,9 +226,6 @@
                                 </t>
                             </table>
                         </t>
-
-            </div>
-        </div>
 
 
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
