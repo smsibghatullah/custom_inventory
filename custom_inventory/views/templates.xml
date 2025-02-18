@@ -101,21 +101,21 @@
             </div>
         </div>
         <br/>
-           <table style="margin-bottom: 10px;  width: 100%;">
-                <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
-                
-                <t t-foreach="valid_fields" t-as="field">
-                    <tr>
-                        <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
-                            <t t-esc="field.text_field" />
-                        </td>
+        <table style="margin-bottom: 10px;  width: 100%;">
+            <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
+            
+            <t t-foreach="valid_fields" t-as="field">
+                <tr>
+                    <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
+                        <t t-esc="field.text_field" />
+                    </td>
 
-                        <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
-                            <t t-esc="field.text_value" />
-                        </td>
-                    </tr>
-                </t>
-            </table>
+                    <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
+                        <t t-esc="field.text_value" />
+                    </td>
+                </tr>
+            </t>
+        </table>
 
         <t t-if="doc.checkbox_fields">
                     <table style="margin-bottom:10px;  width: 100%;">
@@ -124,22 +124,22 @@
                         <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
                             <tr>
                                 <t t-if="index &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
                                         <t t-esc="doc.checkbox_fields[index].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 1 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
                                         <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 2 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
                                         <t t-esc="doc.checkbox_fields[index + 2].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 3 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
                                         <t t-esc="doc.checkbox_fields[index + 3].checkbox_field" />
                                     </td>
                                 </t>
