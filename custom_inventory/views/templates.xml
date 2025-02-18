@@ -124,22 +124,22 @@
                         <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
                             <tr>
                                 <t t-if="index &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
                                         <t t-esc="doc.checkbox_fields[index].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 1 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
                                         <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 2 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
                                         <t t-esc="doc.checkbox_fields[index + 2].checkbox_field" />
                                     </td>
                                 </t>
                                 <t t-if="index + 3 &lt; checkbox_count">
-                                    <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;text-align: center;">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
                                         <t t-esc="doc.checkbox_fields[index + 3].checkbox_field" />
                                     </td>
                                 </t>
@@ -147,25 +147,25 @@
                             <tr>
                                 <!-- Checkbox Values -->
                                 <t t-if="index &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                         <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
                                         <t t-else="">NO</t>
                                     </td>
                                 </t>
                                 <t t-if="index + 1 &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                         <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
                                         <t t-else="">NO</t>
                                     </td>
                                 </t>
                                 <t t-if="index + 2 &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                         <t t-if="doc.checkbox_fields[index + 2].checkbox_value">YES</t>
                                         <t t-else="">NO</t>
                                     </td>
                                 </t>
                                 <t t-if="index + 3 &lt; checkbox_count">
-                                    <td style="border: 1px solid black; padding: 10px; text-align: center;">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
                                         <t t-if="doc.checkbox_fields[index + 3].checkbox_value">YES</t>
                                         <t t-else="">NO</t>
                                     </td>
