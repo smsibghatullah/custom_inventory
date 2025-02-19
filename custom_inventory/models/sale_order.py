@@ -93,11 +93,7 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get("amount_total", 0) <= 0:
-            raise ValidationError("Sale order amount must be greater than zero.")
-
         order = super(SaleOrder, self).create(vals)
-        
         if 'reference' in vals:
             user = self.env.user
             order.message_post(
@@ -108,14 +104,9 @@ class SaleOrder(models.Model):
         
         return order
 
+    @api.model
     def write(self, vals):
-        """Ensure required text fields have values before updating a record."""
         result = super(SaleOrder, self).write(vals)
-
-        for order in self:
-            if order.amount_total <= 0:
-                raise ValidationError("Sale order amount must be greater than zero.")
-        
         if 'reference' in vals:
             user = self.env.user
             for order in self:
