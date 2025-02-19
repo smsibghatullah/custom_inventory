@@ -1,7 +1,7 @@
 from unicodedata import category
 
 from odoo import models, fields, api,_
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError,ValidationError
 import base64
 from odoo.fields import Command
 import random
@@ -54,6 +54,14 @@ class SaleOrder(models.Model):
         currency_field="currency_id"
     )
 
+    is_tag_access = fields.Boolean(compute="_compute_tag_access")
+
+    @api.depends("brand_id")
+    def _compute_tag_access(self):
+        for record in self:
+            record.is_tag_access = record.brand_id.is_tag_show if record.brand_id else False
+
+
     @api.depends("order_line.price_subtotal", "order_line.discount")
     def _compute_discount_amount(self):
         for order in self:
@@ -85,28 +93,47 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
-        user = self.env.user
+        if vals.get("amount_total", 0) <= 0:
+            raise ValidationError("Sale order amount must be greater than zero.")
+
         order = super(SaleOrder, self).create(vals)
+        
         if 'reference' in vals:
+            user = self.env.user
             order.message_post(
                 body=f"Sale Order with Reference: {order.reference}",
                 message_type='notification',
                 author_id=user.partner_id.id
             )
+        
         return order
 
     def write(self, vals):
-        user = self.env.user
+        """Ensure required text fields have values before updating a record."""
         result = super(SaleOrder, self).write(vals)
+
         for order in self:
-            if 'reference' in vals:
-                    order.message_post(
-                        body=f"Sale Order with Reference: {order.reference}",
-                        message_type='notification',
-                        author_id=user.partner_id.id
-                    )
-               
+            if order.amount_total <= 0:
+                raise ValidationError("Sale order amount must be greater than zero.")
+        
+        if 'reference' in vals:
+            user = self.env.user
+            for order in self:
+                order.message_post(
+                    body=f"Sale Order with Reference: {order.reference}",
+                    message_type='notification',
+                    author_id=user.partner_id.id
+                )
+        
         return result
+
+    def _validate_text_fields(self):
+            """Check if required text fields (where validation_check=True) have values."""
+            for record in self.text_fields:
+                print(record.validation_check,"kkkkkkkkkkkkkkkkkkkkkkkkkkkk",record.text_value)
+                if record.validation_check and not record.text_value:
+                    raise ValidationError(_("The field '%s' is required. Please fill the value.") % record.text_field)
+
 
     @api.onchange('bom_id')
     def _onchange_bom_id(self):
@@ -145,7 +172,6 @@ class SaleOrder(models.Model):
     def _compute_text_field(self):
         for line in self:
             if line.brand_id:
-                # _logger.info("Computing text fields for Sale Order %s", line.id)
                 copied_text_fields = []
                 if line.brand_id.text_fields:
                     for item in line.brand_id.text_fields:
@@ -155,7 +181,6 @@ class SaleOrder(models.Model):
                         })
                         copied_text_fields.append(copied_item.id)
                 line.text_fields = [(6, 0, copied_text_fields)]
-                # _logger.info("Copied Text Fields: %s", copied_text_fields)
             else:
                 line.text_fields = [(5, 0, 0)]
                 line.category_ids  = [(6, 0, [])]

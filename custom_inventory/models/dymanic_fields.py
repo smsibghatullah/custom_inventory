@@ -9,8 +9,8 @@ class DynamicFieldText(models.Model):
 
     brand_id = fields.Many2one('brand.master', string='Brand', ondelete='cascade')
     sale_order_id = fields.Many2one('sale.order', string='sale', ondelete='cascade')
-
     text_field = fields.Char('')
+    validation_check = fields.Boolean('')
     text_value = fields.Char('')
 
 

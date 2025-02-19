@@ -25,8 +25,86 @@
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
                 <field name="bom_id" options="{'no_create': True}"/>
-                <field name="reference" />
+                <field name="is_tag_access" invisible="1" />
+                <field name="tag_ids" widget="many2many_tags" invisible="is_tag_access != False" options="{'color_field': 'color', 'no_create_edit': True}" />
+                <field name="reference" required="1" />
             </xpath>
+             <xpath expr="//field[@name='payment_term_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='validity_date']" position="attributes">
+                    <attribute name="required">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_quotation_send']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma_primary']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+            </xpath>
+             <xpath expr="//page[@name='other_information']" position="replace">
+               <page string="Other Info" name="other_information">
+                        <group>
+                            <group name="sales_person" string="Sales">
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="team_id" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}" options="{'no_create': True}"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                <field name="require_signature"
+                                       readonly="state in ['cancel', 'sale']"/>
+                                <label for="require_payment"/>
+                                <div id="require_payment">
+                                    <field name="require_payment"
+                                        readonly="state in ['cancel', 'sale']"/>
+                                    <span class="mx-3" invisible="not require_payment">of</span>
+                                    <field name="prepayment_percent"
+                                        readonly="state in ['cancel', 'sale']"
+                                        invisible="not require_payment"
+                                        widget="percentage"
+                                        style="width: 3rem"/>
+                                </div>
+                                <field name="reference" readonly="1" invisible="not reference"/>
+                                <field name="client_order_ref"/>
+                                <!-- <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/> -->
+                            </group>
+                            <group name="sale_info" string="Invoicing">
+                                <field name="show_update_fpos" invisible="1"/>
+                                <label for="fiscal_position_id"/>
+                                <div class="o_row">
+                                    <field name="fiscal_position_id" options="{'no_create': True}"/>
+                                    <button name="action_update_taxes" type="object"
+                                        string=" Update Taxes"
+                                        help="Recompute all taxes based on this fiscal position"
+                                        class="btn-link mb-1 px-0" icon="fa-refresh"
+                                        confirm="This will update all taxes based on the currently selected fiscal position."
+                                        invisible="not show_update_fpos or state in ['sale', 'cancel']"/>
+                                </div>
+                                <field name="partner_invoice_id" groups="!account.group_delivery_invoice_address" invisible="1"/>
+                                <field name="analytic_account_id" context="{'default_partner_id':partner_invoice_id, 'default_name':name}" readonly="invoice_count != 0 and state == 'sale'" groups="analytic.group_analytic_accounting" force_save="1"/>
+                                <field name="journal_id" groups="base.group_no_one" readonly="invoice_count != 0 and state == 'sale'"/>
+                                <field name="invoice_status" invisible="state != 'sale'" groups="base.group_no_one"/>
+                                <!-- test_event_configurator -->
+                                <field name="invoice_status" invisible="1" groups="!base.group_no_one"/>
+                            </group>
+                            <group name="sale_shipping" string="Shipping">
+                                <label for="commitment_date" string="Delivery Date"/>
+                                <div name="commitment_date_div" class="o_row">
+                                    <field name="commitment_date" readonly="state == 'cancel' or locked"/>
+                                    <span name="expected_date_span" class="text-muted">Expected: <field name="expected_date" class="oe_inline" widget="date"/></span>
+                                </div>
+                            </group>
+                            <group string="Tracking" name="sale_reporting">
+                                <field name="origin"/>
+                                <field name="campaign_id" options="{'create_name_field': 'title'}"/>
+                                <field name="medium_id"/>
+                                <field name="source_id"/>
+                            </group>
+                        </group>
+                    </page>
+            </xpath>
+
+
+ 
+
+
             <xpath expr="//field[@name='product_template_id']" position="attributes">
                 <attribute name="domain">[('category_ids', 'in', category_ids),('sale_ok', '=', True)]</attribute>
             </xpath>
@@ -41,7 +119,7 @@
                     <field name="text_fields">
                         <tree editable="top">
                             <field name="text_field"></field>
-                            <field name="text_value"></field>
+                            <field  name="text_value"></field>
                         </tree>
                         </field>
                         <field name="checkbox_fields">
@@ -88,6 +166,27 @@
         <field name="target">new</field>
     </record>
 
+    <record id="sale_order_tree_inherit" model="ir.ui.view">
+            <field name="name">sale.order.tree.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="brand_id"/>
+                </field>
+            </field>
+        </record>
+
+    <record id="sale_order_qutation_tree_inherit" model="ir.ui.view">
+        <field name="name">sale.order.tree.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="brand_id"/>
+            </field>
+        </field>
+    </record>
 
       <record id="action_sale_order_revision" model="ir.actions.act_window">
         <field name="name">Revised Sale Orders</field>

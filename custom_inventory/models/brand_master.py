@@ -24,6 +24,11 @@ class BrandMaster(models.Model):
         default=False,
         help="Indicates whether this line represents a tax-related item."
     )
+    is_tag_show = fields.Boolean(
+        string="Is Tag",
+        default=False,
+        help="Indicates whether this line represents a tag-related item."
+    )
 
 
 

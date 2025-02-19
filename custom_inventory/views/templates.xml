@@ -253,8 +253,8 @@
            <t t-set="index" t-value="index + 1"/>
                 <tr>
                     <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>Bacon Burger</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>Bacon Burger</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
                     <t t-if="doc.brand_id.is_tax_show">
                     <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
                     <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
@@ -265,11 +265,11 @@
                     <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
                     </t>
                     <td style="border: 1px solid black; padding: 10px;">
-                            <span t-field="line.product_uom_qty">3</span>
+                            <span t-field="line.product_uom_qty">0.00</span>
                             <span t-field="line.product_uom">units</span>
                     </td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">3</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">27.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
                 </tr>
             </t>
         </tbody>

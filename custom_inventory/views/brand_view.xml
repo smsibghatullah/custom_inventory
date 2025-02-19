@@ -25,6 +25,7 @@
                         <field name="so_email"/>
                         <field name="po_email"/>
                         <field name="inv_email"/>
+                        <field name="is_tag_show"/>
                         <field name="is_tax_show"/>
                         <field name="bank_account_details"/>
                         <field name="address" />
@@ -32,6 +33,7 @@
                     <group><field name="text_fields">
                         <tree editable="bottom">
                             <field name="text_field"></field>
+                            <field name="validation_check" string="Validation Check"></field>
                             <field name="text_value"></field>
                         </tree>
                         </field>
