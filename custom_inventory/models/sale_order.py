@@ -94,6 +94,9 @@ class SaleOrder(models.Model):
     @api.model
     def create(self, vals):
         order = super(SaleOrder, self).create(vals)
+        print(order.amount_total,"mmmmmmmmmmmmmmmmmmmmmmmmmm")
+        if order.amount_total == 0:
+                raise ValidationError("The Sale Order total amount cannot be zero.")
         if 'reference' in vals:
             user = self.env.user
             order.message_post(
@@ -107,6 +110,10 @@ class SaleOrder(models.Model):
     @api.model
     def write(self, vals):
         result = super(SaleOrder, self).write(vals)
+        print(self.amount_total,"mmmmmmmmccccmmmmmmmmmmmmmmmmmm")
+        for order in self:
+            if order.amount_total == 0:
+                raise ValidationError("The Sale Order total amount cannot be zero.")
         if 'reference' in vals:
             user = self.env.user
             for order in self:
