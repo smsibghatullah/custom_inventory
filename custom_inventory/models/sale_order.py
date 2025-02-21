@@ -12,7 +12,7 @@ class SaleOrder(models.Model):
 
     brand_id = fields.Many2one(
         'brand.master', 
-        string='Brand',
+        string='Brand *',
          required=True,
         help='Select the brand associated with this sale order'
     )
@@ -22,7 +22,7 @@ class SaleOrder(models.Model):
         'sale_category_rel',
         'product_id',
         'category_id',
-        string='Categories',
+        string='Categories *',
          required=True,
         help='Select the Categories associated with the selected brand'
     )
@@ -34,7 +34,7 @@ class SaleOrder(models.Model):
     revision_number_count = fields.Integer(compute="_compute_revision_number_count")
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
-    reference = fields.Char(string='Reference')
+    reference = fields.Char(string='Reference *')
     amount_without_shipping = fields.Float(
         string="Subtotal (Excluding Shipping)",
         compute="_compute_amount_without_shipping",
@@ -43,7 +43,6 @@ class SaleOrder(models.Model):
         string="Formatted Order Date",
         compute="_compute_formatted_dates",
     )
-    
     formatted_validity_date = fields.Char(
         string="Formatted Expiry Date",
         compute="_compute_formatted_dates",
@@ -53,8 +52,25 @@ class SaleOrder(models.Model):
         compute="_compute_discount_amount",
         currency_field="currency_id"
     )
-
     is_tag_access = fields.Boolean(compute="_compute_tag_access")
+    has_text_fields = fields.Boolean(compute="_compute_has_text_fields", store=True)
+    has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
+    has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
+
+    @api.depends('text_fields')
+    def _compute_has_text_fields(self):
+        for record in self:
+            record.has_text_fields = bool(record.text_fields)
+
+    @api.depends('checkbox_fields')
+    def _compute_has_checkbox_fields(self):
+        for record in self:
+            record.has_checkbox_fields = bool(record.checkbox_fields)
+
+    @api.depends('selection_fields')
+    def _compute_has_selection_fields(self):
+        for record in self:
+            record.has_selection_fields = bool(record.selection_fields)
 
     @api.depends("brand_id")
     def _compute_tag_access(self):

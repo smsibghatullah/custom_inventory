@@ -29,11 +29,11 @@
                 <field name="tag_ids" widget="many2many_tags" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True}" />
                 <field name="reference" required="1" />
             </xpath>
-             <xpath expr="//field[@name='payment_term_id']" position="attributes">
-                    <attribute name="required">1</attribute>
+             <xpath expr="//field[@name='payment_term_id']" position="replace">
+                     <field name="payment_term_id" string="Payment Terms *" required="1"/>
             </xpath>
-            <xpath expr="//field[@name='validity_date']" position="attributes">
-                    <attribute name="required">1</attribute>
+            <xpath expr="//field[@name='validity_date']" position="replace">
+                    <field name="validity_date" string="Expiration *" required="1"/>
             </xpath>
             <xpath expr="//button[@name='action_quotation_send']" position="attributes">
                     <attribute name="invisible">1</attribute>
@@ -115,20 +115,22 @@
                 <field name="pricelist_id" />
             </xpath>
             <xpath expr="//field[@name='note']" position="before">
-                    
-                    <field name="text_fields">
+                     <field name="has_text_fields" invisible="1" />
+                    <field name="text_fields" invisible="has_text_fields == False">
                         <tree editable="top">
                             <field name="text_field"></field>
                             <field  name="text_value"></field>
                         </tree>
                         </field>
-                        <field name="checkbox_fields">
+                         <field name="has_checkbox_fields" invisible="1" />
+                        <field name="checkbox_fields" invisible="has_checkbox_fields == False">
                             <tree editable="top">
                                 <field name="checkbox_field"></field>
                                 <field name="checkbox_value"></field>
                             </tree>
                         </field>
-                            <field name="selection_fields">
+                         <field name="has_selection_fields" invisible="1"  />
+                            <field name="selection_fields" invisible="has_selection_fields == False">
                                 <tree editable="top">
                                 <field name="selection_field"/>
                                 <field name="selected_value"/>
