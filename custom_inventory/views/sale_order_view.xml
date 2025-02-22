@@ -163,7 +163,7 @@
                     <field name="text_fields" invisible="has_text_fields == False">
                         <tree editable="top">
                             <field name="text_field"></field>
-                            <field  name="text_value"></field>
+                            <field  name="text_value" ></field>
                         </tree>
                         </field>
                          <field name="has_checkbox_fields" invisible="1" />

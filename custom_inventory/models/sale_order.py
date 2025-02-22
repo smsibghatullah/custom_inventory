@@ -128,6 +128,9 @@ class SaleOrder(models.Model):
         result = super(SaleOrder, self).write(vals)
         print(self.amount_total,"mmmmmmmmccccmmmmmmmmmmmmmmmmmm")
         for order in self:
+            for item in order.text_fields:
+                if item.validation_check and not item.text_value:
+                    raise ValidationError(f"The field '{item.text_field}' requires a value.")
             if order.amount_total == 0:
                 raise ValidationError("The Sale Order total amount cannot be zero.")
         if 'reference' in vals:
