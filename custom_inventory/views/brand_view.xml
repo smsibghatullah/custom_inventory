@@ -12,65 +12,70 @@
         </field>
     </record>
 
-    <record id="view_form_brand_master" model="ir.ui.view">
-        <field name="name">Brand Master Form</field>
-        <field name="model">brand.master</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <field name="name"/>
-                        <field name="logo" widget="image" style="width:200px;height:200" required="1"/>
-                        <field name="printable_formats"/>
-                        <field name="so_email"/>
-                        <field name="po_email"/>
-                        <field name="inv_email"/>
-                        <field name="is_tag_show"/>
-                        <field name="is_tax_show"/>
-                        <field name="bank_account_details"/>
-                        <field name="address" />
-                    </group>
-                    <group><field name="text_fields">
+   <record id="view_form_brand_master" model="ir.ui.view">
+    <field name="name">Brand Master Form</field>
+    <field name="model">brand.master</field>
+    <field name="arch" type="xml">
+        <form>
+            <sheet>
+                <group>
+                    <field name="name"/>
+                    <field name="logo" widget="image" style="width:200px;height:200px;" required="1"/>
+                    <field name="printable_formats"/>
+                    <field name="so_email"/>
+                    <field name="po_email"/>
+                    <field name="inv_email"/>
+                    <field name="is_tag_show"/>
+                    <field name="is_tax_show"/>
+                    <field name="bank_account_details"/>
+                    <field name="address"/>
+                </group>
+
+                <group>
+                    <field name="text_fields">
                         <tree editable="bottom">
-                            <field name="text_field"></field>
-                            <field name="validation_check" string="Mandatory Checkbox"></field>
-                            <field name="text_value"></field>
+                            <field name="text_field"/>
+                            <field name="validation_check" string="Mandatory Checkbox"/>
+                            <field name="text_value" attrs="{'required': [('validation_check', '=', True)]}"/>
                         </tree>
-                        </field>
-                    </group>
-                    <group>
-                        <field name="checkbox_fields">
-                            <tree editable="bottom">
-                                <field name="checkbox_field"></field>
-                                <field name="checkbox_value"></field>
-                            </tree>
-                        </field>
-                    </group>
-                    <group>
-                        <field name="selection_fields">
-                            <tree>
-                                <field name="selection_field"/>
-                                <field name="selection_value">
-                                </field>
-                            </tree>
-                            <form>
-                                <field name="selection_field"/>
-                                <field name="selection_value">
-                                    <tree editable="bottom" >
-                                        <field name="value_field"/>
-                                    </tree>
-                                </field>
-                            </form>
-                        </field>
-                    </group>
-                    <group>
-                        <field name="terms_conditions" string="Terms and Condition (Sale)"/>
-                        <field name="terms_conditions_invoice" string="Terms and Condition (Invoice)" />
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+                    </field>
+                </group>
+
+                <group>
+                    <field name="checkbox_fields">
+                        <tree editable="bottom">
+                            <field name="checkbox_field"/>
+                            <field name="checkbox_value"/>
+                        </tree>
+                    </field>
+                </group>
+
+                <group>
+                    <field name="selection_fields">
+                        <tree>
+                            <field name="selection_field"/>
+                            <field name="selection_value"/>
+                        </tree>
+                        <form>
+                            <field name="selection_field"/>
+                            <field name="selection_value">
+                                <tree editable="bottom">
+                                    <field name="value_field"/>
+                                </tree>
+                            </field>
+                        </form>
+                    </field>
+                </group>
+
+                <group>
+                    <field name="terms_conditions" string="Terms and Condition (Sale)"/>
+                    <field name="terms_conditions_invoice" string="Terms and Condition (Invoice)"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
 
 
 
