@@ -33,7 +33,7 @@
                     <group><field name="text_fields">
                         <tree editable="bottom">
                             <field name="text_field"></field>
-                            <field name="validation_check" string="Validation Check"></field>
+                            <field name="validation_check" string="Mandatory Checkbox"></field>
                             <field name="text_value"></field>
                         </tree>
                         </field>
