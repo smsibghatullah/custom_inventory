@@ -56,7 +56,13 @@ class SaleOrder(models.Model):
     has_text_fields = fields.Boolean(compute="_compute_has_text_fields", store=True)
     has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
     has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
+    has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
 
+    @api.depends("brand_id", "brand_id.is_tag_show")
+    def _compute_has_tag_required(self):
+        for record in self:
+            record.has_tag_required = bool(record.brand_id.is_tag_show)
+            
     @api.depends('text_fields')
     def _compute_has_text_fields(self):
         for record in self:
