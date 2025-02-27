@@ -410,6 +410,7 @@ class SaleOrder(models.Model):
     def _onchange_brand_id(self):
         if self.brand_id:
             self.category_ids  = [(6, 0, [])]
+            self.order_line  = [(6, 0, [])]
             self.terms_conditions = self.brand_id.terms_conditions
 
        

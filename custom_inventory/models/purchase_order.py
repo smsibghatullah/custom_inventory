@@ -56,6 +56,7 @@ class PurchaseOrder(models.Model):
     def _onchange_brand_id(self):
         if self.brand_id:
             self.category_ids = False
+            self.order_line  = [(6, 0, [])]
             self.terms_conditions = self.brand_id.terms_conditions
 
     def action_send_report_email(self):
