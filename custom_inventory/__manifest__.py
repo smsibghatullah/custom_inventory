@@ -29,7 +29,9 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery'],
 
     'data': [
-         'data/data.xml',
+        
+        'data/data.xml',
+        'security/ir.model.access.csv',
         'views/brand_view.xml',
         'views/bom_products_view.xml',
         'views/invoice_view.xml',
@@ -40,7 +42,8 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/crm.xml',
         'views/stock_picking_view.xml',
         'views/expense_cost_wizard_view.xml',
-        'security/ir.model.access.csv',
+        'views/shift_assignment_view.xml',
+       
        
     ],
 

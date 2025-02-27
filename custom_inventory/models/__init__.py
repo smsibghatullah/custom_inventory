@@ -8,4 +8,6 @@ from . import bom_products
 from . import crm
 from . import stock_picking
 from . import expense_cost_wizard
+from . import shift_assignment
+
 

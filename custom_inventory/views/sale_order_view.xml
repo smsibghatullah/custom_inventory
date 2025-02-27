@@ -5,6 +5,7 @@
         <field name="name">sale.order.form.inherit.brand</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority">9</field>
         <field name="arch" type="xml">
 
          <xpath expr="//header" position="replace">
@@ -283,6 +284,12 @@
                 <attribute name="domain">[('category_ids', 'in', category_ids),('sale_ok', '=', True)]</attribute>
             </xpath>
             <xpath expr="//field[@name='product_template_id']" position="after">
+                 <field name="category_ids" invisible="1" />
+            </xpath>
+               <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="domain">[('category_ids', 'in', category_ids),('sale_ok', '=', True)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
                  <field name="category_ids" invisible="1" />
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="after">
