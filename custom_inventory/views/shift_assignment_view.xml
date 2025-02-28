@@ -34,12 +34,12 @@
                             <group>
                                 <field name="project_id" string="Project" readonly="state != 'draft'"/>
                                 <field name="task_id" string="Task" readonly="state != 'draft'"/>
-                                <field name="supervisor_ids" readonly="state != 'draft'" widget="many2many_tags" string="Supervisors" />
+                                <field name="supervisor_ids" readonly="state != 'draft'" widget="many2many_tags" string="Supervisors" domain="[('id', 'not in', employee_ids)]"/>
                             </group>
                             <group>
                                 <field name="survey_id" string="Survey Form" readonly="state != 'draft'" />
                                 <field name="team_checkin_required" string="Check-in Required?" readonly="state != 'draft'"/>
-                                 <field name="employee_ids" widget="many2many_tags" string="Employees" readonly="state != 'draft'" />
+                                 <field name="employee_ids" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
                             </group>
                         </group>
                         <notebook>

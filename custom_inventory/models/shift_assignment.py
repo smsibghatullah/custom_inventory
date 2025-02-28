@@ -5,11 +5,10 @@ class ShiftAssignment(models.Model):
     _description = 'Shift Assignment for Project Management'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    project_id = fields.Many2one('project.project', string='Project', tracking=True)
+    project_id = fields.Many2one('project.project', string='Project')
     task_id = fields.Many2one(
         'project.task', 
         string='Task', 
-        tracking=True,
         domain="[('project_id', '=', project_id)]"
     )
     supervisor_ids = fields.Many2many(
@@ -18,7 +17,6 @@ class ShiftAssignment(models.Model):
         'shift_id', 
         'employee_id', 
         string='Supervisors', 
-        tracking=True
     )
     employee_ids = fields.Many2many(
         'hr.employee', 
@@ -26,16 +24,15 @@ class ShiftAssignment(models.Model):
         'shift_id', 
         'employee_id', 
         string='Employees', 
-        tracking=True
     )
-    survey_id = fields.Many2one('survey.survey', string='Survey Form', tracking=True)
+    survey_id = fields.Many2one('survey.survey', string='Survey Form')
 
-    team_checkin_required = fields.Boolean(string="Team Check-in Required", tracking=True)
+    team_checkin_required = fields.Boolean(string="Team Check-in Required")
     state = fields.Selection([
         ('draft', 'Draft'),
         ('waiting_for_checkin', 'Waiting for Check-in'),
         ('done', 'Done')
-    ], string="Status", default='draft', tracking=True)
+    ], string="Status", default='draft')
     attendance_ids = fields.One2many('shift.attendance', 'shift_id', string="Attendance Records")
 
     def action_waiting_for_checkin(self):
@@ -47,11 +44,11 @@ class ShiftAttendance(models.Model):
     _description = 'Shift Attendance'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    shift_id = fields.Many2one('shift.assignment', string='Shift Assignment', required=True, tracking=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True, tracking=True)
-    check_in = fields.Datetime(string='Check-in Time', tracking=True)
-    check_out = fields.Datetime(string='Check-out Time', tracking=True)
-    duration = fields.Float(string='Worked Hours', compute='_compute_duration', store=True, tracking=True)
+    shift_id = fields.Many2one('shift.assignment', string='Shift Assignment', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    check_in = fields.Datetime(string='Check-in Time')
+    check_out = fields.Datetime(string='Check-out Time')
+    duration = fields.Float(string='Worked Hours', compute='_compute_duration', store=True)
 
     @api.depends('check_in', 'check_out')
     def _compute_duration(self):
