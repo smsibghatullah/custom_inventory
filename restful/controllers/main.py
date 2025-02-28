@@ -108,8 +108,10 @@ class APIController(http.Controller):
         payload = request.httprequest.data.decode()
         payload = json.loads(payload)
         print(payload,"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+        _logger.info("Received payload: %s", payload)
         model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
         print(model.model,"oooooooooooooooooooooooooooooooo")
+        _logger.info(model.model)
         values = {}
         if model:
             try:
@@ -120,7 +122,7 @@ class APIController(http.Controller):
                         values[k[7:]] = ast.literal_eval(v)
                     else:
                         values[k] = v
-           
+                _logger.info(values)
                 resource = request.env[model.model].sudo().create(values)
             except Exception as e:
                 request.env.cr.rollback()
