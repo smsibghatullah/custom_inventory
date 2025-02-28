@@ -45,6 +45,7 @@ class AccessToken(http.Controller):
            content = json.loads(req.content.decode('utf-8'))
            headers.update(access-token=content.get('access_token'))
         """
+        
         payload = request.httprequest.data.decode()
         payload = json.loads(payload)
 
