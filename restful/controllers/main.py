@@ -109,6 +109,7 @@ class APIController(http.Controller):
         payload = json.loads(payload)
         print(payload,"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
         model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
+        print(model.model,"oooooooooooooooooooooooooooooooo")
         values = {}
         if model:
             try:
@@ -119,8 +120,8 @@ class APIController(http.Controller):
                         values[k[7:]] = ast.literal_eval(v)
                     else:
                         values[k] = v
-
-                resource = request.env[model.model].create(values)
+           
+                resource = request.env[model.model].sudo().create(values)
             except Exception as e:
                 request.env.cr.rollback()
                 return invalid_response("params", e)
@@ -155,7 +156,7 @@ class APIController(http.Controller):
                     values[k[7:]] = ast.literal_eval(v)
                 else:
                     values[k] = v
-            record.write(values)
+            record.sudo().write(values)
         except Exception as e:
             request.env.cr.rollback()
             return invalid_response("exception", e)
