@@ -34,21 +34,13 @@ class ShiftAssignment(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('waiting_for_checkin', 'Waiting for Check-in'),
-        ('verified', 'Verified')
+        ('done', 'Done')
     ], string="Status", default='draft', tracking=True)
     attendance_ids = fields.One2many('shift.attendance', 'shift_id', string="Attendance Records")
 
-    @api.onchange('team_checkin_required')
-    def _onchange_team_checkin_required(self):
-        """If check-in required, move to waiting state"""
-        if self.team_checkin_required:
-            self.state = 'waiting_for_checkin'
-        else:
-            self.state = 'draft'
-
-    def action_verify_checkin(self):
+    def action_waiting_for_checkin(self):
         """Mark shift assignment as verified"""
-        self.state = 'verified'
+        self.state = 'waiting_for_checkin'
 
 class ShiftAttendance(models.Model):
     _name = 'shift.attendance'

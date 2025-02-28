@@ -26,21 +26,34 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
+                        <button name="action_waiting_for_checkin" type="object" string="Check In" class="oe_highlight"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
                         <group>
                             <group>
-                                <field name="project_id" string="Project"/>
-                                <field name="task_id" string="Task"/>
-                                <field name="supervisor_ids" widget="many2many_tags" string="Supervisors" domain="[('id', 'not in', employee_ids)]"/>
+                                <field name="project_id" string="Project" readonly="state != 'draft'"/>
+                                <field name="task_id" string="Task" readonly="state != 'draft'"/>
+                                <field name="supervisor_ids" readonly="state != 'draft'" widget="many2many_tags" string="Supervisors" domain="[('id', 'not in', employee_ids)]"/>
                             </group>
                             <group>
-                                <field name="survey_id" string="Survey Form"/>
-                                <field name="team_checkin_required" string="Check-in Required?"/>
-                                 <field name="employee_ids" widget="many2many_tags" string="Employees" domain="[('id', 'not in', supervisor_ids)]"/>
+                                <field name="survey_id" string="Survey Form" readonly="state != 'draft'" />
+                                <field name="team_checkin_required" string="Check-in Required?" readonly="state != 'draft'"/>
+                                 <field name="employee_ids" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
                             </group>
                         </group>
+                        <notebook>
+                            <page string="Work Tracking">
+                                <field name="attendance_ids" readonly="1" >
+                                    <tree editable="bottom">
+                                        <field name="employee_id"/>
+                                        <field name="check_in"/>
+                                        <field name="check_out"/>
+                                        <field name="duration"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
                     </sheet>
                    
                     <div class="oe_chatter">

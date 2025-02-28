@@ -107,6 +107,7 @@ class APIController(http.Controller):
         """
         payload = request.httprequest.data.decode()
         payload = json.loads(payload)
+        print(payload,"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
         model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
         values = {}
         if model:
