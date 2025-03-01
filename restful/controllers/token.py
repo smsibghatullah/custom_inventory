@@ -19,6 +19,59 @@ class AccessToken(http.Controller):
 
         self._token = request.env["api.access_token"]
 
+
+    @http.route('/api/shift.attendance/create', type="json", auth="public", methods=["POST"], csrf=False)
+    def post(self, **payload):
+        try:
+            access_token = request.httprequest.headers.get("access_token")
+            if not access_token:
+                return invalid_response("access_token_not_found", "Missing access token in request header", 401)
+
+            access_token_data = (
+                request.env["api.access_token"].sudo().search([("token", "=", access_token)], order="id DESC", limit=1)
+            )
+
+            if not access_token_data or access_token_data.token != access_token:
+                return invalid_response("access_token_invalid", "Token is expired or invalid", 401)
+
+            _logger.info("User authenticated: %s", access_token_data.user_id.id)
+
+            # Set user in session and update request environment
+            request.session.uid = access_token_data.user_id.id
+            request.update_env(user=access_token_data.user_id)
+
+            # Decode JSON payload
+            payload = request.httprequest.data.decode()
+            payload = json.loads(payload)
+            _logger.info("Received payload: %s", payload)
+
+            # Get shift.attendance model
+            model = request.env['shift.attendance'].sudo()
+
+            # Prepare values for record creation
+            values = {}
+            for k, v in payload.items():
+                if "__api__" in k:
+                    values[k[7:]] = ast.literal_eval(v)
+                else:
+                    values[k] = v
+
+            _logger.info("Creating shift attendance with values: %s", values)
+
+            # Create shift attendance record
+            resource = model.create(values)
+
+            _logger.info("Record created: %s", resource)
+
+            # Return successful response
+            return valid_response(resource.read())
+
+        except Exception as e:
+            request.env.cr.rollback()
+            _logger.error("Error creating shift attendance: %s", str(e))
+            return invalid_response("error", str(e))
+        
+
     @http.route("/api1/auth/token", methods=["POST"], type="json", auth="public", csrf=False)
     def token(self, **post):
         """The token URL to be used for getting the access_token:
