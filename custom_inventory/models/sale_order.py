@@ -5,6 +5,7 @@ from odoo.exceptions import UserError,ValidationError
 import base64
 from odoo.fields import Command
 import random
+from collections import defaultdict
 
 
 class SaleOrder(models.Model):
@@ -655,3 +656,87 @@ class AccountTax(models.Model):
             tax_values_list = []
 
         return to_update_vals, tax_values_list
+
+class SaleOrderDiscount(models.TransientModel):
+    _inherit = 'sale.order.discount'
+    _description = "Discount Wizard"
+
+    discount_type_new = fields.Selection(
+        selection=[
+            ('so_discount', "Global Discount"),
+            ('amount', "Fixed Amount"),
+        ],
+        default='so_discount',
+    )
+
+    @api.constrains('discount_type_new', 'discount_percentage')
+    def _check_discount_amount(self):
+        for wizard in self:
+            if (
+                wizard.discount_type_new in ('sol_discount', 'so_discount')
+                and wizard.discount_percentage > 1.0
+            ):
+                raise ValidationError(_("Invalid discount amount"))
+
+    def action_apply_discount(self):
+        self.ensure_one()
+        self = self.with_company(self.company_id)
+        if self.discount_type_new == 'sol_discount':
+            self.sale_order_id.order_line.write({'discount': self.discount_percentage*100})
+        else:
+            self._create_discount_lines()
+
+    def _create_discount_lines(self):
+        """Create SOline(s) according to wizard configuration"""
+        self.ensure_one()
+        discount_product = self._get_discount_product()
+
+        if self.discount_type_new == 'amount':
+            vals_list = [
+                self._prepare_discount_line_values(
+                    product=discount_product,
+                    amount=self.discount_amount,
+                    taxes=self.env['account.tax'],
+                )
+            ]
+        else: # so_discount
+            total_price_per_tax_groups = defaultdict(float)
+            for line in self.sale_order_id.order_line:
+                if not line.product_uom_qty or not line.price_unit:
+                    continue
+
+                total_price_per_tax_groups[line.tax_id] += line.price_subtotal
+
+            if not total_price_per_tax_groups:
+                # No valid lines on which the discount can be applied
+                return
+            elif len(total_price_per_tax_groups) == 1:
+                # No taxes, or all lines have the exact same taxes
+                taxes = next(iter(total_price_per_tax_groups.keys()))
+                subtotal = total_price_per_tax_groups[taxes]
+                vals_list = [{
+                    **self._prepare_discount_line_values(
+                        product=discount_product,
+                        amount=subtotal * self.discount_percentage,
+                        taxes=taxes,
+                        description=_(
+                            "Discount: %(percent)s%%",
+                            percent=self.discount_percentage*100
+                        ),
+                    ),
+                }]
+            else:
+                vals_list = [
+                    self._prepare_discount_line_values(
+                        product=discount_product,
+                        amount=subtotal * self.discount_percentage,
+                        taxes=taxes,
+                        description=_(
+                            "Discount: %(percent)s%%"
+                            "- On products with the following taxes %(taxes)s",
+                            percent=self.discount_percentage*100,
+                            taxes=", ".join(taxes.mapped('name'))
+                        ),
+                    ) for taxes, subtotal in total_price_per_tax_groups.items()
+                ]
+        return self.env['sale.order.line'].create(vals_list)

@@ -16,10 +16,10 @@
             <t t-if="doc.brand_id">
                 <div style="display: flex; align-items: center; margin-bottom: 20px;">
                     <div>
-                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 100px; max-width: 150px;" />
+                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 150px; max-width: 300px;" />
                     </div>
                     <div style="margin-left: 10px;">
-                        <span t-field="doc.brand_id.name" />
+                        <!-- <span t-field="doc.brand_id.name" /> -->
                     </div>
                 </div>
             </t>
@@ -288,7 +288,7 @@
                         <td style="padding: 5px;">Sub Total</td>
                         <td style="padding: 5px;"><span t-field="doc.amount_without_shipping">0.00</span></td>
                     </tr>
-                    <tr>
+                    <tr t-if="doc.carrier_id.fixed_price">
                         <td style="padding: 5px;">Shipping</td>
                         <td style="padding: 5px;"><span t-field="doc.carrier_id.fixed_price">0.00</span></td>
                     </tr>

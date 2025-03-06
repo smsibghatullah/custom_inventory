@@ -1,0 +1,43 @@
+<odoo>
+    <data>
+        <record id="choose_delivery_carrier_view_form_inherit" model="ir.ui.view">
+                <field name="name">choose.delivery.carrier.form.inherit</field>
+                <field name="model">choose.delivery.carrier</field>
+                <field name="inherit_id" ref="delivery.choose_delivery_carrier_view_form"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//field[@name='display_price']" position="attributes">
+                        <attribute name="readonly">0</attribute>
+                    </xpath>
+                </field>
+            </record>
+            <record id="sale_order_line_wizard_form_inherit" model="ir.ui.view">
+                <field name="name">sale.order.line.wizard.form.inherit</field>
+                <field name="model">sale.order.discount</field>
+                <field name="inherit_id" ref="sale.sale_order_line_wizard_form"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//div[@class='row']" position="replace">
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-4 col-lg-4 col-4">
+                                            <group>
+                                                <label for="discount_amount" string="Discount" invisible="discount_type_new != 'amount'"/>
+                                                <field name="discount_amount" invisible="discount_type_new != 'amount'" nolabel="1"/>
+                                                <label for="discount_percentage"
+                                                    string="Discount"
+                                                    invisible="discount_type_new not in ('so_discount')"/>
+                                                <field name="discount_percentage"
+                                                    invisible="discount_type_new not in ('so_discount')"
+                                                    widget="percentage" nolabel="1"/>
+                                            </group>
+                                        </div>
+                                        <div class="col-sm-7 col-md-8 col-lg-8 col-8">
+                                            <field name="discount_type_new" widget="radio"/>
+                                        </div>
+                                    </div> 
+                        </xpath>
+                </field>
+            </record>
+    </data>
+</odoo>
+
+
+
