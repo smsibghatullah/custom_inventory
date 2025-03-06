@@ -740,3 +740,21 @@ class SaleOrderDiscount(models.TransientModel):
                     ) for taxes, subtotal in total_price_per_tax_groups.items()
                 ]
         return self.env['sale.order.line'].create(vals_list)
+
+
+class ChooseDeliveryCarrier(models.TransientModel):
+    _inherit = 'choose.delivery.carrier'
+    _description = 'Delivery Carrier Selection Wizard'
+
+    def button_confirm(self):
+        if self.carrier_id:
+            self.delivery_price = self.display_price
+            self.carrier_id.fixed_price = self.display_price
+            fixed_amount = self.carrier_id.fixed_price
+            self.carrier_id.product_id.list_price = fixed_amount
+
+        self.order_id.set_delivery_line(self.carrier_id, self.delivery_price)
+        self.order_id.write({
+            'recompute_delivery_price': False,
+            'delivery_message': self.delivery_message,
+        })

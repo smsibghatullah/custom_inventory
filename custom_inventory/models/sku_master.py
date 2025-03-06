@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields,api
 
 class SKUTypeMaster(models.Model):
     _name = 'sku.type.master'
@@ -9,3 +9,5 @@ class SKUTypeMaster(models.Model):
     brand_id = fields.Many2one('brand.master', string='Brand')
 
 
+
+    
