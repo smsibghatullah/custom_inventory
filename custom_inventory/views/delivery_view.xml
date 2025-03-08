@@ -8,6 +8,7 @@
                     <xpath expr="//field[@name='display_price']" position="attributes">
                         <attribute name="readonly">0</attribute>
                     </xpath>
+
                 </field>
             </record>
             <record id="sale_order_line_wizard_form_inherit" model="ir.ui.view">
