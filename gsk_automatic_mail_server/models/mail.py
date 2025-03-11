@@ -16,6 +16,7 @@ class MailMail(models.Model):
                 if mail_server:
                     mail.mail_server_id = mail_server.id
                     partner = self.env['res.partner'].sudo().search([('email','=',mail_server.smtp_user)],limit=1)
+                    print(partner.email_formatted,self.env.company.email_formatted,mail.email_from,"vvvvvvvvvvvvvvvvvvvvvvvvvvvv" )
                     mail.email_from = partner.email_formatted if partner else self.env.company.email_formatted
 
         return super(MailMail, self).send(auto_commit=auto_commit,raise_exception=raise_exception)

@@ -16,7 +16,7 @@
             <t t-if="doc.brand_id">
                 <div style="display: flex; align-items: center; margin-bottom: 20px;">
                     <div>
-                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 150px; max-width: 300px;" />
+                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 250px; max-width: 300px;" />
                     </div>
                     <div style="margin-left: 10px;">
                         <!-- <span t-field="doc.brand_id.name" /> -->
@@ -378,10 +378,10 @@
               <t t-if="o.brand_id">
                     <div style="display: flex; align-items: center; margin-bottom: 20px;">
                         <div>
-                            <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 100px; max-width: 150px;" />
+                            30<img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 250px; max-width: 300px;" />
                         </div>
                         <div style="margin-left: 10px;">
-                            <span t-field="o.brand_id.name" />
+                            <!-- <span t-field="o.brand_id.name" /> -->
                         </div>
                     </div>
                     <div style="margin-left: 10px;">
@@ -539,10 +539,10 @@
                         <t t-if="o.brand_id">
                             <div style="display: flex; align-items: center; margin-bottom: 20px;">
                                 <div>
-                                    <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 100px; max-width: 150px;" />
+                                    <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 250px; max-width: 300px;" />
                                 </div>
                                 <div style="margin-left: 10px;">
-                                    <span t-field="o.brand_id.name" />
+                                    <!-- <span t-field="o.brand_id.name" /> -->
                                 </div>
                             </div>
                         </t>

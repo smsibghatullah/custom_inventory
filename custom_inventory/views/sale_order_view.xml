@@ -284,6 +284,9 @@
                 <attribute name="domain">[('category_ids', 'in', category_ids), ('sale_ok', '=', True)]</attribute>
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
             </xpath>
+             <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
             <xpath expr="//field[@name='product_template_id']" position="after">
                 <field name="category_ids" invisible="1"/>
             </xpath>
