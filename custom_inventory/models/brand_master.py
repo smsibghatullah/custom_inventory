@@ -29,6 +29,7 @@ class BrandMaster(models.Model):
         default=False,
         help="Indicates whether this line represents a tag-related item."
     )
+    company_id = fields.Many2one('res.company', string="Company")
 
 
 

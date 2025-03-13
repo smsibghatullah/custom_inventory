@@ -9,6 +9,7 @@ class PurchaseOrder(models.Model):
         'brand.master', 
         string='Brand',
          required=True,
+          domain="[('company_id', '=', company_id)]",
         help='Select the brand associated with this sale order'
     )
 

@@ -44,6 +44,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/expense_cost_wizard_view.xml',
         'views/shift_assignment_view.xml',
         'views/delivery_view.xml',
+        'views/res_company_view.xml',
     ],
 
   

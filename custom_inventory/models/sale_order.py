@@ -15,6 +15,7 @@ class SaleOrder(models.Model):
         'brand.master', 
         string='Brand *',
          required=True,
+          domain="[('company_id', '=', company_id)]",
         help='Select the brand associated with this sale order'
     )
 
@@ -58,6 +59,7 @@ class SaleOrder(models.Model):
     has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
     has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
     has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
+
 
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):
@@ -484,7 +486,7 @@ class SaleOrderEmailWizard(models.TransientModel):
                 'attachment_ids': [(6, 0, [attachment.id])],
             }
             mail = self.env['mail.mail'].create(mail_values)
-            mail.send()
+            # mail.send()
 
         except Exception as e:
             raise UserError(_("An error occurred while generating the PDF: %s") % str(e))
