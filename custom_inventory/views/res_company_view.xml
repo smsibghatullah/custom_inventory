@@ -8,6 +8,8 @@
         <xpath expr="//field[@name='currency_id']" position="after">
             <field name="brand_ids" options="{'no_create': True}" widget="many2many_tags">
             </field>
+            <field name="tag_ids" options="{'no_create': True}" widget="many2many_tags">
+            </field>
         </xpath>
     </field>
 </record>
