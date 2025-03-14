@@ -19,6 +19,47 @@ class AccessToken(http.Controller):
 
         self._token = request.env["api.access_token"]
 
+    @http.route('/api/survey_question_data/<int:survey_id>', type="http", auth="public", methods=["GET"], csrf=False)
+    def get_survey_questions(self, survey_id, **kwargs):
+        try:
+            survey = request.env['survey.survey'].sudo().browse(survey_id)
+            if not survey.exists():
+                return {"error": "Survey not found"}
+
+            questions_data = []
+            questions = request.env['survey.question'].sudo().search([('id', 'in', survey.question_ids.ids)])
+            for question in questions:
+                answer_ids = question.suggested_answer_ids.ids + question.matrix_row_ids.ids
+                answers = request.env['survey.question.answer'].sudo().search([('id', 'in', answer_ids)])
+                answers_data = [
+                    {
+                        "answer_id": answer.id,
+                        "answer_value": answer.value,
+                        "answer_type": answer.question_type,
+                    }
+                    for answer in answers
+                ]
+                questions_data.append({
+                    "question_id": question.id,
+                    "question_name": question.display_name,
+                    "question_type": question.question_type,
+                    "answers": answers_data
+                })
+            response_data = {
+                "survey_id": survey.id,
+                "survey_title": survey.title,
+                "questions": questions_data
+            }
+            return valid_response(response_data)
+
+        except AccessError as e:
+            return {"error": "Access error", "message": str(e)}
+
+        except Exception as e:
+            return {"error": "Unexpected error", "message": str(e)}
+
+        
+
     @http.route("/api1/auth/token", methods=["POST"], type="json", auth="public", csrf=False)
     def token(self, **post):
         """The token URL to be used for getting the access_token:
@@ -106,6 +147,7 @@ class AccessToken(http.Controller):
         user_image_base64 = user_image and user_image.decode('utf-8') or None
         employee = request.env["hr.employee"].sudo().search([("user_id", "=", uid)], limit=1)
         hr_employee_id = employee.id if employee else None
+        user_email = user.email
 
         # Generate token
         access_token = _token.find_one_or_create_token(user_id=uid, create=True)
@@ -115,6 +157,7 @@ class AccessToken(http.Controller):
             "uid": uid,
             "partner_id": request.env.user.partner_id.id,
             "access_token": access_token,
+            "user_email": user_email,
             "is_in_teacher": is_in_teacher,
             "is_in_parent": is_in_parent,
             "user_name": user_name,

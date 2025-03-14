@@ -38,7 +38,7 @@ def validate_token(func):
 
 
 _routes = ["/api/<model>", "/api/<model>/<id>", "/api/<model>/<id>/<action>"]
-print(_routes,"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
+print(_routes,"kkkkkkkmmmmmmmmmmmmmmmmmmmmmmkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
 
 
 class APIController(http.Controller):
