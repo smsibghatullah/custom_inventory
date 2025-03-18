@@ -15,3 +15,5 @@ access_dynamic_field_selection_values_sale,name_dynamic_field_selection_values_s
 access_product_cost_wizard,product.cost.wizard_access,model_product_cost_wizard,base.group_user,1,1,1,1
 access_shift_assignment,shift.assignment_access,model_shift_assignment,group_shift_assignment_access,1,1,1,1
 access_shift_attendance,shift.attendance_access,model_shift_attendance,group_shift_assignment_access,1,1,1,1
+access_maintenance_equipment_access,maintenance.equipment.access_access,model_maintenance_equipment_access,base.group_user,1,1,1,1
+

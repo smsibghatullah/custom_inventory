@@ -2,7 +2,7 @@ import json
 import logging
 
 import werkzeug.wrappers
-
+from odoo import http, models, fields
 from odoo import http
 from odoo.addons.restful.common import invalid_response, valid_response
 from odoo.exceptions import AccessDenied, AccessError
@@ -18,6 +18,58 @@ class AccessToken(http.Controller):
     def __init__(self):
 
         self._token = request.env["api.access_token"]
+
+
+    @http.route('/api/equipment_info/<int:record_id>', type="http", auth="public", methods=["GET"], csrf=False)
+    def get_equipment_info(self, record_id, **kwargs):
+        try:
+            equipment = request.env['maintenance.equipment'].sudo().browse(record_id)
+            print(equipment.maintenance_team_id, "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", 
+                equipment.technician_user_id, equipment.rating_ids)
+
+            if not equipment.exists():
+                return {"error": "Equipment not found"}
+
+            private_fields = request.env['maintenance.equipment.access'].sudo().search([
+                ('equipment_id', '=', record_id),
+                ('is_private', '=', True)
+            ]).mapped('field_name')
+
+            private_data = {}
+            for field in private_fields:
+                if hasattr(equipment, field):
+                    value = getattr(equipment, field)
+                    field_label = equipment._fields[field].string if field in equipment._fields else field
+                    if isinstance(value, models.Model):  
+                        field_value = value.display_name if value else None
+                    else:
+                        field_value = value
+                    private_data[field_label] = field_value
+
+            public_fields = request.env['maintenance.equipment.access'].sudo().search([
+                ('equipment_id', '=', record_id),
+                ('is_public', '=', True)
+            ]).mapped('field_name')
+
+            public_data = {}
+            for field in public_fields:
+                if hasattr(equipment, field):
+                    value = getattr(equipment, field)
+                    if isinstance(value, models.Model):  
+                        public_data[field] = value.display_name if value else None
+                    else:
+                        public_data[field] = value
+
+            response_data = {
+                "id": equipment.id,
+                "name": equipment.name,
+                "private_fields": private_data,
+                "public_fields" : public_data
+            }
+            return valid_response(response_data)
+
+        except Exception as e:
+            return {"error": "Unexpected error", "message": str(e)}
 
     @http.route('/api/survey_question_data/<int:survey_id>', type="http", auth="public", methods=["GET"], csrf=False)
     def get_survey_questions(self, survey_id, **kwargs):
@@ -161,7 +213,7 @@ class AccessToken(http.Controller):
             "is_in_teacher": is_in_teacher,
             "is_in_parent": is_in_parent,
             "user_name": user_name,
-            "user_image": user_image_base64, 
+            "user_image": user.image_1920 , 
             "hr_employee_id": hr_employee_id,
         }
         werkzeug.wrappers.Response(

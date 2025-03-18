@@ -16,6 +16,7 @@
                     <field name="supervisor_ids" widget="many2many_tags" />
                     <field name="employee_ids" widget="many2many_tags" />
                     <field name="survey_id"/>
+                    <field name="state" widget="badge"/>
                 </tree>
             </field>
         </record>
@@ -49,7 +50,7 @@
                                         <field name="employee_id"/>
                                         <field name="check_in"/>
                                         <field name="check_out"/>
-                                        <field name="duration"/>
+                                        <field name="duration" widget="timesheet_uom" />
                                     </tree>
                                 </field>
                             </page>
