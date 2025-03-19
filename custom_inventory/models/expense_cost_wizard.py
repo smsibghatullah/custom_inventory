@@ -24,6 +24,7 @@ class ProductCostWizard(models.TransientModel):
 
     def action_save(self):
         for record in self:
+            print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
             if record.total_qty != 0 and record.new_expenses_cost != 0:
                 expense_per_qty = record.new_expenses_cost / record.total_qty
                 new_cost = record.product_cost + expense_per_qty
@@ -31,12 +32,14 @@ class ProductCostWizard(models.TransientModel):
                 raise UserError(_("Expense cannot be zero."))
             else:
                 raise UserError(_("Please ensure that total quantity and expenses cost are not zero."))
-            
+            print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
             product = record.product_id
             product.write({
                 'standard_price': new_cost, 
-                'default_product_cost': record.product_cost if product.default_product_cost == False else product.default_product_cost 
+                'default_product_cost': record.product_cost if product.default_product_cost == False else product.default_product_cost ,
+                'lst_price' : new_cost
             })
+            print(product.standard_price,"kkkkkkkkkkkkkkkkkkkkkk",new_cost,"pppppppppppppppppp")
             message = f"Last Price: {record.product_cost}\n" \
                       f" | New Cost: {new_cost:.2f}\n" \
                       f" | Quantity: {record.total_qty}\n" \
