@@ -403,7 +403,8 @@ class SaleOrder(models.Model):
             'category_ids': [(6, 0, self.category_ids.ids)],
             'bom_id': self.bom_id.id,
             'terms_conditions': self.brand_id.terms_conditions_invoice,
-            'reference': self.reference
+            'reference': self.reference,
+            'tag_ids':[(6, 0, self.tag_ids.ids)],
         }
         if self.journal_id:
             values['journal_id'] = self.journal_id.id
@@ -440,7 +441,17 @@ class SaleOrder(models.Model):
         for order in self:
             for line in order.order_line:
                 line._update_price_from_pricelist()
-
+            
+    def action_confirm(self):
+        """Override sale order confirmation to mark the linked CRM Lead as 'Won'."""
+        res = super(SaleOrder, self).action_confirm()
+        for order in self:
+            if order.opportunity_id:
+                won_stage = self.env['crm.stage'].search([('is_won', '=', True)], limit=1)
+                if won_stage:
+                    order.opportunity_id.write({'stage_id': won_stage.id})
+        return res
+    
 
 class SaleOrderEmailWizard(models.TransientModel):
     _name = 'sale.order.email.wizard'

@@ -21,4 +21,6 @@ class Tag(models.Model):
     _inherit = "crm.tag"
 
     company_id = fields.Many2one('res.company', string="Company")
+    purchase_id = fields.Many2one('purchase.order', string="Purchase")
+    invoice_id = fields.Many2one('account.move', string="Invoice")
 

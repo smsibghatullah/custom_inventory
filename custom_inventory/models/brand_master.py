@@ -7,13 +7,14 @@ class BrandMaster(models.Model):
     _description = 'Brand Master'
 
     name = fields.Char(string='Brand', required=True)
-    logo = fields.Binary(string='Logo')
+    logo = fields.Binary()
     printable_formats = fields.Char(string='Printable Formats')  
     so_email = fields.Char(string='Sale Order Email', required=True)
     po_email = fields.Char(string='Purchase Order Email')
     inv_email = fields.Char(string='Invoice Email')
     terms_conditions = fields.Text(string='Terms & Conditions')
     terms_conditions_invoice = fields.Text(string='Terms & Conditions')
+    terms_conditions_purchase = fields.Text(string='Terms & Conditions')
     bank_account_details = fields.Text(string='Bank Account Details')
     address = fields.Text(string='Address')
     text_fields = fields.One2many('dynamic.field.text', 'brand_id', string='Text Fields')
@@ -30,6 +31,9 @@ class BrandMaster(models.Model):
         help="Indicates whether this line represents a tag-related item."
     )
     company_id = fields.Many2one('res.company', string="Company")
+    purchase_text_fields = fields.One2many('purchase.dynamic.field.text', 'brand_id', string='Purchase Text Fields')
+    purchase_checkbox_fields = fields.One2many('purchase.dynamic.field.checkbox', 'brand_id', string='Purchase Checkbox Fields')
+    purchase_selection_fields = fields.One2many('purchase.dynamic.field.selection.key', 'brand_id', string='Purchase Selection Fields')
 
 
 

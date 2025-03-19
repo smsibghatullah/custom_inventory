@@ -40,6 +40,27 @@ class AccountMove(models.Model):
         compute="_compute_formatted_dates",
     )
 
+    tag_ids = fields.One2many(
+        'crm.tag',  
+        'invoice_id', 
+        string='Tags',
+        help='Select the brands associated with this company'
+    )
+
+    is_tag_access = fields.Boolean(compute="_compute_tag_access")
+    has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
+
+    @api.depends("brand_id", "brand_id.is_tag_show")
+    def _compute_has_tag_required(self):
+        for record in self:
+            record.has_tag_required = bool(record.brand_id.is_tag_show)
+
+    @api.depends("brand_id")
+    def _compute_tag_access(self):
+        for record in self:
+            record.is_tag_access = record.brand_id.is_tag_show if record.brand_id else False
+
+
     def _compute_formatted_dates(self):
         for move in self:
             move.formatted_invoice_date = move.invoice_date.strftime("%d-%b-%Y") if move.invoice_date else ""

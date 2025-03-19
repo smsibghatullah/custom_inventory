@@ -1,6 +1,7 @@
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
 import base64
+import random
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -23,7 +24,67 @@ class PurchaseOrder(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
+    tag_ids = fields.One2many(
+        'crm.tag',  
+        'purchase_id', 
+        string='Tags',
+        help='Select the brands associated with this company'
+    )
+
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
+    is_tag_access = fields.Boolean(compute="_compute_tag_access")
+    has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
+    text_fields = fields.One2many('purchase.dynamic.field.text', 'purchase_order_id', compute="_compute_text_field", inverse="_inverse_text_field", store=True )
+    checkbox_fields = fields.One2many('purchase.dynamic.field.checkbox', 'purchase_order_id', compute="_compute_checkbox_field", inverse="_inverse_checkbox_field", store=True)
+    selection_fields = fields.One2many('purchase.dynamic.purchaseorder.selection.key', 'purchase_order_id', compute="_compute_selection_field", inverse="_inverse_selection_field", store=True)
+    has_text_fields = fields.Boolean(compute="_compute_has_text_fields", store=True)
+    has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
+    has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
+
+    def _inverse_text_field(self):
+        for line in self:
+            for item in line.text_fields:
+                # Update the sale_order_id on the corresponding text field
+                item.purchase_order_id = line.id
+
+    def _inverse_checkbox_field(self):
+        for line in self:
+            for item in line.checkbox_fields:
+                # Update the purchase_order_id on the corresponding text field
+                item.purchase_order_id = line.id
+
+    def _inverse_selection_field(self):
+        for line in self:
+            for item in line.selection_fields:
+                # Update the purchase_order_id on the corresponding text field
+                item.purchase_order_id = line.id
+
+    @api.depends('text_fields')
+    def _compute_has_text_fields(self):
+        for record in self:
+            record.has_text_fields = bool(record.text_fields)
+
+    @api.depends('checkbox_fields')
+    def _compute_has_checkbox_fields(self):
+        for record in self:
+            record.has_checkbox_fields = bool(record.checkbox_fields)
+
+    @api.depends('selection_fields')
+    def _compute_has_selection_fields(self):
+        for record in self:
+            record.has_selection_fields = bool(record.selection_fields)
+
+
+    @api.depends("brand_id", "brand_id.is_tag_show")
+    def _compute_has_tag_required(self):
+        for record in self:
+            record.has_tag_required = bool(record.brand_id.is_tag_show)
+
+    @api.depends("brand_id")
+    def _compute_tag_access(self):
+        for record in self:
+            record.is_tag_access = record.brand_id.is_tag_show if record.brand_id else False
+
 
     def _prepare_invoice(self):
         """Prepare the dict of values to create the new invoice for a purchase order.
@@ -50,6 +111,7 @@ class PurchaseOrder(models.Model):
             'terms_conditions': self.brand_id.terms_conditions_invoice,
             'invoice_line_ids': [],
             'company_id': self.company_id.id,
+            'tag_ids':[(6, 0, self.tag_ids.ids)],
         }
         return invoice_vals
 
@@ -58,7 +120,7 @@ class PurchaseOrder(models.Model):
         if self.brand_id:
             self.category_ids = False
             self.order_line  = [(6, 0, [])]
-            self.terms_conditions = self.brand_id.terms_conditions
+            self.terms_conditions = self.brand_id.terms_conditions_purchase
 
     def action_send_report_email(self):
         self.ensure_one()
@@ -74,6 +136,73 @@ class PurchaseOrder(models.Model):
                 'default_subject': f'Purchase Order {self.name}',
             },
         }
+
+    @api.depends('brand_id')
+    def _compute_text_field(self):
+        for line in self:
+            if line.brand_id:
+                copied_text_fields = []
+                if line.brand_id.purchase_text_fields:
+                    for item in line.brand_id.purchase_text_fields:
+                        copied_item = item.copy({
+                            'purchase_order_id': line.id,
+                            'brand_id': False
+                        })
+                        copied_text_fields.append(copied_item.id)
+                line.text_fields = [(6, 0, copied_text_fields)]
+            else:
+                line.text_fields = [(5, 0, 0)]
+                line.category_ids  = [(6, 0, [])]
+
+    @api.depends('brand_id')
+    def _compute_checkbox_field(self):
+        for line in self:
+            if line.brand_id:
+                copied_checkbox_fields = []
+
+                for item in line.brand_id.purchase_checkbox_fields:
+                    copied_checkbox_fields.append(item.copy({
+                        'purchase_order_id': line.id,
+                        'brand_id': False  # Clear the brand_id field
+                    }).id)
+                line.checkbox_fields = [(6, 0, copied_checkbox_fields)]
+                # line.sku_ids  = [(6, 0, [])]
+
+
+
+    @api.depends('brand_id')
+    def _compute_selection_field(self):
+        selection_fields = []
+        random_number = random.randint(100000, 999999)
+        for line in self:
+            if line.brand_id:
+                for item in line.brand_id.purchase_selection_fields:
+                    options = {}
+                    if line.id:
+                        selection_id = self.env['purchase.dynamic.purchaseorder.selection.key'].search([('purchase_order_id','=',line.id)])
+                        if not selection_id:
+                            item_sale_item_selection = {'selection_field': item.selection_field,
+                                                        'purchase_order_id': line.id,'sale_random_key': random_number}
+                            selection_id = self.env['purchase.dynamic.purchaseorder.selection.key'].create(item_sale_item_selection)
+                    else:
+                        item_sale_item_selection = {'selection_field': item.selection_field,
+                        'purchase_order_id':line.id}
+                        selection_id = self.env['purchase.dynamic.purchaseorder.selection.key'].create(item_sale_item_selection)
+                    # selection_value = self.env['dynamic.field.selection.values.sale'].search([('sale_random_key','=',selection_id.random_number)])
+                    # if selection_value:
+                    for value in item.selection_value:
+                       options = {
+                        'value_field': value.value_field,
+                        'key_field': selection_id.id,
+                        'key_field_parent': item.selection_field  
+                        }
+                      
+                       new_option = self.env['purchase.dynamic.field.selection.values.purchase'].create(options)
+                    
+                    if not selection_id.selected_value:
+                        selection_id.selected_value = new_option
+                    selection_fields.append(selection_id.id)
+            line.selection_fields = [(6, 0, selection_fields)]
 
 
 class PurchaseOrderEmailWizard(models.TransientModel):
