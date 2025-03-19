@@ -1,7 +1,11 @@
+from unicodedata import category
+
 from odoo import models, fields, api,_
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError,ValidationError
 import base64
+from odoo.fields import Command
 import random
+from collections import defaultdict
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -40,6 +44,31 @@ class PurchaseOrder(models.Model):
     has_text_fields = fields.Boolean(compute="_compute_has_text_fields", store=True)
     has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
     has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
+
+    @api.model
+    def create(self, vals):
+        order = super(PurchaseOrder, self).create(vals)
+        print(order.amount_total,"mmmmmmmmmmmmmmmmmmmmmmmmmm")
+        for item in order.text_fields:
+                if item.validation_check and not item.text_value:
+                    raise ValidationError(f"The field '{item.text_field}' requires a value.")
+        if order.amount_total == 0:
+                raise ValidationError("The Sale Order total amount cannot be zero.")
+        
+        return order
+
+    @api.model
+    def write(self, vals):
+        result = super(PurchaseOrder, self).write(vals)
+        print(self.amount_total,"mmmmmmmmccccmmmmmmmmmmmmmmmmmm")
+        for order in self:
+            for item in order.text_fields:
+                if item.validation_check and not item.text_value:
+                    raise ValidationError(f"The field '{item.text_field}' requires a value.")
+            if order.amount_total == 0:
+                raise ValidationError("The Sale Order total amount cannot be zero.")
+        
+        return result
 
     def _inverse_text_field(self):
         for line in self:
