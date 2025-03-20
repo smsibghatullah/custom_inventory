@@ -410,13 +410,18 @@ class SaleOrder(models.Model):
             values['journal_id'] = self.journal_id.id
         return values
 
+
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         if self.brand_id:
-            self.category_ids  = [(6, 0, [])]
-            self.order_line  = [(6, 0, [])]
+            matched_categories = self.env['sku.type.master'].search([
+                ('brand_id', '=', self.brand_id.id),
+                ('id', 'in', self.category_ids.ids)
+            ])
+            if not matched_categories:
+                self.category_ids = [(6, 0, [])]
+                self.order_line = [(6, 0, [])]
             self.terms_conditions = self.brand_id.terms_conditions
-
        
     def action_send_report_email(self):
         self.ensure_one()

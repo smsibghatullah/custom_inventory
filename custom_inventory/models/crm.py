@@ -36,7 +36,7 @@ class CrmLead(models.Model):
             'default_brand_id': self.brand_id.id,
             'default_category_ids': [(6, 0, self.category_ids.ids)],
         })
-        print("aaaaaaaaaaaaaaaaaaa")
+        print("aaaaaaaaaaaaaaaaaaa",self.category_ids.ids)
         print(context)
 
         return context
