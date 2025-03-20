@@ -7,6 +7,8 @@ class SKUTypeMaster(models.Model):
     category_id = fields.Char(string='Category ID', required=True)
     name = fields.Char(string='Name', required=True)
     brand_id = fields.Many2one('brand.master', string='Brand')
+    company_id = fields.Many2one('res.company', string="Company")
+    user_id = fields.Many2one('res.users', string="Users")
 
 
 

@@ -45,7 +45,8 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/shift_assignment_view.xml',
         'views/delivery_view.xml',
         'views/res_company_view.xml',
-        'views/maintaince_equipment_view.xml'
+        'views/maintaince_equipment_view.xml',
+        'views/res_users_view.xml'
     ],
 
   

@@ -18,15 +18,7 @@ class PurchaseOrder(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    category_ids = fields.Many2many(
-        'sku.type.master',
-        'purchase_category_rel',
-        'product_id',
-        string='Categories',
-        domain="[('brand_id', '=', brand_id)]",
-         required=True,
-        help='Select the Categories associated with the selected brand'
-    )
+
 
     tag_ids = fields.One2many(
         'crm.tag',  
@@ -44,6 +36,34 @@ class PurchaseOrder(models.Model):
     has_text_fields = fields.Boolean(compute="_compute_has_text_fields", store=True)
     has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
     has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
+    available_tag_ids = fields.Many2many(
+        'crm.tag',
+        compute="_compute_available_tags",
+    )
+    available_category_ids = fields.Many2many(
+        'sku.type.master',
+        compute="_compute_available_categories",
+    )
+    category_ids = fields.Many2many(
+        'sku.type.master',
+        'purchase_category_rel',
+        'product_id',
+        string='Categories',
+        domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]",
+         required=True,
+        help='Select the Categories associated with the selected brand'
+    )
+    @api.depends("tag_ids")
+    def _compute_available_tags(self):
+        for record in self:
+            record.available_tag_ids = self.env.user.tag_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+    @api.depends("category_ids")
+    def _compute_available_categories(self):
+        for record in self:
+            record.available_category_ids = self.env.user.category_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+
 
     @api.model
     def create(self, vals):

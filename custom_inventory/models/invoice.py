@@ -12,14 +12,7 @@ class AccountMove(models.Model):
         help='Select the brand associated with this sale order'
     )
 
-    category_ids = fields.Many2many(
-        'sku.type.master',
-        'account_category_rel',
-        'product_id',
-        string='Categories',
-        domain="[('brand_id', '=', brand_id)]",
-        help='Select the Categories associated with the selected brand'
-    )
+   
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
     bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
     payment_link = fields.Text(string='Payment Link')
@@ -49,6 +42,36 @@ class AccountMove(models.Model):
 
     is_tag_access = fields.Boolean(compute="_compute_tag_access")
     has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
+    available_tag_ids = fields.Many2many(
+        'crm.tag',
+        compute="_compute_available_tags",
+    )
+    
+    available_category_ids = fields.Many2many(
+        'sku.type.master',
+        compute="_compute_available_categories",
+    )
+
+    category_ids = fields.Many2many(
+        'sku.type.master',
+        'account_category_rel',
+        'product_id',
+        string='Categories',
+        domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]",
+        help='Select the Categories associated with the selected brand'
+    )
+    @api.depends("tag_ids")
+    def _compute_available_tags(self):
+        for record in self:
+            record.available_tag_ids = self.env.user.tag_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+    @api.depends("category_ids")
+    def _compute_available_categories(self):
+        for record in self:
+            record.available_category_ids = self.env.user.category_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+
+
 
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):

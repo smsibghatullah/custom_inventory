@@ -10,6 +10,8 @@
             </field>
             <field name="tag_ids" options="{'no_create': True}" widget="many2many_tags">
             </field>
+            <field name="category_ids" domain="[('brand_id', 'in', brand_ids)]"  invisible="brand_ids == False"  options="{'no_create': True}" widget="many2many_tags">
+            </field>
         </xpath>
     </field>
 </record>

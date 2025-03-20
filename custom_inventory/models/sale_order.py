@@ -59,7 +59,24 @@ class SaleOrder(models.Model):
     has_checkbox_fields = fields.Boolean(compute="_compute_has_checkbox_fields", store=True)
     has_selection_fields = fields.Boolean(compute="_compute_has_selection_fields", store=True)
     has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
-
+    available_tag_ids = fields.Many2many(
+        'crm.tag',
+        compute="_compute_available_tags",
+    )
+    available_category_ids = fields.Many2many(
+        'sku.type.master',
+        compute="_compute_available_categories",
+    )
+    @api.depends("tag_ids")
+    def _compute_available_tags(self):
+        for record in self:
+            record.available_tag_ids = self.env.user.tag_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+    @api.depends("category_ids")
+    def _compute_available_categories(self):
+        for record in self:
+            record.available_category_ids = self.env.user.category_ids
+            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):
@@ -98,6 +115,7 @@ class SaleOrder(models.Model):
 
     def _compute_formatted_dates(self):
         for order in self:
+            
             print('ppppppppppppppppppppppppppppppppppppppp')
             order.formatted_date_order = order.date_order.strftime("%d-%b-%Y") if order.date_order else ""
             order.formatted_validity_date = order.validity_date.strftime("%d-%b-%Y") if order.validity_date else ""
@@ -106,7 +124,9 @@ class SaleOrder(models.Model):
     @api.onchange('date_order','validity_date')
     def _compute_formatted_dates_onchange(self):
         for order in self:
-            print('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
+            order.available_tag_ids = self.env.user.tag_ids
+            order.available_category_ids = self.env.user.category_ids
+            print(order.available_tag_ids,'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
             order.formatted_date_order = order.date_order.strftime("%d-%b-%Y") if order.date_order else ""
             order.formatted_validity_date = order.validity_date.strftime("%d-%b-%Y") if order.validity_date else ""
             print(order.formatted_validity_date,order.formatted_date_order,"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")

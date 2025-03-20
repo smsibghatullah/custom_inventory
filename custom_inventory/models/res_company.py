@@ -14,7 +14,14 @@ class ResCompany(models.Model):
         'crm.tag',  
         'company_id', 
         string='Tags',
-        help='Select the brands associated with this company'
+        help='Select the Tags associated with this company'
+    )
+
+    category_ids = fields.One2many(
+        'sku.type.master',  
+        'company_id', 
+        string='Categories',
+        help='Select the Categories associated with this company'
     )
 
 class Tag(models.Model):

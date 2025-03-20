@@ -205,13 +205,15 @@
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="brand_id" options="{'no_create': True}" />
-                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id)]"  invisible="brand_id == False"  widget="many2many_tags" />
+                <field name="available_category_ids" invisible="1" />
+                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
                 <field name="bom_id" options="{'no_create': True}"/>
                 <field name="is_tag_access" invisible="1" />
                 <field name="has_tag_required" invisible="1" />
-                <field name="tag_ids" widget="many2many_tags"  domain="[('company_id', '=', company_id)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />
+                <field name="available_tag_ids" invisible="1" />
+                <field name="tag_ids" widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />
                 <field name="reference" required="1" />
             </xpath>
              <xpath expr="//field[@name='payment_term_id']" position="replace">
