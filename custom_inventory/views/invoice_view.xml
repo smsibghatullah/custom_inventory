@@ -10,15 +10,76 @@
                 <button name="action_send_report_email" type="object" string="Send Email" class="btn-primary"/>
             </header>
             <xpath expr="//field[@name='invoice_date']" position="after">
-                <field name="brand_id" required='1' string="Brand" options="{'no_create': True}" /> 
-                <field name="category_ids" required='1' string="Categories" options="{'no_create': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
-                <field name="bom_id" string="BOM" options="{'no_create': True}" />
+                <field name="brand_id" required='1' string="Brand" options="{'no_create': True, 'no_create_edit': True}" /> 
+                <field name="category_ids" required='1' string="Categories" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                <field name="bom_id" string="BOM" options="{'no_create': True, 'no_create_edit': True}" />
                 <field name="is_tag_access" invisible="1" />
                 <field name="has_tag_required" invisible="1" />
-                <field name="tag_ids" widget="many2many_tags"  domain="[('company_id', '=', company_id)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True}" />
+                <field name="tag_ids" widget="many2many_tags"  domain="[('company_id', '=', company_id)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />
                  <field name="reference" />
                 <field name="payment_link" string="Payment Link"  />
             </xpath>
+
+           <xpath expr="//tree" position="replace">
+              <tree editable="bottom" string="Journal Items" default_order="sequence, id">
+                                        <control>
+                                            <create name="add_line_control" string="Add a line"/>
+                                            <!-- <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/> -->
+                                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                        </control>
+
+                                        <!-- Displayed fields -->
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="product_id"
+                                               optional="show"
+                                               widget="many2one_barcode"
+                                               domain="
+                                                    context.get('default_move_type') in ('out_invoice', 'out_refund', 'out_receipt')
+                                                    and [('sale_ok', '=', True)]
+                                                    or [('purchase_ok', '=', True)]
+                                               "/>
+                                        <field name="name" widget="section_and_note_text" optional="show"/>
+                                        <field name="account_id"
+                                               context="{'partner_id': partner_id, 'move_type': parent.move_type}"
+                                               groups="account.group_account_readonly"
+                                               options="{'no_quick_create': True}"
+                                               domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance')), ('company_id', 'parent_of', parent.company_id)]"
+                                               required="display_type not in ('line_note', 'line_section')"/>
+                                        <field name="analytic_distribution" widget="analytic_distribution"
+                                               groups="analytic.group_analytic_accounting"
+                                               optional="show"
+                                               options="{'product_field': 'product_id', 'account_field': 'account_id', 'amount_field': 'price_subtotal'}"
+                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
+                                        <field name="quantity" optional="show"/>
+                                        <field name="product_uom_category_id" column_invisible="True"/>
+                                        <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
+                                        <!-- /l10n_in_edi.test_edi_json -->
+                                        <!-- required for @api.onchange('product_id') -->
+                                        <field name="product_uom_id" column_invisible="True"/>
+                                        <field name="price_unit" string="Price"/>
+                                        <field name="discount" string="Disc.%" optional="hide"/>
+                                        <field name="tax_ids" widget="many2many_tags"
+                                               domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]"
+                                               context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain, 'active_test': True}"
+                                               options="{'no_create': True}"
+                                               optional="show"/>
+                                        <field name="price_subtotal"
+                                               string="Tax excl."/>
+                                        <field name="price_total"
+                                               string="Tax incl."
+                                               column_invisible="parent.tax_calculation_rounding_method == 'round_globally'"
+                                               optional="hide"/>
+
+                                        <!-- Others fields -->
+                                        <field name="partner_id" column_invisible="True"/>
+                                        <field name="currency_id" column_invisible="True"/>
+                                        <field name="company_id" column_invisible="True"/>
+                                        <field name="company_currency_id" column_invisible="True"/>
+                                        <field name="display_type" force_save="1" column_invisible="True"/>
+                                    </tree>
+
+                 </xpath>
+
              <xpath expr="//field[@name='product_id']" position="attributes">
                 <attribute name="domain">[('category_ids', 'in', category_ids)]</attribute>
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
@@ -27,7 +88,19 @@
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
             </xpath>
             <xpath expr="//field[@name='product_id']" position="after">
-                 <field name="category_ids" invisible="1" />
+                 <field name="category_ids" column_invisible="True" />
+            </xpath>
+             <xpath expr="//field[@name='campaign_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_bank_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='medium_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='source_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
             </xpath>
 <!--            <xpath>-->
 <!--                <field name="terms_conditions" />-->

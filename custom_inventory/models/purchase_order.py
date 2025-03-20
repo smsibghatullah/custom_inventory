@@ -53,7 +53,7 @@ class PurchaseOrder(models.Model):
                 if item.validation_check and not item.text_value:
                     raise ValidationError(f"The field '{item.text_field}' requires a value.")
         if order.amount_total == 0:
-                raise ValidationError("The Sale Order total amount cannot be zero.")
+                raise ValidationError("The Purchase Order total amount cannot be zero.")
         
         return order
 
@@ -66,7 +66,7 @@ class PurchaseOrder(models.Model):
                 if item.validation_check and not item.text_value:
                     raise ValidationError(f"The field '{item.text_field}' requires a value.")
             if order.amount_total == 0:
-                raise ValidationError("The Sale Order total amount cannot be zero.")
+                raise ValidationError("The Purchase Order total amount cannot be zero.")
         
         return result
 
