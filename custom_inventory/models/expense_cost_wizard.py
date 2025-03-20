@@ -27,6 +27,7 @@ class ProductCostWizard(models.TransientModel):
             print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
             if record.total_qty != 0 and record.new_expenses_cost != 0:
                 expense_per_qty = record.new_expenses_cost / record.total_qty
+                print(expense_per_qty,"mmmmmmmmmmmmmmmmmmmm",record.product_cost + expense_per_qty)
                 new_cost = record.product_cost + expense_per_qty
             elif record.new_expenses_cost == 0:
                 raise UserError(_("Expense cannot be zero."))
@@ -37,9 +38,9 @@ class ProductCostWizard(models.TransientModel):
             product.write({
                 'standard_price': new_cost, 
                 'default_product_cost': record.product_cost if product.default_product_cost == False else product.default_product_cost ,
-                'lst_price' : new_cost
+                'avg_cost':new_cost
             })
-            print(product.standard_price,"kkkkkkkkkkkkkkkkkkkkkk",new_cost,"pppppppppppppppppp")
+            print(product.standard_price,"kkkkkkkkkkkkkkkkkkkkkk",new_cost,"pppppppppppppppppp",product.avg_cost)
             message = f"Last Price: {record.product_cost}\n" \
                       f" | New Cost: {new_cost:.2f}\n" \
                       f" | Quantity: {record.total_qty}\n" \
@@ -54,6 +55,36 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     default_product_cost = fields.Float(string="Product Original Cost", required=True)
+
+    @api.depends('stock_valuation_layer_ids')
+    @api.depends_context('to_date', 'company')
+    def _compute_value_svl(self):
+        """Compute totals of multiple svl related values"""
+        company_id = self.env.company
+        self.company_currency_id = company_id.currency_id
+        domain = [
+            *self.env['stock.valuation.layer']._check_company_domain(company_id),
+            ('product_id', 'in', self.ids),
+        ]
+        if self.env.context.get('to_date'):
+            to_date = fields.Datetime.to_datetime(self.env.context['to_date'])
+            domain.append(('create_date', '<=', to_date))
+        groups = self.env['stock.valuation.layer']._read_group(
+            domain,
+            groupby=['product_id'],
+            aggregates=['value:sum', 'quantity:sum'],
+        )
+        # Browse all products and compute products' quantities_dict in batch.
+        group_mapping = {product: aggregates for product, *aggregates in groups}
+        for product in self:
+            print(product.standard_price,"ppppppppppppppppppppp")
+            value_sum, quantity_sum = group_mapping.get(product._origin, (0, 0))
+            value_svl = company_id.currency_id.round(value_sum)
+            avg_cost = product.standard_price
+            product.value_svl = value_svl
+            product.quantity_svl = quantity_sum
+            product.avg_cost = avg_cost
+            product.total_value = avg_cost * product.sudo(False).qty_available
 
     def open_product_cost_wizard(self):
         return {
