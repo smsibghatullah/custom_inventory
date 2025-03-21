@@ -29,6 +29,7 @@
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
                          />
                         <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category" widget="many2many_tags" />
+                        <field name="bci_project" string="BCI Project" />
                         <field name="phone" string="Phone" placeholder='e.g. "0123456789"' />
                         <label for="expected_revenue"/>
                         <div>

@@ -33,14 +33,14 @@
         <br/>
         <br/>
         <t t-if="doc.state in ['draft', 'sent']">
-        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
             <span style="font-weight: bold; font-size: 30px;">&#160;&#160; QUOTATION / ESTIMATE &#160;&#160;</span>
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
         </div>
         </t>
         <t t-else="">
-        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
             <span style="font-weight: bold; font-size: 30px;">&#160;&#160; SALES ORDER &#160;&#160;</span>
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
@@ -96,6 +96,10 @@
                     <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
+                    </tr>
+                     <tr t-if="doc.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Term #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>
@@ -389,21 +393,21 @@
             <br/>
             <br/>
             <t t-if="o.state in ['draft', 'sent', 'to approve']">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; REQUEST FOR QUOTATION &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                 </div>
                 </t>
             <t t-if="o.state in ['purchase', 'done']">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; PURCHASE ORDER &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                 </div>
             </t>
             <t t-if="o.state == 'cancel'">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; CANCELLED PURCHASE ORDER &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
@@ -457,6 +461,10 @@
                     <tr t-if="o.partner_ref">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="o.partner_ref"></span></td>
+                    </tr>
+                     <tr t-if="o.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Term #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>
@@ -719,7 +727,7 @@
                     <br/>
                     <br/>
 
-                    <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                    <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                         <span style="font-weight: bold; font-size: 30px;">&#160;&#160; INVOICE &#160;&#160;</span>
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
@@ -773,6 +781,10 @@
                     <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
+                    </tr>
+                     <tr t-if="o.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Term #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>
@@ -929,21 +941,21 @@
             <br/>
             <br/>
             <t t-if="o.state in ['draft', 'sent', 'to approve']">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; REQUEST FOR QUOTATION &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                 </div>
                 </t>
             <t t-if="o.state in ['purchase', 'done']">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; PURCHASE ORDER &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                 </div>
             </t>
             <t t-if="o.state == 'cancel'">
-                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:100px">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     <span style="font-weight: bold; font-size: 30px;">&#160;&#160; CANCELLED PURCHASE ORDER &#160;&#160;</span>
                     <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
@@ -997,6 +1009,10 @@
                     <tr t-if="o.partner_ref">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="o.partner_ref"></span></td>
+                    </tr>
+                     <tr t-if="o.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Term #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>

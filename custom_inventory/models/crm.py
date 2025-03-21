@@ -34,6 +34,7 @@ class CrmLead(models.Model):
         'sku.type.master',
         compute="_compute_available_categories",
     )
+    bci_project = fields.Char(string='BCI Project', required=True)
     @api.depends("tag_ids")
     def _compute_available_tags(self):
         for record in self:
