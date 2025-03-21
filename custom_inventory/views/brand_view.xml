@@ -156,7 +156,8 @@
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='detailed_type']" position="after">
-                <field name="category_ids" 
+                <field name="available_category_ids" invisible="1" />
+                <field name="category_ids"  options="{'no_create': True}" domain="[('id', 'in', available_category_ids)]"
                        widget="many2many_tags"
                       />
             </xpath>

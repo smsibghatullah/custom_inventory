@@ -62,6 +62,16 @@ class ProductTemplate(models.Model):
         required=True
     )
     is_brand_matched = fields.Boolean(string='Is Brand Matched', default=False)
+    available_category_ids = fields.Many2many(
+        'sku.type.master',
+        compute="_compute_available_categories",
+    )
+  
+    @api.depends("category_ids")
+    def _compute_available_categories(self):
+        for record in self:
+            record.available_category_ids = self.env.user.category_ids
+
 
    
 
