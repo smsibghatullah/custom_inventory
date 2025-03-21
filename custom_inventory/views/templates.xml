@@ -782,9 +782,9 @@
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
                     </tr>
-                     <tr t-if="o.payment_term_id">
+                     <tr t-if="o.invoice_payment_term_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>
