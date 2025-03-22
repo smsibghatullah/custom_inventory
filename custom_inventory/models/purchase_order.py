@@ -299,11 +299,17 @@ class PurchaseOrder(models.Model):
                     'credit': totals['credit'],
                     'name': f"Purchase Order {order.name} - {self.env['product.category'].browse(category_id).name} - Credit",
                 }))
+            receipt = self.env['stock.picking'].search([
+                ('origin', '=', order.name),
+                ('picking_type_id.code', '=', 'incoming')  
+            ], limit=1)
+
+            reference = f"{receipt.name if receipt else 'No Receipt'} ({order.name})"
 
             move = self.env['account.move'].create({
-                'journal_id': next(iter(category_accounts.values()))['journal'].id,  # Use the first journal found
+                'journal_id': next(iter(category_accounts.values()))['journal'].id,  
                 'date': fields.Date.context_today(self),
-                'ref': order.name,
+                'ref': reference,
                 'line_ids': move_lines,
             })
             move.action_post()

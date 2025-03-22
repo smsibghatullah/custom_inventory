@@ -524,10 +524,18 @@ class SaleOrder(models.Model):
                     'name': f"Sale Order {order.name} - {self.env['product.category'].browse(category_id).name} - Credit",
                 }))
 
+            delivery_order = self.env['stock.picking'].search([
+                ('origin', '=', order.name),
+                ('picking_type_id.code', '=', 'outgoing')  
+            ], limit=1)
+
+            reference = f"{delivery_order.name if delivery_order else 'No Delivery'} ({order.name})"
+
+
             move = self.env['account.move'].create({
                 'journal_id': next(iter(category_accounts.values()))['journal'].id,  # Use the first journal found
                 'date': fields.Date.context_today(self),
-                'ref': order.name,
+                'ref': reference,
                 'line_ids': move_lines,
             })
             move.action_post()
