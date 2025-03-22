@@ -253,6 +253,61 @@ class PurchaseOrder(models.Model):
                     selection_fields.append(selection_id.id)
             line.selection_fields = [(6, 0, selection_fields)]
 
+    def create_journal_entry(self):
+        for order in self:
+            category_totals = defaultdict(lambda: {'debit': 0.0, 'credit': 0.0})
+            category_accounts = {}
+
+            for line in order.order_line:
+                category = line.product_id.categ_id
+
+                if not category:
+                    continue
+
+                if category.id not in category_accounts:
+                    debit_account = category.purchase_debit_account_id
+                    credit_account = category.purchase_credit_account_id
+                    purchase_journal = category.purchase_journal_id
+
+                    if not debit_account or not credit_account or not purchase_journal:
+                        raise UserError(f"Please configure Purchase Debit Account, Credit Account, and Journal in category '{category.name}'.")
+
+                    category_accounts[category.id] = {
+                        'debit_account': debit_account,
+                        'credit_account': credit_account,
+                        'journal': purchase_journal
+                    }
+
+                category_totals[category.id]['debit'] += line.price_subtotal
+                category_totals[category.id]['credit'] += line.price_subtotal
+
+            move_lines = []
+
+            for category_id, totals in category_totals.items():
+                accounts = category_accounts[category_id]
+                
+                move_lines.append((0, 0, {
+                    'account_id': accounts['debit_account'].id,
+                    'debit': totals['debit'],
+                    'credit': 0.0,
+                    'name': f"Purchase Order {order.name} - {self.env['product.category'].browse(category_id).name} - Debit",
+                }))
+
+                move_lines.append((0, 0, {
+                    'account_id': accounts['credit_account'].id,
+                    'debit': 0.0,
+                    'credit': totals['credit'],
+                    'name': f"Purchase Order {order.name} - {self.env['product.category'].browse(category_id).name} - Credit",
+                }))
+
+            move = self.env['account.move'].create({
+                'journal_id': next(iter(category_accounts.values()))['journal'].id,  # Use the first journal found
+                'date': fields.Date.context_today(self),
+                'ref': order.name,
+                'line_ids': move_lines,
+            })
+            move.action_post()
+
 
 class PurchaseOrderEmailWizard(models.TransientModel):
     _name = 'purchase.order.email.wizard'

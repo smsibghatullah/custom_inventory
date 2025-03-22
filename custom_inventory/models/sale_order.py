@@ -476,6 +476,61 @@ class SaleOrder(models.Model):
                 if won_stage:
                     order.opportunity_id.write({'stage_id': won_stage.id})
         return res
+
+    def create_journal_entry(self):
+        for order in self:
+            category_totals = defaultdict(lambda: {'debit': 0.0, 'credit': 0.0})
+            category_accounts = {}
+
+            for line in order.order_line:
+                category = line.product_id.categ_id
+
+                if not category:
+                    continue
+
+                if category.id not in category_accounts:
+                    debit_account = category.sale_debit_account_id
+                    credit_account = category.sale_credit_account_id
+                    sale_journal = category.sale_journal_id
+
+                    if not debit_account or not credit_account or not sale_journal:
+                        raise UserError(f"Please configure Sale Debit Account, Credit Account, and Journal in category '{category.name}'.")
+
+                    category_accounts[category.id] = {
+                        'debit_account': debit_account,
+                        'credit_account': credit_account,
+                        'journal': sale_journal
+                    }
+
+                category_totals[category.id]['debit'] += line.price_total
+                category_totals[category.id]['credit'] += line.price_total
+
+            move_lines = []
+
+            for category_id, totals in category_totals.items():
+                accounts = category_accounts[category_id]
+                
+                move_lines.append((0, 0, {
+                    'account_id': accounts['debit_account'].id,
+                    'debit': totals['debit'],
+                    'credit': 0.0,
+                    'name': f"Sale Order {order.name} - {self.env['product.category'].browse(category_id).name} - Debit",
+                }))
+
+                move_lines.append((0, 0, {
+                    'account_id': accounts['credit_account'].id,
+                    'debit': 0.0,
+                    'credit': totals['credit'],
+                    'name': f"Sale Order {order.name} - {self.env['product.category'].browse(category_id).name} - Credit",
+                }))
+
+            move = self.env['account.move'].create({
+                'journal_id': next(iter(category_accounts.values()))['journal'].id,  # Use the first journal found
+                'date': fields.Date.context_today(self),
+                'ref': order.name,
+                'line_ids': move_lines,
+            })
+            move.action_post()
     
 
 class SaleOrderEmailWizard(models.TransientModel):

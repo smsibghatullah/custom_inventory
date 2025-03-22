@@ -1,5 +1,33 @@
 from odoo import models, fields, api
 
+class ShiftRole(models.Model):
+    _name = 'shift.assignment.main'
+    _description = 'Shift Assignment'
+
+    name = fields.Char(string="Name", required=True)
+    date = fields.Date(string="Date", default=fields.Date.context_today)
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('in_progress', 'In Progress'),
+        ('done', 'Done')
+    ], string="Status", default='draft')
+    main_shift_assignment_id = fields.One2many('shift.assignment', 'main_shift_assignment_id', string="Shift Assigments")
+   
+
+    def action_waiting_for_checkin(self):
+        """Mark shift assignment as verified"""
+        self.state = 'in_progress'
+        for shift in self.main_shift_assignment_id:
+            shift.write({'state': 'waiting_for_checkin'})
+            print(shift.state,"ppppppppppppppppppppppppppppppppppppppppdddddddddddddddddddddddddddddddddddddddd")
+
+    def check_and_update_state(self):
+        """Check if all Shift Assignments are done, then update Main Shift Assignment state"""
+        for record in self:
+            if record.state != 'done' and record.main_shift_assignment_id and all(shift.state == 'done' for shift in record.main_shift_assignment_id):
+                record.state = 'done'
+
+
 class ShiftAssignment(models.Model):
     _name = 'shift.assignment'
     _description = 'Shift Assignment for Project Management'
@@ -25,19 +53,25 @@ class ShiftAssignment(models.Model):
         'employee_id', 
         string='Employees', 
     )
-    survey_id = fields.Many2one('survey.survey', string='Survey Form')
+    survey_id = fields.Many2many('survey.survey', string='Survey Form')
 
     team_checkin_required = fields.Boolean(string="Team Check-in Required")
     state = fields.Selection([
         ('draft', 'Draft'),
-        ('waiting_for_checkin', 'Waiting for Check-in'),
+        ('waiting_for_checkin', 'Waiting For Check-in'),
         ('done', 'Done')
     ], string="Status", default='draft')
+    main_shift_assignment_id = fields.Many2one('shift.assignment.main', string='Shift Assignment', required=True)
     attendance_ids = fields.One2many('shift.attendance', 'shift_id', string="Attendance Records")
 
-    def action_waiting_for_checkin(self):
-        """Mark shift assignment as verified"""
-        self.state = 'waiting_for_checkin'
+    def write(self, vals):
+        """Check if all shift assignments are done when state changes"""
+        result = super(ShiftAssignment, self).write(vals)
+        if 'state' in vals and vals['state'] == 'done':
+            self.mapped('main_shift_assignment_id').check_and_update_state()
+        return result
+
+
 
 class ShiftAttendance(models.Model):
     _name = 'shift.attendance'

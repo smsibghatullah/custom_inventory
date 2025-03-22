@@ -32,6 +32,17 @@ class StockPicking(models.Model):
     courier_and_standard_fields = fields.Boolean(string="Both Fields", compute="_compute_carrier_fields")
     show_statusbar = fields.Boolean(compute="_compute_show_statusbar")
 
+    def button_validate(self):
+        res = super(StockPicking, self).button_validate()
+        
+        for picking in self:
+            if picking.sale_id:
+                picking.sale_id.create_journal_entry()
+            elif picking.purchase_id:
+                picking.purchase_id.create_journal_entry()
+
+        return res
+
     @api.depends('sale_id')
     def _compute_show_statusbar(self):
         for record in self:

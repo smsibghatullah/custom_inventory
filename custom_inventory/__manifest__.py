@@ -46,7 +46,8 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/delivery_view.xml',
         'views/res_company_view.xml',
         'views/maintaince_equipment_view.xml',
-        'views/res_users_view.xml'
+        'views/res_users_view.xml',
+        'views/product_category_view.xml'
     ],
 
   
