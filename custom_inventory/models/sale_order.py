@@ -140,9 +140,10 @@ class SaleOrder(models.Model):
     def create(self, vals):
         order = super(SaleOrder, self).create(vals)
         print(order.amount_total,"mmmmmmmmmmmmmmmmmmmmmmmmmm")
-        for item in order.text_fields:
-                if item.validation_check and not item.text_value:
-                    raise ValidationError(f"The field '{item.text_field}' requires a value.")
+        if not self.env.context.get('skip_validation'):
+            for item in order.text_fields:
+                    if item.validation_check and not item.text_value:
+                        raise ValidationError(f"The field '{item.text_field}' requires a value.")
         if order.amount_total == 0:
                 raise ValidationError("The Sale Order total amount cannot be zero.")
         if 'reference' in vals:
@@ -160,9 +161,10 @@ class SaleOrder(models.Model):
         result = super(SaleOrder, self).write(vals)
         print(self.amount_total,"mmmmmmmmccccmmmmmmmmmmmmmmmmmm")
         for order in self:
-            for item in order.text_fields:
-                if item.validation_check and not item.text_value:
-                    raise ValidationError(f"The field '{item.text_field}' requires a value.")
+            if not self.env.context.get('skip_validation'):
+                for item in order.text_fields:
+                    if item.validation_check and not item.text_value:
+                        raise ValidationError(f"The field '{item.text_field}' requires a value.")
             if order.amount_total == 0:
                 raise ValidationError("The Sale Order total amount cannot be zero.")
         if 'reference' in vals:
@@ -312,25 +314,22 @@ class SaleOrder(models.Model):
 
     def action_revise_order(self):
         for item in self:
-
             if not item.revision_number:
-                revision_number_count = 1
                 item.revision_number = item.name
-            else:
-                revision_number_count = self.search_count([('revision_number', '=', item.revision_number)])
 
-            new_item = item.copy()
-            number  = 2 if revision_number_count ==2 else revision_number_count + 1
-            new_item.name = item.revision_number+'-'+str(revision_number_count)
+            revision_number_count = self.search_count([('revision_number', '=', item.revision_number)])
+            new_item = item.with_context(skip_validation=True).copy()
+
+            new_item.name = f"{item.revision_number}-{revision_number_count}"
             item.action_cancel()
 
             return {
                 'type': 'ir.actions.act_window',
                 'name': 'Revised Order',
                 'view_mode': 'form',
-                'res_model': self._name,  
-                'res_id': new_item.id,  
-                'target': 'current', 
+                'res_model': self._name,
+                'res_id': new_item.id,
+                'target': 'current',
             }
 
     # @api.onchange('brand_id')
