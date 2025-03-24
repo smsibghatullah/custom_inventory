@@ -28,8 +28,8 @@
                         <field name="email_from" string="Email" placeholder='e.g. "email@address.com"' />
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
                          />
-                        <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category" widget="many2many_tags" />
-                        <field name="bci_project" string="BCI Project" />
+                        <field name="category_id" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
+                        <field name="bci_project" string="BCI Project ID / Address" />
                         <field name="phone" string="Phone" placeholder='e.g. "0123456789"' />
                         <label for="expected_revenue"/>
                         <div>
@@ -85,16 +85,17 @@
                     <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
                 </xpath>
                 <xpath expr="//label[@for='phone']" position="before">
+                   <field name="bci_project" string="BCI Project ID / Address" />
                     <label for="brand_id"></label>
                     <div>
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
                          />
                     </div>
-                    <label for="category_ids"></label>
+                    <label for="category_id"></label>
                     <div>
                         <field name="available_tag_ids" invisible="1" />
                         <field name="available_category_ids" invisible="1" />
-                        <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" options="{'no_create': True, 'no_create_edit': True}"  string="Category" widget="many2many_tags" />
+                        <field name="category_id" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" options="{'no_create': True, 'no_create_edit': True}"  string="Category" />
                     </div>
                 </xpath>
                  <xpath expr="//field[@name='tag_ids']" position="attributes">
