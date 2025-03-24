@@ -307,6 +307,11 @@ class PurchaseOrder(models.Model):
             reference = f"{receipt.name if receipt else 'No Receipt'} ({order.name})"
 
             move = self.env['account.move'].create({
+                'brand_id': self.brand_id.id,
+                'category_ids': [(6, 0, self.category_ids.ids)],
+                'terms_conditions': self.brand_id.terms_conditions_invoice,
+                'company_id': self.company_id.id,
+                'tag_ids':[(6, 0, self.tag_ids.ids)],
                 'journal_id': next(iter(category_accounts.values()))['journal'].id,  
                 'date': fields.Date.context_today(self),
                 'ref': reference,

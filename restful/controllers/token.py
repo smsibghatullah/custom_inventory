@@ -41,10 +41,11 @@ class AccessToken(http.Controller):
                     value = getattr(equipment, field)
                     field_label = equipment._fields[field].string if field in equipment._fields else field
                     if isinstance(value, models.Model):  
-                        field_value = value.display_name if value else None
+                        field_value = value.mapped('display_name') if len(value) > 1 else (value.display_name if value else None)
                     else:
                         field_value = value
                     private_data[field_label] = field_value
+
 
             public_fields = request.env['maintenance.equipment.access'].sudo().search([
                 ('equipment_id', '=', record_id),
@@ -56,9 +57,10 @@ class AccessToken(http.Controller):
                 if hasattr(equipment, field):
                     value = getattr(equipment, field)
                     if isinstance(value, models.Model):  
-                        public_data[field] = value.display_name if value else None
+                        public_data[field] = value.mapped('display_name') if len(value) > 1 else (value.display_name if value else None)
                     else:
                         public_data[field] = value
+
 
             response_data = {
                 "id": equipment.id,

@@ -530,14 +530,23 @@ class SaleOrder(models.Model):
             ], limit=1)
 
             reference = f"{delivery_order.name if delivery_order else 'No Delivery'} ({order.name})"
-
+            print(move_lines,"ppppppppppppppppppppppppppssssss")
+            
 
             move = self.env['account.move'].create({
-                'journal_id': next(iter(category_accounts.values()))['journal'].id,  # Use the first journal found
+                'brand_id': self.brand_id.id,
+                'category_ids': [(6, 0, self.category_ids.ids)],
+                'bom_id': self.bom_id.id,
+                'terms_conditions': self.brand_id.terms_conditions_invoice,
+                'reference': self.reference,
+                'tag_ids':[(6, 0, self.tag_ids.ids)],
+                'journal_id': next(iter(category_accounts.values()))['journal'].id,  
                 'date': fields.Date.context_today(self),
                 'ref': reference,
                 'line_ids': move_lines,
             })
+            print(move.line_ids,"ppppppppppppppppppppppppppssssss")
+            # 9/0
             move.action_post()
     
 
