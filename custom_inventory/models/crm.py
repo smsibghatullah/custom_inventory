@@ -22,6 +22,16 @@ class CrmLead(models.Model):
         help='Select the Category associated with the selected brand'
     )
 
+    category_ids = fields.Many2many(
+        'sku.type.master',
+        'crm_category_rel',
+        'product_id',
+        'category_id',
+        string='Categories *',
+         required=True,
+        help='Select the Categories associated with the selected brand'
+    )
+
     sku_ids = fields.Many2many('product.template', string="SKU")
 
     available_tag_ids = fields.Many2many(
