@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
+import re
 
 
 class CrmLead(models.Model):
@@ -43,6 +44,14 @@ class CrmLead(models.Model):
         compute="_compute_available_categories",
     )
     bci_project = fields.Char(string='BCI Project', required=True)
+    mobile_no = fields.Char(string='Mobile')
+
+    @api.constrains('mobile_no')
+    def _check_mobile_no(self):
+        for record in self:
+            if record.mobile_no and not re.match(r'^\+?\d{7,15}$', record.mobile_no):
+                raise models.ValidationError("Enter a valid mobile number (7-15 digits, optional + at start).")
+
     @api.depends("tag_ids")
     def _compute_available_tags(self):
         for record in self:

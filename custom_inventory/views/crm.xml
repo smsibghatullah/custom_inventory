@@ -30,6 +30,7 @@
                          />
                         <field name="category_id" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
                         <field name="bci_project" string="BCI Project ID / Address" />
+                        <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
                         <field name="phone" string="Phone" placeholder='e.g. "0123456789"' />
                         <label for="expected_revenue"/>
                         <div>
@@ -86,6 +87,7 @@
                 </xpath>
                 <xpath expr="//label[@for='phone']" position="before">
                    <field name="bci_project" string="BCI Project ID / Address" />
+                   <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
                     <label for="brand_id"></label>
                     <div>
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
@@ -165,6 +167,10 @@
                                     </div>
                                     <div>
                                     <field name="bci_project" string="BCI Project ID / Address" />
+                                    
+                                    </div>
+                                    <div>
+                                    <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
                                     </div>
                                     <div>
                                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
