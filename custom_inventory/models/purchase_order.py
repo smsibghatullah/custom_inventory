@@ -342,7 +342,7 @@ class PurchaseOrder(models.Model):
             'default_res_ids': self.ids,
             'default_custom_email_to':self.partner_id.email,
             'default_custom_email_from' : self.brand_id.po_email ,
-            'default_template_id': template_id,
+            'default_template_id': self.brand_id.mail_purchase_template_id.id if self.brand_id.mail_purchase_template_id else None,
             'default_composition_mode': 'comment',
             'default_email_layout_xmlid': "mail.mail_notification_layout_with_responsible_signature",
             'force_email': True,

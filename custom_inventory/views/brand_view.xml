@@ -122,6 +122,15 @@
                                 </group>
                             </group>
                         </page>
+                        <page string="Mail Templates">
+                            <group>
+                                <group>
+                                    <field name="mail_sale_template_id" />
+                                    <field name="mail_purchase_template_id" />
+                                    <field name="mail_invoice_template_id" />
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
 
                 </sheet>

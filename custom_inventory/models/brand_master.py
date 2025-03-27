@@ -34,6 +34,21 @@ class BrandMaster(models.Model):
     purchase_text_fields = fields.One2many('purchase.dynamic.field.text', 'brand_id', string='Purchase Text Fields')
     purchase_checkbox_fields = fields.One2many('purchase.dynamic.field.checkbox', 'brand_id', string='Purchase Checkbox Fields')
     purchase_selection_fields = fields.One2many('purchase.dynamic.field.selection.key', 'brand_id', string='Purchase Selection Fields')
+    mail_sale_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        string="Use Sale Order template",
+        domain="[('model', '=', 'sale.order')]",
+    )
+    mail_purchase_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        string="Use Purchase Order template",
+        domain="[('model', '=', 'purchase.order')]",
+    )
+    mail_invoice_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        string="Use Invoice template",
+        domain="[('model', '=', 'account.move')]",
+    )
 
 
 

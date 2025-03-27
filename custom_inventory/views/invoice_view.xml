@@ -242,7 +242,7 @@
                                     colspan="2"/>
                             </group>
                             <group>
-                                <field name="mail_template_id"
+                                <field name="mail_template_id" readonly="1"
                                     required="mode == 'invoice_multi'"
                                     options="{'no_create': True, 'no_edit': True}"
                                     context="{'default_model': 'account.move'}"/>
