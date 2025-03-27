@@ -168,6 +168,27 @@ class AccountMove(models.Model):
             },
         }
 
+    def action_send_and_print(self):
+            template = self.env.ref(self._get_mail_template(), raise_if_not_found=False)
+
+            if any(not x.is_sale_document(include_receipts=True) for x in self):
+                raise UserError(_("You can only send sales documents"))
+
+            return {
+                'name': _("Send"),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'account.move.send',
+                'target': 'new',
+                'context': {
+                    'active_ids': self.ids,
+                    'default_mail_template_id': template and template.id or False,
+                    'default_custom_email_to':self.partner_id.email,
+                    'default_custom_email_from' : self.brand_id.so_email ,
+                },
+            }
+
 
 class InvoiceOrderEmailWizard(models.TransientModel):
     _name = 'invoice.order.email.wizard'
@@ -268,3 +289,80 @@ class AccountMoveLine(models.Model):
     
             
     
+class AccountMoveSend(models.TransientModel):
+    _inherit = "account.move.send"
+
+    custom_email_to = fields.Char(string="Custom Email To")
+    custom_email_from = fields.Char(string="Custom Email From")
+
+    def _get_wizard_values(self):
+        self.ensure_one()
+        return {
+            'mail_template_id': self.mail_template_id.id,
+            'sp_partner_id': self.env.user.partner_id.id,
+            'sp_user_id': self.env.user.id,
+            'download': self.checkbox_download,
+            'send_mail': self.checkbox_send_mail,
+        }
+
+    @api.model
+    def _send_mails(self, moves_data):
+        subtype = self.env.ref('mail.mt_comment')
+
+        for move, move_data in [(move, move_data) for move, move_data in moves_data.items() if move.partner_id.email]:
+            mail_template = move_data['mail_template_id']
+            mail_template.email_to =self.custom_email_to
+            mail_lang = move_data['mail_lang']
+            mail_params = self._get_mail_params(move, move_data)
+            if not mail_params:
+                continue
+
+            if move_data.get('proforma_pdf_attachment'):
+                attachment = move_data['proforma_pdf_attachment']
+                mail_params['attachments'].append((attachment.name, attachment.raw))
+
+            email_from = self.custom_email_from
+            model_description = move.with_context(lang=mail_lang).type_name
+
+            self._send_mail(
+                move,
+                mail_template,
+                subtype_id=subtype.id,
+                model_description=model_description,
+                email_from=email_from,
+                **mail_params,
+            )
+
+    @api.model
+    def _send_mail(self, move, mail_template, **kwargs):
+        """ Send the journal entry passed as parameter by mail. """
+        partner_ids = kwargs.get('partner_ids', [])
+        author_id = kwargs.pop('author_id')
+
+        new_message = move\
+            .with_context(
+                no_new_invoice=True,
+                mail_notify_author=author_id in partner_ids,
+            ).message_post(
+                message_type='comment',
+                **kwargs,
+                **{
+                    'email_layout_xmlid': 'mail.mail_notification_layout_with_responsible_signature',
+                    'email_add_signature': not mail_template,
+                    'mail_auto_delete': mail_template.auto_delete,
+                    'mail_server_id': mail_template.mail_server_id.id,
+                    'reply_to_force_new': False,
+                },
+            )
+
+        new_message.attachment_ids.invalidate_recordset(['res_id', 'res_model'], flush=False)
+        new_message.mail_ids.write({
+            'email_to': self.custom_email_to,
+            'recipient_ids': [(5, 0, 0)],
+        })
+        if new_message.attachment_ids.ids:
+            self.env.cr.execute("UPDATE ir_attachment SET res_id = NULL WHERE id IN %s", [tuple(new_message.attachment_ids.ids)])
+        new_message.attachment_ids.write({
+            'res_model': new_message._name,
+            'res_id': new_message.id,
+        })
