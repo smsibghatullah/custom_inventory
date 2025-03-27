@@ -165,7 +165,10 @@ class MailComposeMessage(models.TransientModel):
                 messages += message
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
-        messages.mail_ids.email_to = self.custom_email_to
+        messages.mail_ids.write({
+            'email_to': self.custom_email_to,
+            'recipient_ids': [(5, 0, 0)],
+        })
         return messages
 
     

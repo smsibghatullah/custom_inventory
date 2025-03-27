@@ -26,7 +26,7 @@
                     type="action" context="{'default_advance_payment_method': 'percentage'}" data-hotkey="q"
                     invisible="invoice_status != 'no' or state != 'sale'"/>
                 <button name="action_quotation_send" id="send_by_email_primary" string="Send by Email" type="object" data-hotkey="g"
-                     class="btn-primary"
+                    invisible="state != 'draft'" class="btn-primary"
                     context="{'validate_analytic': True}"/>
                 <!-- <button name="action_quotation_send" id="send_proforma_primary" type="object" string="Send PRO-FORMA Invoice" class="btn-primary"
                     groups="sale.group_proforma_sales"
@@ -44,7 +44,7 @@
                         invisible="not locked" groups="sales_team.group_sale_manager"/>
                 <button name="action_preview_sale_order" string="Preview" type="object" class="btn-secondary"/>
                 <button name="action_cancel" type="object" string="Cancel" invisible="state not in ['draft', 'sent', 'sale'] or not id or locked" data-hotkey="x"/>
-                <button name="action_send_report_email" type="object" string="Send Email" class="btn-primary"/>
+<!--                <button name="action_send_report_email" type="object" string="Send Email" class="btn-primary"/>-->
                 <button name="action_revise_order" type="object" string="Revision" class="btn-primary" invisible="state != 'draft'"/> 
                 <button name="action_draft" invisible="state != 'cancel'" type="object" string="Set to Quotation" data-hotkey="w"/>
                 <t groups="sale.group_auto_done_setting">
