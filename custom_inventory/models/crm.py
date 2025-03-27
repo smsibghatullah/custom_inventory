@@ -1,6 +1,6 @@
 
 
-from odoo import models, fields, api,_
+from odoo import models, fields, api,_, tools, Command
 from odoo.exceptions import UserError
 import re
 
@@ -77,5 +77,101 @@ class CrmLead(models.Model):
         print(context)
 
         return context
+
+class MailMessage(models.Model):
+    _inherit = "mail.message"
+
+    custom_email_to = fields.Char(string="Custom Email To")
+
+class MailComposeMessage(models.TransientModel):
+    _inherit = "mail.compose.message"
+
+    custom_email_to = fields.Char(string="Custom Email To")
+    custom_email_from = fields.Char(string="Custom Email From")
+
+    
+    def _prepare_mail_values_rendered(self, res_ids):
+        """Generate values that are already rendered. This is used mainly in
+        monorecord mode, when the wizard contains value already generated
+        (e.g. "Send by email" on a sale order, in form view).
+
+        :param list res_ids: list of record IDs on which composer runs;
+
+        :return dict results: for each res_id, the generated values used to
+          populate in '_prepare_mail_values';
+        """
+        self.ensure_one()
+        print("_prepare_mail_values_rendered","ppppppppppppppppppppp_prepare_mail_values_rendered")
+        email_mode = self.composition_mode == 'mass_mail'
+
+        # Duplicate attachments linked to the email.template. Indeed, composer
+        # duplicates attachments in mass mode. But in 'rendered' mode attachments
+        # may come from an email template (same IDs). They also have to be
+        # duplicated to avoid changing their ownership.
+        if self.composition_mode == 'comment' and self.template_id and self.attachment_ids:
+            new_attachment_ids = []
+            for attachment in self.attachment_ids:
+                if attachment in self.template_id.attachment_ids:
+                    new_attachment_ids.append(attachment.copy({
+                        'res_model': 'mail.compose.message',
+                        'res_id': self.id,
+                    }).id)
+                else:
+                    new_attachment_ids.append(attachment.id)
+            new_attachment_ids.reverse()
+            self.write({'attachment_ids': [Command.set(new_attachment_ids)]})
+            print(self.custom_email_from,"ooooooooooooooopppppppppppppwwwwwwwwwwwww")
+
+        return {
+            res_id: {
+                'attachment_ids': [attach.id for attach in self.attachment_ids],
+                'body': self.body or '',
+                'email_from': self.custom_email_from,
+                # 'email_to': self.custom_email_to,
+                'partner_ids': self.partner_ids.ids,
+                'scheduled_date': self.scheduled_date,
+                'subject': self.subject or '',
+                **(
+                    {
+                        # notify parameter to force layout lang
+                        'force_email_lang': self.lang,
+                    } if not email_mode else {}
+                ),
+            }
+            for res_id in res_ids
+        }
+        
+
+    def _action_send_mail_comment(self, res_ids):
+        """ Send in comment mode. It calls message_post on model, or the generic
+        implementation of it if not available (as message_notify). """
+        self.ensure_one()
+        post_values_all = self._prepare_mail_values(res_ids)
+        ActiveModel = self.env[self.model] if self.model and hasattr(self.env[self.model], 'message_post') else self.env['mail.thread']
+        if self.composition_batch:
+            # add context key to avoid subscribing the author
+            ActiveModel = ActiveModel.with_context(
+                mail_create_nosubscribe=True,
+            )
+
+        messages = self.env['mail.message']
+        for res_id, post_values in post_values_all.items():
+            if ActiveModel._name == 'mail.thread':
+                post_values.pop('message_type')  # forced to user_notification
+                post_values.pop('parent_id', False)  # not supported in notify
+                if self.model:
+                    post_values['model'] = self.model
+                    post_values['res_id'] = res_id
+                message = ActiveModel.message_notify(**post_values)
+                if not message:
+                    # if message_notify returns an empty record set, no recipients where found.
+                    raise UserError(_("No recipient found."))
+                messages += message
+            else:
+                messages += ActiveModel.browse(res_id).message_post(**post_values)
+        messages.mail_ids.email_to = self.custom_email_to
+        return messages
+
+    
 
 

@@ -26,7 +26,7 @@
                     type="action" context="{'default_advance_payment_method': 'percentage'}" data-hotkey="q"
                     invisible="invoice_status != 'no' or state != 'sale'"/>
                 <button name="action_quotation_send" id="send_by_email_primary" string="Send by Email" type="object" data-hotkey="g"
-                    invisible="state != 'draft'" class="btn-primary"
+                     class="btn-primary"
                     context="{'validate_analytic': True}"/>
                 <!-- <button name="action_quotation_send" id="send_proforma_primary" type="object" string="Send PRO-FORMA Invoice" class="btn-primary"
                     groups="sale.group_proforma_sales"
