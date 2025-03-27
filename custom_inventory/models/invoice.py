@@ -185,7 +185,7 @@ class AccountMove(models.Model):
                     'active_ids': self.ids,
                     'default_mail_template_id': template and template.id or False,
                     'default_custom_email_to':self.partner_id.email,
-                    'default_custom_email_from' : self.brand_id.so_email ,
+                    'default_custom_email_from' : self.brand_id.inv_email ,
                 },
             }
 
