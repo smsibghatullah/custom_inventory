@@ -78,10 +78,6 @@ class CrmLead(models.Model):
 
         return context
 
-class MailMessage(models.Model):
-    _inherit = "mail.message"
-
-    custom_email_to = fields.Char(string="Custom Email To")
 
 class MailComposeMessage(models.TransientModel):
     _inherit = "mail.compose.message"
