@@ -35,7 +35,9 @@ class SaleOrder(models.Model):
     revision_number = fields.Char('')
     revision_number_count = fields.Integer(compute="_compute_revision_number_count")
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
-    bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+    bom_id = fields.Many2one('bom.products', string='BOM',
+     domain="[('brand_id', '=', brand_id)]"
+    , help='Select the Bill of Materials')
     reference = fields.Char(string='Reference *')
     amount_without_shipping = fields.Float(
         string="Subtotal (Excluding Shipping)",
@@ -102,6 +104,12 @@ class SaleOrder(models.Model):
     def _compute_tag_access(self):
         for record in self:
             record.is_tag_access = record.brand_id.is_tag_show if record.brand_id else False
+    
+    @api.onchange('brand_id')
+    def _onchange_brand_id(self):
+        self.bom_id = False  
+        return {'domain': {'bom_id': [('brand_id', '=', self.brand_id.id)]}}
+
 
 
     @api.depends("order_line.price_subtotal", "order_line.discount")

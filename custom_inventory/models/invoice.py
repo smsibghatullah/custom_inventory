@@ -14,7 +14,9 @@ class AccountMove(models.Model):
 
    
     terms_conditions = fields.Text(string='Brand Terms & Conditions')
-    bom_id = fields.Many2one('bom.products', string='BOM', help='Select the Bill of Materials')
+    bom_id = fields.Many2one('bom.products',
+    domain="[('brand_id', '=', brand_id)]",
+     string='BOM', help='Select the Bill of Materials')
     payment_link = fields.Text(string='Payment Link')
     reference = fields.Char(string='Reference')
     discount_amount = fields.Monetary(
