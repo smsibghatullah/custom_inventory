@@ -123,13 +123,17 @@
                             </group>
                         </page>
                         <page string="Mail Templates">
-                            <group>
-                                <group>
-                                    <field name="mail_sale_template_id" />
-                                    <field name="mail_purchase_template_id" />
-                                    <field name="mail_invoice_template_id" />
-                                </group>
-                            </group>
+                                    <group string="Sale Templates">
+                                       <field name="mail_sale_quotation_template_id" />
+                                       <field name="mail_sale_template_id" />
+                                    </group>
+                                    <group string="Purchase Templates">
+                                       <field name="mail_purchase_quotation_template_id" />
+                                       <field name="mail_purchase_template_id" />
+                                    </group>
+                                     <group string="Invoice Templates">
+                                       <field name="mail_invoice_template_id" />
+                                    </group>
                         </page>
                     </notebook>
 

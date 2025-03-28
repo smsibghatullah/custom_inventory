@@ -28,6 +28,9 @@
                 <button name="action_quotation_send" id="send_by_email_primary" string="Send by Email" type="object" data-hotkey="g"
                     invisible="state != 'draft'" class="btn-primary"
                     context="{'validate_analytic': True}"/>
+                <button name="action_sale_order_send" id="send_by_email_primary" string="Send SO by Email" type="object" data-hotkey="g"
+                    invisible="state != 'sale'" class="btn-primary"
+                    context="{'validate_analytic': True}"/>
                 <!-- <button name="action_quotation_send" id="send_proforma_primary" type="object" string="Send PRO-FORMA Invoice" class="btn-primary"
                     groups="sale.group_proforma_sales"
                     invisible="state != 'draft' or invoice_count &gt;= 1" context="{'proforma': True, 'validate_analytic': True}"/> -->
