@@ -28,11 +28,22 @@ class ResUsers(models.Model):
         """Remove only the tags and categories that do not match the selected companies."""
         if self.company_ids:
             company_ids = self.company_ids.ids
-
             valid_tags = self.env['crm.tag'].search([('company_id', 'in', company_ids)]).ids
             valid_categories = self.env['sku.type.master'].search([('company_id', 'in', company_ids)]).ids
-
             self.tag_ids = [(6, 0, list(set(self.tag_ids.ids) & set(valid_tags)))]
+            self.category_ids = [(2, category.id) for category in self.category_ids if category.id not in valid_categories]
 
-            self.category_ids = [(6, 0, list(set(self.category_ids.ids) & set(valid_categories)))]
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    brand_ids = fields.Many2many(
+        'brand.master',
+        'res_partner_brand_rel_we',
+        string='Brands',
+        domain="[('company_id', '=', company_id)]",
+        required=True,
+        help='Select the Brands'
+    )
+
+
                

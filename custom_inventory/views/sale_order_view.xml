@@ -211,7 +211,7 @@
                 <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
-                <field name="bom_id" options="{'no_create': True}"/>
+                <field name="bom_id" domain="[('brand_id', '=', brand_id)]" options="{'no_create': True}"/>
                 <field name="is_tag_access" invisible="1" />
                 <field name="has_tag_required" invisible="1" />
                 <field name="available_tag_ids" invisible="1" />
