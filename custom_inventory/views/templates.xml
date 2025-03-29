@@ -729,7 +729,7 @@
 
                     <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
-                        <span style="font-weight: bold; font-size: 30px;">&#160;&#160; INVOICE &#160;&#160;</span>
+                        <span style="font-weight: bold; font-size: 30px;">&#160;&#160; TAX INVOICE &#160;&#160;</span>
                         <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
                     </div>
                     <h2 style="display:none"></h2>
