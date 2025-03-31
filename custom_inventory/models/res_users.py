@@ -40,10 +40,28 @@ class ResPartner(models.Model):
         'brand.master',
         'res_partner_brand_rel_we',
         string='Brands',
-        domain="[('company_id', '=', company_id)]",
+        domain="[('company_id', '=', current_company_id)]",
         required=True,
         help='Select the Brands'
     )
+
+    current_company_id = fields.Many2one(
+        'res.company',
+        compute='_compute_current_company',
+        store=False
+    )
+
+    @api.depends('company_id')
+    def _compute_current_company(self):
+        for record in self:
+            record.current_company_id = self.env.company
+
+ 
+
+
+               
+
+ 
 
 
                
