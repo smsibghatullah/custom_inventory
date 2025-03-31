@@ -41,7 +41,6 @@ class ResPartner(models.Model):
         'res_partner_brand_rel_we',
         string='Brands',
         domain="[('company_id', '=', current_company_id)]",
-        required=True,
         help='Select the Brands'
     )
 
