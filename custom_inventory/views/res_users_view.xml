@@ -20,7 +20,7 @@
     <field name="inherit_id" ref="base.view_partner_form"/>
     <field name="arch" type="xml">
         <xpath expr="//field[@name='category_id']" position="after">
-            <field name="brand_ids" options="{'no_create': True}" widget="many2many_tags">
+            <field name="brand_ids" options="{'no_create': True}" invisible="1" widget="many2many_tags">
             </field>
         </xpath>
          
