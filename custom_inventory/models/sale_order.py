@@ -563,8 +563,8 @@ class SaleOrder(models.Model):
                         'journal': sale_journal
                     }
 
-                category_totals[category.id]['debit'] += line.price_total
-                category_totals[category.id]['credit'] += line.price_total
+                category_totals[category.id]['debit'] += line.product_id.standard_price
+                category_totals[category.id]['credit'] += line.product_id.standard_price
 
             move_lines = []
 
