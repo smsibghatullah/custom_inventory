@@ -2,7 +2,6 @@ from odoo import models, fields, api
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
-
     
 
     tag_ids = fields.Many2many(
@@ -47,9 +46,10 @@ class ResPartner(models.Model):
     current_company_id = fields.Many2one(
         'res.company',
         compute='_compute_current_company',
-        store=True
+        store=False
     )
 
+    @api.depends('company_id')
     def _compute_current_company(self):
         for record in self:
             record.current_company_id = self.env.company
