@@ -47,10 +47,9 @@ class ResPartner(models.Model):
     current_company_id = fields.Many2one(
         'res.company',
         compute='_compute_current_company',
-        store=False
+        store=True
     )
 
-    @api.depends('company_id')
     def _compute_current_company(self):
         for record in self:
             record.current_company_id = self.env.company
