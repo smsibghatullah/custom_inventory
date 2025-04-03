@@ -24,13 +24,19 @@ class ResUsers(models.Model):
 
     @api.onchange('company_ids')
     def _onchange_company_ids(self):
-        """Remove only the tags and categories that do not match the selected companies."""
-        if self.company_ids:
-            company_ids = self.company_ids.ids
-            valid_tags = self.env['crm.tag'].search([('company_id', 'in', company_ids)]).ids
-            valid_categories = self.env['sku.type.master'].search([('company_id', 'in', company_ids)]).ids
-            self.tag_ids = [(6, 0, list(set(self.tag_ids.ids) & set(valid_tags)))]
-            self.category_ids = [(2, category.id) for category in self.category_ids if category.id not in valid_categories]
+        """Remove only tags and categories related to removed companies."""
+        previous_companies = self._origin.company_ids.ids if self._origin else []
+        current_companies = self.company_ids.ids
+        removed_companies = list(set(previous_companies) - set(current_companies))
+        print("Removed Companies:", removed_companies)
+
+        if removed_companies:
+            removed_tags = self.env['crm.tag'].search([('company_id', 'in', removed_companies)]).ids
+            removed_categories = self.env['sku.type.master'].search([('company_id', 'in', removed_companies)]).ids
+            self.tag_ids = [(3, tag_id) for tag_id in removed_tags if tag_id in self.tag_ids.ids]
+            self.category_ids = [(2, category.id) for category in self.category_ids if
+                                 category.company_id.id in removed_companies]
+                                 
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
