@@ -81,7 +81,7 @@ class ProductProduct(models.Model):
             value_sum, quantity_sum = group_mapping.get(product._origin, (0, 0))
             value_svl = company_id.currency_id.round(value_sum)
             avg_cost = product.standard_price
-            product.value_svl = value_svl
+            product.value_svl = product.standard_price
             product.quantity_svl = quantity_sum
             product.avg_cost = avg_cost
             product.total_value = avg_cost * product.sudo(False).qty_available

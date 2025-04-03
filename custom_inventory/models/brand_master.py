@@ -97,6 +97,15 @@ class ProductTemplate(models.Model):
         for record in self:
             record.available_category_ids = self.env.user.category_ids
 
+    @api.depends_context('company')
+    @api.depends('product_variant_ids.standard_price')
+    def _compute_standard_price(self):
+        for record in self:
+            previous_price = record.standard_price
+            record._compute_template_field_from_variant_field('standard_price')
+            if record.standard_price == 0 and previous_price:
+                record.standard_price = previous_price
+
 
    
 

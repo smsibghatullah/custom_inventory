@@ -542,6 +542,7 @@ class SaleOrder(models.Model):
         for order in self:
             category_totals = defaultdict(lambda: {'debit': 0.0, 'credit': 0.0})
             category_accounts = {}
+            product_cost = 0
 
             for line in order.order_line:
                 category = line.product_id.categ_id
@@ -565,6 +566,7 @@ class SaleOrder(models.Model):
 
                 category_totals[category.id]['debit'] += line.product_id.standard_price
                 category_totals[category.id]['credit'] += line.product_id.standard_price
+                product_cost += line.product_id.standard_price
 
             move_lines = []
 
@@ -606,9 +608,10 @@ class SaleOrder(models.Model):
                 'ref': reference,
                 'line_ids': move_lines,
             })
-            print(move.line_ids,"ppppppppppppppppppppppppppssssss")
+            print(move.line_ids,product_cost,"ppppppppppppppppppppppppppssssss")
             # 9/0
             move.action_post()
+            line.product_id.standard_price = product_cost
     
 
 class SaleOrderEmailWizard(models.TransientModel):
