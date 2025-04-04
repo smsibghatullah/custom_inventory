@@ -8,6 +8,7 @@ from odoo.addons.restful.common import invalid_response, valid_response
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.http import request
 import base64
+from odoo.service import db
 
 _logger = logging.getLogger(__name__)
 
@@ -109,6 +110,15 @@ class AccessToken(http.Controller):
         except AccessError as e:
             return {"error": "Access error", "message": str(e)}
 
+        except Exception as e:
+            return {"error": "Unexpected error", "message": str(e)}
+
+    @http.route('/api/list_databases', type="http", auth="public", methods=["GET"], csrf=False)
+    def list_databases(self, **kwargs):
+        try:
+            databases = db.list_dbs()  
+            db_data = [{"id": index + 1, "name": name} for index, name in enumerate(databases)]
+            return valid_response(db_data)
         except Exception as e:
             return {"error": "Unexpected error", "message": str(e)}
 
