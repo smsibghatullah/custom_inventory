@@ -33,14 +33,13 @@ class StockPicking(models.Model):
     show_statusbar = fields.Boolean(compute="_compute_show_statusbar")
 
     def button_validate(self):
-        res = super(StockPicking, self).button_validate()
-        
         for picking in self:
             if picking.sale_id:
                 picking.sale_id.create_journal_entry()
             elif picking.purchase_id:
                 picking.purchase_id.create_journal_entry()
 
+        res = super(StockPicking, self).button_validate()
         return res
 
     @api.depends('sale_id')
