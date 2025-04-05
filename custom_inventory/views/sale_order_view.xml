@@ -207,8 +207,8 @@
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="brand_id" options="{'no_create': True}" />
-                <field name="available_category_ids" invisible="1" />
-                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
+                <field name="available_sku_category_ids" invisible="1" />
+                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
                 <field name="revision_number" invisible="1"/>
                 <field name="revision_number_count" invisible="1"/>
                 <field name="bom_id" domain="[('brand_id', '=', brand_id)]" options="{'no_create': True}"/>

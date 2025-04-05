@@ -65,7 +65,7 @@ class SaleOrder(models.Model):
         'crm.tag',
         compute="_compute_available_tags",
     )
-    available_category_ids = fields.Many2many(
+    available_sku_category_ids = fields.Many2many(
         'sku.type.master',
         compute="_compute_available_categories",
     )
@@ -77,8 +77,8 @@ class SaleOrder(models.Model):
     @api.depends("category_ids")
     def _compute_available_categories(self):
         for record in self:
-            record.available_category_ids = self.env.user.category_ids
-            print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+            record.available_sku_category_ids = self.env.user.sku_category_ids
+            print(record.available_sku_category_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):
@@ -133,7 +133,7 @@ class SaleOrder(models.Model):
     def _compute_formatted_dates_onchange(self):
         for order in self:
             order.available_tag_ids = self.env.user.tag_ids
-            order.available_category_ids = self.env.user.category_ids
+            order.available_sku_category_ids = self.env.user.sku_category_ids
             print(order.available_tag_ids,'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
             order.formatted_date_order = order.date_order.strftime("%d-%b-%Y") if order.date_order else ""
             order.formatted_validity_date = order.validity_date.strftime("%d-%b-%Y") if order.validity_date else ""

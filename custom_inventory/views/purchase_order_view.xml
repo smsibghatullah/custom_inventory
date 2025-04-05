@@ -35,11 +35,11 @@
            </xpath>
 
             <xpath expr="//field[@name='date_order']" position="after">
-                <field name="available_category_ids" invisible="1" />
+                <field name="available_sku_category_ids" invisible="1" />
                 <field name="available_tag_ids" invisible="1" />
                 <field name="payment_term_id" readonly="invoice_status == 'invoiced' or state == 'done'" options="{'no_create': True,'no_create_edit': True}"/>
                 <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}" /> 
-                <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
                 <field name="is_tag_access" invisible="1" />
                 <field name="has_tag_required" invisible="1" />
                 <field name="tag_ids" widget="many2many_tags"  domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />

@@ -19,7 +19,7 @@ class CrmLead(models.Model):
     category_id = fields.Many2one(
         'sku.type.master',
         string='Category',
-        domain="[('brand_id', '=', brand_id), ('id', 'in', available_category_ids)]",
+        domain="[('brand_id', '=', brand_id), ('id', 'in', available_sku_category_ids)]",
         help='Select the Category associated with the selected brand'
     )
 
@@ -39,7 +39,7 @@ class CrmLead(models.Model):
         'crm.tag',
         compute="_compute_available_tags",
     )
-    available_category_ids = fields.Many2many(
+    available_sku_category_ids = fields.Many2many(
         'sku.type.master',
         compute="_compute_available_categories",
     )
@@ -60,7 +60,7 @@ class CrmLead(models.Model):
     @api.depends("category_id")
     def _compute_available_categories(self):
         for record in self:
-            record.available_category_ids = self.env.user.category_ids
+            record.available_sku_category_ids = self.env.user.sku_category_ids
             print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
 
