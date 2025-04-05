@@ -95,7 +95,7 @@ class ProductTemplate(models.Model):
     @api.depends("category_ids")
     def _compute_available_categories(self):
         for record in self:
-            record.available_sku_category_ids = self.env.user.category_ids
+            record.available_sku_category_ids = self.env.user.sku_category_ids
 
     @api.depends_context('company')
     @api.depends('product_variant_ids.standard_price')
