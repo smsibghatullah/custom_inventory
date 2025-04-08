@@ -51,7 +51,7 @@
            
               <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
-                  <attribute name="domain">[('brand_ids', 'in', brand_id)]</attribute>
+                  <!-- <attribute name="domain">[('brand_ids', 'in', brand_id)]</attribute> -->
             </xpath>
             <xpath expr="//field[@name='incoterm_id']" position="attributes">
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
