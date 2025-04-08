@@ -69,6 +69,15 @@ class SaleOrder(models.Model):
         'sku.type.master',
         compute="_compute_available_categories",
     )
+    bci_project = fields.Char(string='BCI Project')
+    customer_description = fields.Char(string="Customer Description")
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.partner_id:
+            self.customer_description = self.partner_id.name
+        else:
+            self.customer_description = False
 
 
     @api.depends("tag_ids")
@@ -427,6 +436,7 @@ class SaleOrder(models.Model):
             'terms_conditions': self.brand_id.terms_conditions_invoice,
             'reference': self.reference,
             'tag_ids':[(6, 0, self.tag_ids.ids)],
+            'customer_description':self.customer_description
         }
         if self.journal_id:
             values['journal_id'] = self.journal_id.id

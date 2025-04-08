@@ -45,6 +45,18 @@ class CrmLead(models.Model):
     )
     bci_project = fields.Char(string='BCI Project', required=True)
     mobile_no = fields.Char(string='Mobile')
+    is_tag_access = fields.Boolean(compute="_compute_tag_access")
+    has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
+
+    @api.depends("brand_id", "brand_id.is_tag_show")
+    def _compute_has_tag_required(self):
+        for record in self:
+            record.has_tag_required = bool(record.brand_id.is_tag_show)
+
+    @api.depends("brand_id")
+    def _compute_tag_access(self):
+        for record in self:
+            record.is_tag_access = record.brand_id.is_tag_show if record.brand_id else False
 
     @api.constrains('mobile_no')
     def _check_mobile_no(self):
@@ -73,6 +85,7 @@ class CrmLead(models.Model):
         context.update({
             'default_brand_id': self.brand_id.id,
             'default_category_ids': [(6, 0, [self.category_id.id])],
+            'default_bci_project': self.bci_project,
         })
         print(context)
 

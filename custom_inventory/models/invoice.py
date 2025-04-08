@@ -62,6 +62,15 @@ class AccountMove(models.Model):
         domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]",
         help='Select the Categories associated with the selected brand'
     )
+    customer_description = fields.Char(string="Customer Description")
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.partner_id:
+            self.customer_description = self.partner_id.name
+        else:
+            self.customer_description = False
+            
     @api.depends("tag_ids")
     def _compute_available_tags(self):
         for record in self:

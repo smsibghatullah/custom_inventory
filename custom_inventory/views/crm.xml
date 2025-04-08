@@ -9,7 +9,14 @@
             <field name="arch" type="xml">
                 <form>
                     <group>
-                      <field name="available_sku_category_ids" invisible="1" />
+                       <field name="available_sku_category_ids" invisible="1" />
+                       <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}" required="1"  
+                         />
+                       <field name="category_id" required="1" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
+                        <field name="is_tag_access" invisible="1" />
+                        <field name="has_tag_required" invisible="1" />
+                        <field name="available_tag_ids" invisible="1" />
+                        <field name="tag_ids"  widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}"  />
                         <field name="partner_id" widget="res_partner_many2one" options="{'no_create': True, 'no_create_edit': True}"
                             class="o_field_highlight"
                             string='Organization / Contact'
@@ -25,17 +32,14 @@
                             'default_team_id': team_id,
                             'show_vat': True}"/>
                         <field name="name" placeholder="e.g. Product Pricing" />
-                        <field name="email_from" string="Email" placeholder='e.g. "email@address.com"' />
-                        <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
-                         />
-                        <field name="category_id" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
-                        <field name="bci_project" string="BCI Project ID / Address" />
-                        <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
-                        <field name="phone" string="Phone" placeholder='e.g. "0123456789"' />
-                        <label for="expected_revenue"/>
+                        <field name="email_from" string="Email" invisible="1" placeholder='e.g. "email@address.com"' />
+                        <field name="phone" string="Phone" invisible="1" required="1" />
+                        
+                        <field name="bci_project" required="1" string="BCI Project ID / Address / Company" />
+                        <field name="date_deadline" required="1"  />
+                        <field name="expected_revenue"  class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                         <div>
                             <div class="o_row">
-                                <field name="expected_revenue" class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                                 <field name="priority" class="oe_inline" nolabel="1" widget="priority"/>
                             </div>
                             <div class="o_row" groups="crm.group_use_recurring_revenues">
@@ -75,7 +79,26 @@
             <field name="inherit_id" ref="crm.crm_lead_view_form"/>
             <field name="priority">15</field>
             <field name="arch" type="xml">
-               
+                <xpath expr="//header" position="replace">
+                  <header>
+                        <button name="action_set_won_rainbowman" string="Won"
+                            type="object" class="oe_highlight" data-hotkey="w" title="Mark as won"
+                            invisible="1"/>
+                        <button name="%(crm.crm_lead_lost_action)d" string="Lost" data-hotkey="l" title="Mark as lost"
+                            type="action" invisible="1"/>
+                        <button name="%(crm.action_crm_lead2opportunity_partner)d" string="Convert to Opportunity" type="action" help="Convert to Opportunity"
+                            class="oe_highlight" invisible="1" data-hotkey="v"/>
+                        <button name="toggle_active" string="Restore" type="object" data-hotkey="x"
+                            invisible="1"/>
+                        <button name="%(crm.crm_lead_lost_action)d" string="Lost" type="action"  data-hotkey="l" title="Mark as lost"
+                            invisible="1"/>
+                        <field name="stage_id" widget="statusbar_duration"
+                            options="{'clickable': '1', 'fold_field': 'fold'}"
+                            domain="['|', ('team_id', '=', team_id), ('team_id', '=', False)]"
+                            invisible="not active or type == 'lead'"/>
+                    </header>
+                </xpath>
+             
                 <xpath expr="//field[@name='campaign_id']" position="attributes">
                     <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
                 </xpath>
@@ -86,8 +109,6 @@
                     <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
                 </xpath>
                 <xpath expr="//label[@for='phone']" position="before">
-                   <field name="bci_project" string="BCI Project ID / Address" />
-                   <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
                     <label for="brand_id"></label>
                     <div>
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
@@ -99,6 +120,10 @@
                         <field name="available_sku_category_ids" invisible="1" />
                         <field name="category_id" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" options="{'no_create': True, 'no_create_edit': True}"  string="Category" />
                     </div>
+                </xpath>
+                <xpath expr="//field[@name='tag_ids']" position="after">
+                   <field name="bci_project" string="BCI Project ID / Address / Company" />
+                   <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
                 </xpath>
                  <xpath expr="//field[@name='tag_ids']" position="attributes">
                     <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
@@ -170,7 +195,7 @@
                                     
                                     </div>
                                     <div>
-                                    <field name="mobile_no" string="Mobile" placeholder='e.g. "0123456789"' />
+                                    <field name="date_deadline" />
                                     </div>
                                     <div>
                                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
@@ -195,6 +220,23 @@
                         </t>
                     </templates>
                 </kanban>
+            </field>
+        </record>
+
+        <record id="crm_iap_enrich.crm_lead_view_form" model="ir.ui.view">
+            <field name="name">crm.lead.view.form.inherit.iap.lead.enrich</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='%(crm.action_crm_lead2opportunity_partner)d']" position="after">
+                    <field name="show_enrich_button" invisible="1"/>
+                    <button string="Enrich" name="iap_enrich" type="object" class="btn btn-secondary" data-hotkey="g"
+                    title="Enrich lead with company data"
+                    invisible="1"/>
+                    <button string="Enrich" name="iap_enrich" type="object" class="btn btn-secondary" data-hotkey="g"
+                    title="Enrich opportunity with company data"
+                    invisible="1"/>
+                </xpath>
             </field>
         </record>
 
