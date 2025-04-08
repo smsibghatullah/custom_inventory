@@ -86,6 +86,7 @@ class CrmLead(models.Model):
             'default_brand_id': self.brand_id.id,
             'default_category_ids': [(6, 0, [self.category_id.id])],
             'default_bci_project': self.bci_project,
+            'default_reference': self.name,
         })
         print(context)
 
