@@ -206,16 +206,7 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="brand_id" options="{'no_create': True}" />
-                <field name="available_sku_category_ids" invisible="1" />
-                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
-                <field name="revision_number" invisible="1"/>
-                <field name="revision_number_count" invisible="1"/>
-                <field name="bom_id" domain="[('brand_id', '=', brand_id)]" options="{'no_create': True}"/>
-                <field name="is_tag_access" invisible="1" />
-                <field name="has_tag_required" invisible="1" />
-                <field name="available_tag_ids" invisible="1" />
-                <field name="tag_ids" widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />
+                
                 <field name="reference" required="1" />
             </xpath>
              <xpath expr="//field[@name='payment_term_id']" position="replace">
@@ -288,8 +279,23 @@
                 <attribute name="domain">[('category_ids', 'in', category_ids), ('sale_ok', '=', True)]</attribute>
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
             </xpath>
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="brand_id" options="{'no_create': True}" />
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="available_sku_category_ids" invisible="1" />
+                <field name="category_ids" options="{'no_create': True}" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]"  invisible="brand_id == False"  widget="many2many_tags" />
+                <field name="revision_number" invisible="1"/>
+                <field name="revision_number_count" invisible="1"/>
+                <field name="bom_id" domain="[('brand_id', '=', brand_id)]" options="{'no_create': True}"/>
+                <field name="is_tag_access" invisible="1" />
+                <field name="has_tag_required" invisible="1" />
+                <field name="available_tag_ids" invisible="1" />
+                <field name="tag_ids" widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}" />
+            </xpath>
              <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+                <attribute name="domain">[('brand_ids', 'in', brand_id)]</attribute>
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="attributes">
                 <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
