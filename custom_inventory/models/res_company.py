@@ -10,11 +10,13 @@ class ResCompany(models.Model):
         help='Select the brands associated with this company'
     )
 
-    tag_ids = fields.One2many(
-        'crm.tag',  
-        'company_id', 
+    tag_ids = fields.Many2many(
+        'crm.tag',
+        'res_company_crm_tag_rel',
+        'company_id',
+        'tag_id',
         string='Tags',
-        help='Select the Tags associated with this company'
+        help='Select the Tags associated with this user',
     )
 
     category_ids = fields.One2many(
