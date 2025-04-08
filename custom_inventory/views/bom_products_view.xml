@@ -8,10 +8,10 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="available_category_ids" invisible="1" />
+                        <field name="available_sku_category_ids" invisible="1" />
                         <field name="company_id" invisible="1" />
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}" /> 
-                        <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_category_ids)]" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
+                        <field name="category_ids" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags"  invisible="brand_id == False" /> 
                
                     </group>
                     <notebook>

@@ -69,6 +69,8 @@ class SaleOrder(models.Model):
         'sku.type.master',
         compute="_compute_available_categories",
     )
+
+
     @api.depends("tag_ids")
     def _compute_available_tags(self):
         for record in self:
@@ -79,6 +81,7 @@ class SaleOrder(models.Model):
         for record in self:
             record.available_sku_category_ids = self.env.user.sku_category_ids
             print(record.available_sku_category_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
+         
 
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):

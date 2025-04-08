@@ -28,7 +28,7 @@ class BomProducts(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
-    available_category_ids = fields.Many2many(
+    available_sku_category_ids = fields.Many2many(
         'sku.type.master',
         compute="_compute_available_categories",
     )
@@ -36,7 +36,7 @@ class BomProducts(models.Model):
     @api.depends("category_ids")
     def _compute_available_categories(self):
         for record in self:
-            record.available_category_ids = self.env.user.category_ids
+            record.available_sku_category_ids = self.env.user.sku_category_ids
 
 class BomProductLine(models.Model):
     _name = 'bom.product.line'
