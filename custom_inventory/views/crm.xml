@@ -12,14 +12,11 @@
                        <field name="available_sku_category_ids" invisible="1" />
                        <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}" required="1"  
                          />
-                       <field name="category_id" required="1" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
-                        <field name="is_tag_access" invisible="1" />
-                        <field name="has_tag_required" invisible="1" />
-                        <field name="available_tag_ids" invisible="1" />
-                        <field name="tag_ids"  widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}"  />
+                       
                         <field name="partner_id" widget="res_partner_many2one" options="{'no_create': True, 'no_create_edit': True}"
                             class="o_field_highlight"
                             string='Organization / Contact'
+                            domain="[('brand_ids', 'in', brand_id)]"
                             context="{
                             'res_partner_search_mode': type == 'opportunity' and 'customer' or False,
                             'default_name': contact_name or partner_name,
@@ -32,15 +29,21 @@
                             'default_team_id': team_id,
                             'show_vat': True}"/>
                         <field name="name" placeholder="e.g. Product Pricing" />
+                        <field name="category_id" required="1" domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]" invisible="brand_id == False" options="{'no_create': True, 'no_create_edit': True}"  string="Category"  />
+                        <field name="is_tag_access" invisible="1" />
+                        <field name="has_tag_required" invisible="1" />
+                        <field name="available_tag_ids" invisible="1" />
+                        <field name="tag_ids"  widget="many2many_tags"   domain="[('id', 'in', available_tag_ids)]" required="has_tag_required == True" invisible="is_tag_access == False" options="{'color_field': 'color', 'no_create_edit': True,'no_create': True}"  />
                         <field name="email_from" string="Email" invisible="1" placeholder='e.g. "email@address.com"' />
                         <field name="phone" string="Phone" invisible="1" required="1" />
                         
                         <field name="bci_project" required="1" string="BCI Project ID / Address / Company" />
+                         <field name="expected_revenue"  class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                         <field name="date_deadline" required="1"  />
-                        <field name="expected_revenue"  class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                        <field name="probability" required="1"  />
                         <div>
                             <div class="o_row">
-                                <field name="priority" class="oe_inline" nolabel="1" widget="priority"/>
+                                <field name="priority" invisible="1" class="oe_inline" nolabel="1" widget="priority"/>
                             </div>
                             <div class="o_row" groups="crm.group_use_recurring_revenues">
                                 <field name="recurring_revenue" class="oe_inline o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
@@ -239,6 +242,8 @@
                 </xpath>
             </field>
         </record>
+
+    
 
         
 
