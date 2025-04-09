@@ -130,7 +130,7 @@ class MailComposeMessage(models.TransientModel):
                     new_attachment_ids.append(attachment.id)
             new_attachment_ids.reverse()
             self.write({'attachment_ids': [Command.set(new_attachment_ids)]})
-            print(self.custom_email_from,"ooooooooooooooopppppppppppppwwwwwwwwwwwww")
+            print(self.custom_email_from,"oooooooooooooooppppmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmpppppppppwwwwwwwwwwwww")
 
         return {
             res_id: {
@@ -179,6 +179,7 @@ class MailComposeMessage(models.TransientModel):
                 messages += message
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
+        print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
         messages.mail_ids.write({
             'email_to': self.custom_email_to,
             'recipient_ids': [(5, 0, 0)],
