@@ -11,7 +11,7 @@ class ResUsers(models.Model):
         'tag_id',
         string='Tags',
         help='Select the Tags associated with this user',
-        domain="[('company_id', 'in', company_ids)]",
+        domain="[('company_ids', 'in', company_ids)]",
     )
 
     sku_category_ids = fields.Many2many(
@@ -34,7 +34,7 @@ class ResUsers(models.Model):
         print("Removed Companies:", removed_companies)
 
         if removed_companies:
-            removed_tags = self.env['crm.tag'].search([('company_id', 'in', removed_companies)]).ids
+            removed_tags = self.env['crm.tag'].search([('company_ids', 'in', removed_companies)]).ids
             removed_categories = self.env['sku.type.master'].search([('company_id', 'in', removed_companies)]).ids
             self.tag_ids = [(3, tag_id) for tag_id in removed_tags if tag_id in self.tag_ids.ids]
             self.sku_category_ids = [(2, category.id) for category in self.sku_category_ids if
