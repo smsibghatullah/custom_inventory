@@ -66,21 +66,18 @@ class ShiftAssignment(models.Model):
 
     def write(self, vals):
         """Check if all shift assignments are done when state changes"""
+       
         result = super(ShiftAssignment, self).write(vals)
-        if 'state' in vals and vals['state'] == 'done':
-            self.mapped('main_shift_assignment_id').check_and_update_state()
-        return result
-
-    @api.model
-    def write(self, vals):
-        if 'state' in vals and vals['state'] == 'done':
+        print("pppppppppppppppppppppppppppppppppppppppp=====================>>>>>>>>>>>>>>>>>>.mubeen>>>>>>>>>>>>>>>>>")
+        if  self.state == 'done' or vals['state'] == 'done':
             for record in self:
                 for attendance in record.attendance_ids:
                     if attendance.check_in and not attendance.check_out:
                         attendance.check_out = fields.Datetime.now()
-        return super(ShiftAssignment, self).write(vals)
+                        print(attendance.check_out,"pppppppppppppppppppppppppppppppppppppppp=====================>>>>>>>>>>>>>>>>>>.mubeen>>>>>>>>>>>>>>>>>")
+        return result
 
-
+  
 
 class ShiftAttendance(models.Model):
     _name = 'shift.attendance'
