@@ -805,7 +805,9 @@
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <t t-if="o.brand_id.is_tax_show">
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                </t>
                 <t t-if="o.discount_amount">
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</th>
                 </t>
@@ -823,10 +825,12 @@
                     <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                    <t t-if="o.brand_id.is_tax_show">
                     <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
                     <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                         <span t-out="taxes if taxes else 'N/A'" id="line_tax_ids">Tax 15%</span>
                     </td>
+                    </t>
                     <t t-if="o.discount_amount">
                     <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
                     </t>
