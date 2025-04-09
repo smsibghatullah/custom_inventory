@@ -71,6 +71,15 @@ class ShiftAssignment(models.Model):
             self.mapped('main_shift_assignment_id').check_and_update_state()
         return result
 
+    @api.model
+    def write(self, vals):
+        if 'state' in vals and vals['state'] == 'done':
+            for record in self:
+                for attendance in record.attendance_ids:
+                    if attendance.check_in and not attendance.check_out:
+                        attendance.check_out = fields.Datetime.now()
+        return super(ShiftAssignment, self).write(vals)
+
 
 
 class ShiftAttendance(models.Model):
