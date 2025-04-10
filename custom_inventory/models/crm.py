@@ -101,6 +101,7 @@ class MailComposeMessage(models.TransientModel):
 
     def action_send_mail(self):
         """ Used for action button that do not accept arguments. """
+        print("ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
         if not mail_server:
             mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
