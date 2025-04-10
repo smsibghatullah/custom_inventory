@@ -1,4 +1,5 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 import re
 
 class MailMail(models.Model):
@@ -14,11 +15,11 @@ class MailMail(models.Model):
                 if not mail_server:
                     mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
                 if not mail_server:
-                    mail_server = self.env['ir.mail_server'].sudo().search([],limit=1)
+                    raise ValidationError(_("SMTP configuration missing for email: %s") % emails[0])
                 if mail_server:
                     mail.mail_server_id = mail_server.id
                     partner = self.env['res.partner'].sudo().search([('email','=',mail_server.smtp_user)],limit=1)
-                    mail.email_from = partner.email_formatted if partner else (self.env.company.email_formatted if self.env.company.email_formatted else emails[0])
+                    mail.email_from = partner.email_formatted if partner else (self.env.company.email_formatted if self.env.company.email_formatted else mail_server.smtp_user)
 
 
         return super(MailMail, self).send(auto_commit=auto_commit,raise_exception=raise_exception)

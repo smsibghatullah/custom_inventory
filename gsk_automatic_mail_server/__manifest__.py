@@ -14,8 +14,8 @@
         Send emails
     """,
     'category': 'Productivity/Discuss',
-    'author': 'Gritnec Solutions',
-    'website': 'https://gritnecsolutions.com',
+    'author': 'Dynamic Solution Maker',
+    'website': 'https://dsmpk.com',
     'license': 'LGPL-3',
     'depends': ['mail'],
     'installable': True,
