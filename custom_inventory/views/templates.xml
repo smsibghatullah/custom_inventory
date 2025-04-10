@@ -1,0 +1,1270 @@
+<odoo>
+    <data>
+
+<template id="sale.report_saleorder_document">
+<t t-call="web.html_container">
+    <t t-call="web.external_layout">
+
+
+        <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+
+        <t t-set="forced_vat" t-value="doc.fiscal_position_id.foreign_vat"/>          
+       <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+       <div class="oe_structure"/>
+       <!-- Brand Logo and name -->
+       <div style="position: fixed; top: 0; left: 0; padding: 10px;">
+            <t t-if="doc.brand_id">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 220px; max-width: 300px;" />
+                    </div>
+                    <div style="margin-left: 10px;">
+                        <!-- <span t-field="doc.brand_id.name" /> -->
+                    </div>
+                </div>
+            </t>
+        </div>
+
+        <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
+            <span t-field="doc.brand_id.address" />
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <t t-if="doc.state in ['draft', 'sent']">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; QUOTATION / ESTIMATE &#160;&#160;</span>
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+        </div>
+        </t>
+        <t t-else="">
+        <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; SALES ORDER &#160;&#160;</span>
+            <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+        </div>
+        </t>
+       <!-- Customer details -->
+        <div style="font-size: 15px; margin-bottom: 10px;">
+            <div style="font-weight: bold;">Bill To : </div>
+            <span t-field="doc.customer_description"
+                style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
+            </div>
+
+        <p t-if="doc.partner_id.vat" style="margin-top: 5px;">
+            <t t-if="doc.company_id.account_fiscal_country_id.vat_label" 
+            t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
+            <t t-else="">Tax ID</t>: 
+            <span t-field="doc.partner_id.vat" style="font-weight: bold;"/>
+        </p>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div style="width: 60%;">
+            
+
+           
+            </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="doc.state in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.state not in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
+                    </tr>
+                    <tr t-if="doc.date_order">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
+                        </td>
+                    </tr>
+                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
+                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
+                            <div name="expiration_date">
+                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
+                    </tr>
+                     <tr t-if="doc.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.payment_term_id"></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br/>
+        <table style="margin-bottom: 10px;  width: 100%;">
+            <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
+            
+            <t t-foreach="valid_fields" t-as="field">
+                <tr>
+                    <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
+                        <t t-esc="field.text_field" />
+                    </td>
+
+                    <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
+                        <t t-esc="field.text_value" />
+                    </td>
+                </tr>
+            </t>
+        </table>
+
+        <t t-if="doc.checkbox_fields">
+                    <table style="margin-bottom:10px;  width: 100%;">
+                        <t t-set="checkbox_count" t-value="len(doc.checkbox_fields)" />
+
+                        <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
+                            <tr>
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index + 1].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index + 2].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="doc.checkbox_fields[index + 3].checkbox_field" />
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr>
+                                <!-- Checkbox Values -->
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="doc.checkbox_fields[index].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="doc.checkbox_fields[index + 1].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="doc.checkbox_fields[index + 2].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="doc.checkbox_fields[index + 3].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </t>
+
+                <t t-if="doc.selection_fields">
+                    <table style="margin-bottom:10px; width: 100%;">
+                        <t t-set="selection_count" t-value="len(doc.selection_fields)" />
+                                <t t-foreach="range(0, selection_count, 4)" t-as="index">
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="doc.selection_fields[index].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="doc.selection_fields[index + 1].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and doc.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="doc.selection_fields[index + 2].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and doc.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="doc.selection_fields[index + 3].selection_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and doc.selection_fields[index].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="doc.selection_fields[index].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and doc.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="doc.selection_fields[index + 1].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and doc.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="doc.selection_fields[index + 2].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and doc.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="doc.selection_fields[index + 3].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+
+        <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+        <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
+        <table style="width: 100%;text-align: center;">
+        <thead>
+            <tr>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <t t-if="doc.brand_id.is_tax_show">
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                </t>
+                 <t t-if="doc.discount_amount">
+                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
+                 </t>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
+            </tr>
+        </thead>
+        <tbody class="sale_tbody">
+           <t t-set="index" t-value="0"/> 
+           <t t-foreach="lines_to_report" t-as="line">
+           <t t-set="index" t-value="index + 1"/>
+                <tr>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                    <t t-if="doc.brand_id.is_tax_show">
+                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
+                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                            <span t-out="taxes">Tax 15%</span>
+                    </td>
+                    </t> 
+                    <t t-if="doc.discount_amount">
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                    </t>
+                    <td style="border: 1px solid black; padding: 10px;">
+                            <span t-field="line.product_uom_qty">0.00</span>
+                            <span t-field="line.product_uom">units</span>
+                    </td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                </tr>
+            </t>
+        </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <!-- Left side -->
+            <div>
+                <p style="font-size: 15px;">Thank you for your business!</p>
+            </div>
+
+            <!-- Right side (Total Calculation) -->
+            <div style="text-align: right;">
+                <table style="border-collapse: collapse; font-size: 15px;">
+                    <tr>
+                        <td style="padding: 5px;">Sub Total</td>
+                        <td style="padding: 5px;"><span t-field="doc.amount_without_shipping">0.00</span></td>
+                    </tr>
+                    <tr t-if="doc.carrier_id.fixed_price">
+                        <td style="padding: 5px;">Shipping</td>
+                        <td style="padding: 5px;"><span t-field="doc.carrier_id.fixed_price">0.00</span></td>
+                    </tr>
+                    <tr t-if="doc.brand_id.is_tax_show">
+                        <td style="padding: 5px;">Total Tax (<span t-field="doc.amount_tax">0.00</span>)</td>
+                        <td style="padding: 5px;">
+                            <span t-field="doc.amount_tax">0.00</span>
+                        </td>
+                    </tr>
+                   <tr t-if="doc.discount_amount">
+                        <td style="padding: 5px;">Discount</td>
+                        <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
+                    </tr>
+                    <tr t-if="doc.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="doc.amount_total">0.00</span></strong></td>
+                    </tr>
+                    <tr t-if="not doc.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="doc.amount_without_shipping + doc.carrier_id.fixed_price if doc.carrier_id else doc.amount_without_shipping">0.00</span></strong></td>
+                    </tr>
+
+                   
+                </table>
+            </div>
+        </div>
+        <!-- Bank Details -->
+        <div style="margin-top: 20px;">
+            <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
+            <p style="font-size: 15px;">Bank Deposit</p>
+
+            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+              <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
+            </div>
+        </div>
+        <!-- Special Notes -->
+         <t t-if="doc.note">
+            <div class="mt-4">
+                <strong>Special Note:</strong>
+                <span t-field="doc.note" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if doc.company_id.terms_type != 'html' else ''}" name="order_note"/>
+            </div>
+        <hr/>
+        </t>
+<br/>
+
+
+        <!-- Terms & conditions -->
+        <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                      <strong>Terms and Conditions:</strong>
+                        <t t-if="doc.state == 'draft'">
+                        <div t-field="doc.terms_conditions" />
+                    </t>
+                    <t t-else="">
+                        <div t-field="doc.terms_conditions" />
+                    </t>
+        </div>
+
+        </div>
+       <div t-if="not doc.signature" class="oe_structure"></div>
+            <div t-else="" class="mt-4 ml64 mr4" name="signature">
+                <div class="offset-8">
+                    <strong>Signature</strong>
+                </div>
+                <div class="offset-8">
+                    <img t-att-src="image_data_uri(doc.signature)" style="max-height: 4cm; max-width: 8cm;"/>
+                </div>
+                <div class="offset-8 text-center">
+              x        <span t-field="doc.signed_by">Oscar Morgan</span>
+                </div>
+            </div>
+    </t>
+    </t>
+</template>
+
+
+
+    
+
+<template id="purchase.report_purchaseorder_document">
+    <t t-call="web.external_layout">
+
+        <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+     
+        <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+        <div class="oe_structure"/>
+        <div style="position: fixed; top: 0; left: 0; padding: 10px;">
+                <t t-if="o.brand_id">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 220px; max-width: 300px;" />
+                        </div>
+                        <div style="margin-left: 10px;">
+                            <!-- <span t-field="o.brand_id.name" /> -->
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
+                <span t-field="o.brand_id.address" />
+            </div>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <t t-if="o.state in ['draft', 'sent', 'to approve']">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; REQUEST FOR QUOTATION &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+                </t>
+            <t t-if="o.state in ['purchase', 'done']">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; PURCHASE ORDER &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+            </t>
+            <t t-if="o.state == 'cancel'">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; CANCELLED PURCHASE ORDER &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+            </t>
+
+                   <!-- Customer details -->
+            <div style="font-size: 15px; margin-bottom: 10px;">
+            <div style="font-weight: bold;">Bill To : </div>
+            <span t-field="o.partner_id"
+                 t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'
+                style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
+            </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div style="width: 60%;">
+              <t t-if="o.dest_address_id">
+                  
+                </t>
+           
+            </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="o.user_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.user_id"></span></td>
+                    </tr>
+                    <tr t-if="o.name">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">PO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.name"></span></td>
+                    </tr>
+                    <tr t-if="o.state in ['purchase','done'] and o.date_approve">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span  t-field="o.date_approve" ></span>
+                        </td>
+                    </tr>
+                     <tr t-elif="o.date_order">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Deadline</td>
+                        <td   style="border: 1px solid black; padding: 5px;">
+                              <div t-if="o.date_order" >
+                                   <p t-field="o.date_order" class="m-0"/>
+                            </div>
+                              <div t-elif="o.date_order" >
+                                <p t-field="o.date_order" class="m-0"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr t-if="o.partner_ref">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.partner_ref"></span></td>
+                    </tr>
+                     <tr t-if="o.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br/>
+         <table style="margin-bottom: 10px;  width: 100%;">
+            <t t-set="valid_fields" t-value="[field for field in o.text_fields if field.text_value]" />
+            
+            <t t-foreach="valid_fields" t-as="field">
+                <tr>
+                    <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
+                        <t t-esc="field.text_field" />
+                    </td>
+
+                    <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
+                        <t t-esc="field.text_value" />
+                    </td>
+                </tr>
+            </t>
+        </table>
+
+        <t t-if="o.checkbox_fields">
+                    <table style="margin-bottom:10px;  width: 100%;">
+                        <t t-set="checkbox_count" t-value="len(o.checkbox_fields)" />
+
+                        <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
+                            <tr>
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 1].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 2].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 3].checkbox_field" />
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr>
+                                <!-- Checkbox Values -->
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 1].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 2].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 3].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </t>
+
+                <t t-if="o.selection_fields">
+                    <table style="margin-bottom:10px; width: 100%;">
+                        <t t-set="selection_count" t-value="len(o.selection_fields)" />
+                                <t t-foreach="range(0, selection_count, 4)" t-as="index">
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and o.selection_fields[index].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and o.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 1].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and o.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 2].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and o.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 3].selection_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and o.selection_fields[index].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and o.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 1].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and o.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 2].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and o.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 3].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+                        <table style="width: 100%;text-align: center;">
+                            <thead>
+                                <tr>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                                    <t t-if="o.brand_id.is_tax_show">
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                                    </t>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                            <t t-set="index" t-value="0"/> 
+                            <t t-foreach="o.order_line" t-as="line">
+                            <t t-set="index" t-value="index + 1"/>
+                                    <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
+                                        <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                                        <t t-if="o.brand_id.is_tax_show">
+                                        <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.taxes_id])"/>
+                                        <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                                            <span t-out="taxes">Tax 15%</span>
+                                        </td>
+                                        </t> 
+                                        <td style="border: 1px solid black; padding: 10px;">
+                                                    <span t-field="line.product_qty"/>
+                                                        <span t-field="line.product_uom.name" groups="uom.group_uom"/>
+                                                        <span t-if="line.product_packaging_id">
+                                                            (<span t-field="line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="line.product_packaging_id"/>)
+                                                        </span>
+                                        </td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            </table>
+
+                            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                                <!-- Left side -->
+                                    <div>
+                                        <p style="font-size: 15px;">Thank you for your business!</p>
+                                    </div>
+
+                                    <!-- Right side (Total Calculation) -->
+                                    <div style="text-align: right;">
+                                        <table style="border-collapse: collapse; font-size: 15px;">
+                                            <tr>
+                                                <td style="padding: 5px;">Sub Total</td>
+                                                <td style="padding: 5px;"><span t-field="o.amount_untaxed">0.00</span></td>
+                                            </tr>
+                                            <tr t-if="o.brand_id.is_tax_show">
+                                                <td style="padding: 5px;">Total Tax (<span t-field="o.amount_tax">0.00</span>)</td>
+                                                <td style="padding: 5px;">
+                                                    <span t-field="o.amount_tax">0.00</span>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                                                <td style="padding: 1px;"><strong>Total</strong></td>
+                                                <td style="padding: 1px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
+                                            </tr>
+                                            <tr t-if="not o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                                                <td style="padding: 1px;"><strong>Total</strong></td>
+                                                <td style="padding: 1px;"><strong><span t-field="o.amount_untaxed">0.00</span></strong></td>
+                                            </tr>
+                                        
+                                        </table>
+                                    </div>
+                                </div>
+                                      <!-- Bank Details -->
+                                <div style="margin-top: 20px;">
+                                    <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
+                                    <p style="font-size: 15px;">Bank Deposit</p>
+
+                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
+                                    </div>
+                                </div>
+                                <!-- Special Notes -->
+                                <t t-if="o.notes">
+                                    <div class="mt-4">
+                                        <strong>Special Note:</strong>
+                                        <span t-field="o.notes" />
+                                    </div>
+                                <hr/>
+                                </t>
+                        <br/>
+
+                                <!-- Terms & conditions -->
+                                <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                                            <strong>Terms and Conditions:</strong>
+                                            <t t-if="o.state == 'draft'">
+                                                <div t-field="o.terms_conditions" />
+                                            </t>
+                                            <t t-else="">
+                                                <div t-field="o.terms_conditions" />
+                                            </t>
+                                </div>
+        </div>
+    </t>
+</template>
+
+<template id="account.report_invoice_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
+                <!-- Brand Logo and name -->
+                <div class="page" style="font-size: 14pt;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+                
+                <div class="oe_structure"/>
+                <div style="position: fixed; top: 0; left: 0; padding: 10px;">
+                        <t t-if="o.brand_id">
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div>
+                                    <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 220px; max-width: 300px;" />
+                                </div>
+                                <div style="margin-left: 10px;">
+                                    <!-- <span t-field="o.brand_id.name" /> -->
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;">
+                        <span t-field="o.brand_id.address" />
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+
+                    <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                        <span style="font-weight: bold; font-size: 30px;">&#160;&#160; TAX INVOICE &#160;&#160;</span>
+                        <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    </div>
+                    <h2 style="display:none"></h2>
+                <!-- Customer details -->
+                    <div style="font-size: 15px; margin-bottom: 10px;">
+                        <div style="font-weight: bold;">Bill To : </div>
+                        <span t-field="o.customer_description"
+                            style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
+                        </div>
+
+                    <p t-if="o.partner_id.vat" style="margin-top: 5px;">
+                        <t t-if="o.company_id.account_fiscal_country_id.vat_label" 
+                        t-out="o.company_id.account_fiscal_country_id.vat_label"/>
+                        <t t-else="">Tax ID</t>: 
+                        <span t-field="o.partner_id.vat" style="font-weight: bold;"/>
+                    </p>
+
+                     <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div style="width: 60%;">
+            <!-- Dynamic fields -->
+            </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_origin">SO0000</span></td>
+                    </tr>
+                     <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-if="o.name != '/'" t-field="o.name">INV/2023/0001</span></td>
+                    </tr>
+                    <tr t-if="o.invoice_date" name="invoice_date">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span t-field="o.formatted_invoice_date" >1-Feb-2024</span>
+                        </td>
+                    </tr>
+                     <tr t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Due Date</td>
+                        <td t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'"   style="border: 1px solid black; padding: 5px;">
+                            <div name="due_date">
+                            <span t-field="o.formatted_due_date">3-Jan-2025</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
+                    </tr>
+                     <tr t-if="o.invoice_payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_payment_term_id"></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+        <!-- Product and Order line table -->
+        <table style="width: 100%;; text-align: center;">
+        <thead>
+            <tr>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                <t t-if="o.brand_id.is_tax_show">
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                </t>
+                <t t-if="o.discount_amount">
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</th>
+                </t>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
+            </tr>
+        </thead>
+        <tbody class="sale_tbody">
+           <t t-set="index" t-value="0"/> 
+           <t t-set="lines" t-value="o.invoice_line_ids.sorted(key=lambda l: (-l.sequence, l.date, l.move_name, -l.id), reverse=True)"/>
+           <t t-foreach="lines" t-as="line">
+           <t t-set="index" t-value="index + 1"/>
+                <tr>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                    <t t-if="o.brand_id.is_tax_show">
+                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
+                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                        <span t-out="taxes if taxes else 'N/A'" id="line_tax_ids">Tax 15%</span>
+                    </td>
+                    </t>
+                    <t t-if="o.discount_amount">
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                    </t>
+                    <td style="border: 1px solid black; padding: 10px;">
+                            <span t-field="line.quantity">0.00</span>
+                            <span t-field="line.product_uom_id">units</span>
+                    </td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                </tr>
+            </t>
+        </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <!-- Left side -->
+            <div>
+                <p style="font-size: 15px;">Thank you for your business!</p>
+            </div>
+
+            <!-- Right side (Total Calculation) -->
+            <div style="text-align: right;">
+                <table style="border-collapse: collapse; font-size: 15px;">
+                    <tr>
+                        <td style="padding: 5px;">Sub Total</td>
+                        <td style="padding: 5px;"><span t-field="o.amount_untaxed">0.00</span></td>
+                    </tr>
+                     <tr t-if="o.discount_amount">
+                        <td style="padding: 5px;">Discount</td>
+                        <td style="padding: 5px;"><span t-field="o.discount_amount">0.00</span></td>
+                    </tr>
+                    <tr t-if="o.brand_id.is_tax_show">
+                        <td style="padding: 5px;">Total Tax (<span t-field="o.amount_tax">0.00</span>)</td>
+                        <td style="padding: 5px;">
+                            <span t-field="o.amount_tax">0.00</span>
+                        </td>
+                    </tr>
+                    <tr t-if="o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
+                    </tr>
+                    <tr t-if="not o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                        <td style="padding: 1px;"><strong>Total</strong></td>
+                        <td style="padding: 1px;"><strong><span t-field="o.amount_untaxed + o.discount_amount if o.discount_amount else o.amount_untaxed">0.00</span></strong></td>
+                    </tr>
+                  
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
+            <p style="font-size: 15px;">Bank Deposit</p>
+
+            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+              <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
+            </div>
+        </div>
+
+        <t t-if="o.narration">
+            <div class="mt-4">
+                <strong>Special Note:</strong>
+            <div class="text-muted mb-3" t-attf-style="#{'text-align:justify;text-justify:inter-word;' if o.company_id.terms_type != 'html' else ''}" t-if="not is_html_empty(o.narration)" name="comment">
+                        <span t-field="o.narration"/>
+                    </div>
+            </div>
+        <hr/>
+        </t>
+        <t t-if="o.payment_link">
+         <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                <strong>Payments Link:</strong>
+            <div t-field="o.payment_link" />
+        </div>
+        <hr/>
+        </t>
+        <t t-if="o.terms_conditions">
+            <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                <strong>Terms and Conditions:</strong>
+            <div t-field="o.terms_conditions" />
+        </div>
+        </t>
+       <div id="right-elements" t-attf-class="#{'col-5' if report_type != 'html' else 'col-12 col-md-5'} ms-5 d-inline-block float-end">
+                              
+                            </div>
+
+        </div>
+                
+            </t>
+        </template>
+
+            <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+        <xpath expr="//div[hasclass('page')]/h2" position="replace">
+            <h2>
+               
+            </h2>
+        </xpath>
+    </template>
+
+
+<template id="purchase.report_purchasequotation_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+                <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
+                <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+        <div class="oe_structure"/>
+        <div style="position: fixed; top: 0; left: 0; padding: 10px;">
+                <t t-if="o.brand_id">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <img t-att-src="image_data_uri(o.brand_id.logo)" style="max-height: 220px; max-width: 300px;" />
+                        </div>
+                        <div style="margin-left: 10px;">
+                            <!-- <span t-field="o.brand_id.name" /> -->
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
+                <span t-field="o.brand_id.address" />
+            </div>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <t t-if="o.state in ['draft', 'sent', 'to approve']">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; REQUEST FOR QUOTATION &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+                </t>
+            <t t-if="o.state in ['purchase', 'done']">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; PURCHASE ORDER &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+            </t>
+            <t t-if="o.state == 'cancel'">
+                <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                    <span style="font-weight: bold; font-size: 30px;">&#160;&#160; CANCELLED PURCHASE ORDER &#160;&#160;</span>
+                    <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
+                </div>
+            </t>
+
+                   <!-- Customer details -->
+            <div style="font-size: 15px; margin-bottom: 10px;">
+            <div style="font-weight: bold;">Bill To : </div>
+            <span t-field="o.partner_id"
+                 t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'
+                style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
+            </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div style="width: 60%;">
+              <t t-if="o.dest_address_id">
+                  
+                </t>
+           
+            </div>
+
+            <!-- Right Side: Sale Order Details -->
+            <div style="width: 35%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <tr t-if="o.user_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.user_id"></span></td>
+                    </tr>
+                    <tr t-if="o.name">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">PO #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.name"></span></td>
+                    </tr>
+                    <tr t-if="o.state in ['purchase','done'] and o.date_approve">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
+                            <span  t-field="o.date_approve" ></span>
+                        </td>
+                    </tr>
+                     <tr t-elif="o.date_order">
+                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Order Deadline</td>
+                        <td   style="border: 1px solid black; padding: 5px;">
+                              <div t-if="o.date_order" >
+                                   <p t-field="o.date_order" class="m-0"/>
+                            </div>
+                              <div t-elif="o.date_order" >
+                                <p t-field="o.date_order" class="m-0"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr t-if="o.partner_ref">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.partner_ref"></span></td>
+                    </tr>
+                     <tr t-if="o.payment_term_id">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
+                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.payment_term_id"></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br/>
+         <table style="margin-bottom: 10px;  width: 100%;">
+            <t t-set="valid_fields" t-value="[field for field in o.text_fields if field.text_value]" />
+            
+            <t t-foreach="valid_fields" t-as="field">
+                <tr>
+                    <td style="width: 25%; max-width: 350px; background-color: #666; color: white; padding: 12px; border: 1px solid black; font-weight: bold;text-align: left;">
+                        <t t-esc="field.text_field" />
+                    </td>
+
+                    <td style="width: 75%; max-width: 300px; border: 1px solid black; padding: 12px; text-align: center; word-wrap: break-word;">
+                        <t t-esc="field.text_value" />
+                    </td>
+                </tr>
+            </t>
+        </table>
+
+        <t t-if="o.checkbox_fields">
+                    <table style="margin-bottom:10px;  width: 100%;">
+                        <t t-set="checkbox_count" t-value="len(o.checkbox_fields)" />
+
+                        <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
+                            <tr>
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 1].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 2].checkbox_field" />
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                        <t t-esc="o.checkbox_fields[index + 3].checkbox_field" />
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr>
+                                <!-- Checkbox Values -->
+                                <t t-if="index &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 1 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 1].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 2 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 2].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                                <t t-if="index + 3 &lt; checkbox_count">
+                                    <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                        <t t-if="o.checkbox_fields[index + 3].checkbox_value">YES</t>
+                                        <t t-else="">NO</t>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </t>
+
+                <t t-if="o.selection_fields">
+                    <table style="margin-bottom:10px; width: 100%;">
+                        <t t-set="selection_count" t-value="len(o.selection_fields)" />
+                                <t t-foreach="range(0, selection_count, 4)" t-as="index">
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and o.selection_fields[index].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and o.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 1].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and o.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 2].selection_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and o.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="text-align: center;background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">
+                                                <t t-esc="o.selection_fields[index + 3].selection_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <t t-if="index &lt; selection_count and o.selection_fields[index].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 1 &lt; selection_count and o.selection_fields[index + 1].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 1].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 2 &lt; selection_count and o.selection_fields[index + 2].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 2].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                        <t t-if="index + 3 &lt; selection_count and o.selection_fields[index + 3].selected_value.value_field">
+                                            <td style="width: 250px; max-width: 250px; border: 1px solid black; padding: 10px; text-align: center; word-wrap: break-word;">
+                                                <t t-esc="o.selection_fields[index + 3].selected_value.value_field" />
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+                        <table style="width: 100%;text-align: center;">
+                            <thead>
+                                <tr>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
+                                    <t t-if="o.brand_id.is_tax_show">
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
+                                    </t>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
+                                    <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                            <t t-set="index" t-value="0"/> 
+                            <t t-foreach="o.order_line" t-as="line">
+                            <t t-set="index" t-value="index + 1"/>
+                                    <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
+                                        <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                                        <t t-if="o.brand_id.is_tax_show">
+                                        <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.taxes_id])"/>
+                                        <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                                            <span t-out="taxes">Tax 15%</span>
+                                        </td>
+                                        </t> 
+                                        <td style="border: 1px solid black; padding: 10px;">
+                                                    <span t-field="line.product_qty"/>
+                                                        <span t-field="line.product_uom.name" groups="uom.group_uom"/>
+                                                        <span t-if="line.product_packaging_id">
+                                                            (<span t-field="line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="line.product_packaging_id"/>)
+                                                        </span>
+                                        </td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            </table>
+
+                            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                                <!-- Left side -->
+                                    <div>
+                                        <p style="font-size: 15px;">Thank you for your business!</p>
+                                    </div>
+
+                                    <!-- Right side (Total Calculation) -->
+                                    <div style="text-align: right;">
+                                        <table style="border-collapse: collapse; font-size: 15px;">
+                                            <tr>
+                                                <td style="padding: 5px;">Sub Total</td>
+                                                <td style="padding: 5px;"><span t-field="o.amount_untaxed">0.00</span></td>
+                                            </tr>
+                                            <tr t-if="o.brand_id.is_tax_show">
+                                                <td style="padding: 5px;">Total Tax (<span t-field="o.amount_tax">0.00</span>)</td>
+                                                <td style="padding: 5px;">
+                                                    <span t-field="o.amount_tax">0.00</span>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                                                <td style="padding: 1px;"><strong>Total</strong></td>
+                                                <td style="padding: 1px;"><strong><span t-field="o.amount_total">0.00</span></strong></td>
+                                            </tr>
+                                            <tr t-if="not o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                                                <td style="padding: 1px;"><strong>Total</strong></td>
+                                                <td style="padding: 1px;"><strong><span t-field="o.amount_untaxed + o.discount_amount if o.discount_amount else o.amount_untaxed">0.00</span></strong></td>
+                                            </tr>
+                                        
+                                        </table>
+                                    </div>
+                                </div>
+                                      <!-- Bank Details -->
+                                <div style="margin-top: 20px;">
+                                    <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
+                                    <p style="font-size: 15px;">Bank Deposit</p>
+
+                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
+                                    </div>
+                                </div>
+                                <!-- Special Notes -->
+                                <t t-if="o.notes">
+                                    <div class="mt-4">
+                                        <strong>Special Note:</strong>
+                                        <span t-field="o.notes" />
+                                    </div>
+                                <hr/>
+                                </t>
+                        <br/>
+
+                                <!-- Terms & conditions -->
+                                <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                                            <strong>Terms and Conditions:</strong>
+                                            <t t-if="o.state == 'draft'">
+                                                <div t-field="o.terms_conditions" />
+                                            </t>
+                                            <t t-else="">
+                                                <div t-field="o.terms_conditions" />
+                                            </t>
+                                </div>
+        </div>
+            </t>
+    </template>
+
+
+    </data>
+</odoo>

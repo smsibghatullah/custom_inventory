@@ -1,0 +1,57 @@
+<odoo>
+    <data>
+        <record id="view_product_cost_wizard" model="ir.ui.view">
+            <field name="name">product.cost.wizard.form</field>
+            <field name="model">product.cost.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Product Cost Wizard">
+                    <group>
+                        <field name="product_id" readonly='1' />
+                        <field name="product_cost" readonly='1' />
+                        <field name="total_qty" readonly='1' />
+                        <field name="new_expenses_cost"/>
+                    </group>
+                    <footer>
+                        <button string="Save" type="object" name="action_save" class="btn-primary"/>
+                        <button string="Cancel" type="object" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_open_product_cost_wizard" model="ir.actions.act_window">
+            <field name="name">Product Cost Wizard</field>
+            <field name="res_model">product.cost.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_product_cost_wizard"/>
+            <field name="target">new</field>
+        </record>
+
+        <record id="product_product_stock_tree_inherited" model="ir.ui.view">
+            <field name="name">product.product.stock.tree.inherited</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.product_product_stock_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <button name="open_product_cost_wizard" string="Expense Cost" type="object" class="btn-link"
+                        icon="fa-calculator"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_product_form_inherit" model="ir.ui.view">
+            <field name="name">product.product.form.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                     <field name="default_product_cost" readonly="1" />
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+
+
+

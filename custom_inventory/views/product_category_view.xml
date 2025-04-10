@@ -1,0 +1,21 @@
+<odoo>
+    <record id="view_product_category_form" model="ir.ui.view">
+        <field name="name">product.category.form.inherit</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='account_property']" position="inside">
+                        <group string="Sale Accounts">
+                            <field name="sale_debit_account_id"/>
+                            <field name="sale_credit_account_id"/>
+                            <field name="sale_journal_id"/>
+                        </group>
+                         <group string="Purchase Accounts">
+                            <field name="purchase_debit_account_id"/>
+                            <field name="purchase_credit_account_id"/>
+                            <field name="purchase_journal_id"/>
+                        </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

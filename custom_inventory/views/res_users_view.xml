@@ -1,0 +1,31 @@
+<odoo>
+<data>
+<record id="view_users_form_inherit" model="ir.ui.view">
+    <field name="name">res.users.form.inherit.brand</field>
+    <field name="model">res.users</field>
+    <field name="inherit_id" ref="base.view_users_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='company_id']" position="after">
+            <field name="tag_ids" options="{'no_create': True}" widget="many2many_tags">
+            </field>
+            <field name="sku_category_ids"  options="{'no_create': True}" widget="many2many_tags">
+            </field>
+        </xpath>
+    </field>
+</record>
+
+<record id="view_partner_form_inherit" model="ir.ui.view">
+    <field name="name">res.partner.form.inherit.brand</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='category_id']" position="after">
+            <field name="brand_ids" options="{'no_create': True}" invisible="0" widget="many2many_tags">
+            </field>
+        </xpath>
+         
+    </field>
+</record>
+
+</data>
+</odoo>
