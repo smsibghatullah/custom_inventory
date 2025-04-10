@@ -311,7 +311,7 @@
                     </tr>
                     <tr t-if="not doc.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
-                        <td style="padding: 1px;"><strong><span t-field="doc.amount_without_shipping + doc.carrier_id.fixed_price if doc.carrier_id else doc.amount_without_shipping">0.00</span></strong></td>
+                        <td style="padding: 1px;"><strong><span t-esc="doc.amount_without_shipping + doc.carrier_id.fixed_price if doc.carrier_id else doc.amount_without_shipping"/></strong></td>
                     </tr>
 
                    
@@ -874,7 +874,7 @@
                     </tr>
                     <tr t-if="not o.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
-                        <td style="padding: 1px;"><strong><span t-field="o.amount_untaxed + o.discount_amount if o.discount_amount else o.amount_untaxed">0.00</span></strong></td>
+                        <td style="padding: 1px;"><strong><span t-esc="o.amount_untaxed + o.discount_amount if o.discount_amount else o.amount_untaxed">0.00</span></strong></td>
                     </tr>
                   
                 </table>
