@@ -103,9 +103,9 @@ class MailComposeMessage(models.TransientModel):
         """ Used for action button that do not accept arguments. """
         print("ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
+        print(mail_server,"ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         if not mail_server:
-            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
-        if not mail_server:
+            print("oooooooooooooooooooooooooooooooooooooooo")
             raise ValidationError("SMTP configuration missing for email: %s" % self.custom_email_from)
         self._action_send_mail(auto_commit=False)
         return {'type': 'ir.actions.act_window_close'}
