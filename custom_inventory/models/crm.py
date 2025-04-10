@@ -99,6 +99,16 @@ class MailComposeMessage(models.TransientModel):
     custom_email_to = fields.Char(string="Custom Email To")
     custom_email_from = fields.Char(string="Custom Email From")
 
+    def action_send_mail(self):
+        """ Used for action button that do not accept arguments. """
+        mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
+        if not mail_server:
+            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
+        if not mail_server:
+            raise UserError(_("SMTP configuration missing for email: %s") % self.custom_email_from)
+        self._action_send_mail(auto_commit=False)
+        return {'type': 'ir.actions.act_window_close'}
+
     
     def _prepare_mail_values_rendered(self, res_ids):
         """Generate values that are already rendered. This is used mainly in
@@ -135,7 +145,7 @@ class MailComposeMessage(models.TransientModel):
             if not mail_server:
                 mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
             if not mail_server:
-                raise ValidationError(_("SMTP configuration missing for email: %s") % self.custom_email_from)
+                raise UserError(_("SMTP configuration missing for email: %s") % self.custom_email_from)
 
         return {
             res_id: {
