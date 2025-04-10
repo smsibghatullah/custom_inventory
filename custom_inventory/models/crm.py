@@ -131,6 +131,11 @@ class MailComposeMessage(models.TransientModel):
             new_attachment_ids.reverse()
             self.write({'attachment_ids': [Command.set(new_attachment_ids)]})
             print(self.custom_email_from,"oooooooooooooooppppmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmpppppppppwwwwwwwwwwwww")
+            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
+            if not mail_server:
+                mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
+            if not mail_server:
+                raise ValidationError(_("SMTP configuration missing for email: %s") % self.custom_email_from)
 
         return {
             res_id: {
