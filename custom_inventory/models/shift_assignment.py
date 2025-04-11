@@ -64,9 +64,9 @@ class ShiftAssignment(models.Model):
     main_shift_assignment_id = fields.Many2one('shift.assignment.main', string='Shift Assignment', required=True)
     attendance_ids = fields.One2many('shift.attendance', 'shift_id', string="Attendance Records")
 
+    @api.model
     def write(self, vals):
         """Check if all shift assignments are done when state changes"""
-       
         result = super(ShiftAssignment, self).write(vals)
         print("pppppppppppppppppppppppppppppppppppppppp=====================>>>>>>>>>>>>>>>>>>.mubeen>>>>>>>>>>>>>>>>>")
         if  self.state == 'done' or vals['state'] == 'done':
