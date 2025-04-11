@@ -97,9 +97,9 @@ class ShiftAttendance(models.Model):
                 duration = (record.check_out - record.check_in).total_seconds() / 3600.0
                 record.duration = round(duration, 2)
                 task = record.shift_id.task_id if record.shift_id.task_id else False
-            
-                if task and hasattr(task, 'timesheet_ids') and task.timesheet_ids:
-                    print(task.id, "pppppppppppppppppppp")
+                print(task.id, "pppppppp=================================================pppppppppppp")
+                if task and hasattr(task, 'timesheet_ids'):
+                    print(task.id, "pppppppp=================================================pppppppppppp")
 
                     self.env['account.analytic.line'].create({
                         'date': record.check_in.date(),
