@@ -21,7 +21,7 @@ class AccessToken(http.Controller):
         self._token = request.env["api.access_token"]
 
 
-    @http.route('/api/equipment_info/<int:record_id>', type="http", auth="public", methods=["GET"], csrf=False)
+    @http.route('/equipment/public/<int:record_id>/private', type="http", auth="public", methods=["GET"], csrf=False)
     def get_equipment_info(self, record_id, **kwargs):
         try:
             equipment = request.env['maintenance.equipment'].sudo().browse(record_id)
