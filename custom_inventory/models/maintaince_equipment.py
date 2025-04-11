@@ -12,24 +12,26 @@ class MaintenanceEquipment(models.Model):
 
     qr_code_equip = fields.Binary("QR Code", compute="_generate_qr_code")
 
-    def _generate_qr_code(self, **kwargs):
+    def _generate_qr_code(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:
             if qrcode and base64:
+                equipment_url = f"{base_url}/equipment/public/{rec.id}"
+                
                 qr = qrcode.QRCode(
                     version=1,
                     error_correction=qrcode.constants.ERROR_CORRECT_L,
                     box_size=3,
                     border=4,
                 )
-                qr.add_data(rec.id)
+                qr.add_data(equipment_url)
                 qr.make(fit=True)
-                
                 img = qr.make_image(fill_color="black", back_color="white")
                 temp = BytesIO()
                 img.save(temp, format="PNG")
                 qr_image = base64.b64encode(temp.getvalue())
-
                 rec.qr_code_equip = qr_image
+
 
 
 class MaintenanceEquipmentAccess(models.Model):

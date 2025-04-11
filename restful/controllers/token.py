@@ -74,6 +74,34 @@ class AccessToken(http.Controller):
         except Exception as e:
             return {"error": "Unexpected error", "message": str(e)}
 
+    @http.route(['/equipment/public/<int:equipment_id>'], type='http', auth='public', website=True)
+    def public_equipment_page(self, equipment_id, **kw):
+        equipment = request.env['maintenance.equipment'].sudo().browse(equipment_id)
+        if not equipment.exists():
+            return request.not_found()
+
+        public_fields = request.env['maintenance.equipment.access'].sudo().search([
+                ('equipment_id', '=', equipment_id),
+                ('is_public', '=', True)
+            ]).mapped('field_name')
+
+        public_data = []
+        for field in public_fields:
+            if hasattr(equipment, field):
+                value = getattr(equipment, field)
+                field_label = equipment._fields[field].string if field in equipment._fields else field
+                if isinstance(value, models.Model):
+                    value = value.mapped('display_name') if len(value) > 1 else (value.display_name if value else None)
+                public_data.append({
+                    'label': field_label,  
+                    'value': value if value else 'N/A'
+                })
+
+        return request.render('custom_inventory.template_equipment_public_view', {
+            'data': public_data
+        })
+
+
     @http.route('/api/survey_question_data/<int:survey_id>', type="http", auth="public", methods=["GET"], csrf=False)
     def get_survey_questions(self, survey_id, **kwargs):
         try:
