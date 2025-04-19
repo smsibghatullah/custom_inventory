@@ -14,12 +14,14 @@ class MailMail(models.Model):
                 emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', mail.email_from or '')
                 if not emails:
                     continue
-                if not mail.mail_server_id or not emails or mail.mail_server_id.smtp_user != emails[0]:
-                    mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',emails[0])], limit=1)
+
+                if not mail.mail_server_id or mail.mail_server_id.smtp_user != emails[0]:
+                    mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user', '=', emails[0])], limit=1)
                     if not mail_server:
-                        raise ValidationError("SMTP configuration missing for email: %s" % emails[0])
-                    if mail_server:
-                        mail.email_from = mail_server.smtp_user
+                        raise ValidationError(_("SMTP configuration missing for email: %s") % emails[0])
+                    
+                    mail.mail_server_id = mail_server.id  
+                    mail.email_from = mail_server.smtp_user
             except Exception as e:
                 _logger.error("Error processing mail ID %s: %s", mail.id, str(e))
                 if raise_exception:
@@ -31,4 +33,4 @@ class MailMail(models.Model):
             _logger.error("Error sending mail(s): %s", str(e))
             if raise_exception:
                 raise
-            return False  
+            return False
