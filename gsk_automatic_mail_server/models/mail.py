@@ -17,8 +17,8 @@ class MailMail(models.Model):
 
                 if not mail.mail_server_id or mail.mail_server_id.smtp_user != emails[0]:
                     mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user', '=', emails[0])], limit=1)
-                    if not mail_server:
-                        raise ValidationError(_("SMTP configuration missing for email: %s") % emails[0])
+                    # if not mail_server:
+                    #     raise ValidationError(_("SMTP configuration missing for email: %s") % emails[0])
                     
                     mail.mail_server_id = mail_server.id  
                     mail.email_from = mail_server.smtp_user
