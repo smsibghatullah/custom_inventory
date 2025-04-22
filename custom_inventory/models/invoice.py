@@ -319,11 +319,7 @@ class AccountMoveSend(models.TransientModel):
     @api.model
     def _send_mails(self, moves_data):
         subtype = self.env.ref('mail.mt_comment')
-        mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
-        if not mail_server:
-            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
-        if not mail_server:
-            raise ValidationError("SMTP configuration missing for email: %s" % self.custom_email_from)
+       
         for move, move_data in [(move, move_data) for move, move_data in moves_data.items() if move.partner_id.email]:
             mail_template = move_data['mail_template_id']
             mail_template.email_to =self.custom_email_to
@@ -351,11 +347,6 @@ class AccountMoveSend(models.TransientModel):
     @api.model
     def _send_mail(self, move, mail_template, **kwargs):
         """ Send the journal entry passed as parameter by mail. """
-        mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
-        if not mail_server:
-            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
-        if not mail_server:
-            raise ValidationError("SMTP configuration missing for email: %s" % self.custom_email_from)
         partner_ids = kwargs.get('partner_ids', [])
         author_id = kwargs.pop('author_id')
 

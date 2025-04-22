@@ -104,9 +104,6 @@ class MailComposeMessage(models.TransientModel):
         print("ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
         print(mail_server,"ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
-        if not mail_server:
-            print("oooooooooooooooooooooooooooooooooooooooo")
-            raise ValidationError("SMTP configuration missing for email: %s" % self.custom_email_from)
         self._action_send_mail(auto_commit=False)
         return {'type': 'ir.actions.act_window_close'}
 
@@ -142,11 +139,7 @@ class MailComposeMessage(models.TransientModel):
             new_attachment_ids.reverse()
             self.write({'attachment_ids': [Command.set(new_attachment_ids)]})
             print(self.custom_email_from,"oooooooooooooooppppmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmpppppppppwwwwwwwwwwwww")
-            mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
-            if not mail_server:
-                mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.env.company.email)],limit=1)
-            if not mail_server:
-                raise ValidationError("SMTP configuration missing for email: %s" % self.custom_email_from)
+           
 
         return {
             res_id: {
