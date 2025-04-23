@@ -701,6 +701,30 @@ class SaleOrderLine(models.Model):
         readonly=False
     )
 
+    @api.onchange('product_id', 'product_uom_qty')
+    def _check_available_quantity(self):
+        for line in self:
+            if line.product_id and line.product_id.type == 'product':
+                # Get total available quantity in internal locations
+                quants = self.env['stock.quant'].search([
+                    ('product_id', '=', line.product_id.id),
+                    ('location_id.usage', '=', 'internal')
+                ])
+                total_available_qty = sum(quants.mapped('available_quantity'))
+
+                if line.product_uom_qty > total_available_qty:
+                    return {
+                        'warning': {
+                            'title': 'Quantity Warning',
+                            'message': (
+                                f"Product: {line.product_id.display_name}\n"
+                                f"Available quantity is only {total_available_qty:.2f}. "
+                                f"You have entered {line.product_uom_qty:.2f}."
+                            ),
+                        }
+                    }
+
+
     @api.onchange('product_id', 'pricelist_id')
     def _onchange_product_pricelist(self):
         """
