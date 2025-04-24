@@ -37,7 +37,9 @@
                         <field name="phone" string="Phone" invisible="1" required="1" />
                         
                         <field name="bci_project" required="1" string="BCI Project ID / Address / Company" />
-                         <field name="expected_revenue"  class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                         <field name="expected_revenue"   class="oe_inline me-5 o_field_highlight" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                         <label for="expected_revenue" string="Expected Revenue must be greater than zero"
+                                class="text-danger fw-bold"/>
                         <field name="date_deadline" required="1"  />
                         <field name="probability" required="1"  />
                         <div>

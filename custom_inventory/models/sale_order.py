@@ -969,3 +969,42 @@ class ChooseDeliveryCarrier(models.TransientModel):
             'recompute_delivery_price': False,
             'delivery_message': self.delivery_message,
         })
+
+
+class ProjectTask(models.Model):
+    _inherit = 'project.task'
+
+    @api.model
+    def create(self, vals):
+        task = super(ProjectTask, self).create(vals)
+
+        if task.sale_line_id and task.sale_line_id.order_id:
+            project_tags = []
+            for crm_tag in task.sale_line_id.order_id.tag_ids:
+                matching_tag = self.env['project.tags'].search([('name', '=', crm_tag.name)], limit=1)
+                if matching_tag:
+                    project_tags.append(matching_tag.id)
+
+            if project_tags:
+                task.tag_ids = [(6, 0, project_tags)]
+
+        return task
+
+class ProjectProject(models.Model):
+    _inherit = 'project.project'
+
+    @api.model
+    def create(self, vals):
+        task = super(ProjectProject, self).create(vals)
+
+        if task.sale_line_id and task.sale_line_id.order_id:
+            project_tags = []
+            for crm_tag in task.sale_line_id.order_id.tag_ids:
+                matching_tag = self.env['project.tags'].search([('name', '=', crm_tag.name)], limit=1)
+                if matching_tag:
+                    project_tags.append(matching_tag.id)
+
+            if project_tags:
+                task.tag_ids = [(6, 0, project_tags)]
+
+        return task

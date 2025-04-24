@@ -48,6 +48,14 @@ class CrmLead(models.Model):
     is_tag_access = fields.Boolean(compute="_compute_tag_access")
     has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
 
+    @api.model
+    def create(self, vals):
+        if vals.get('expected_revenue', 0) <= 0:
+            raise ValidationError(_("Expected Revenue must be greater than zero."))
+        
+        return super(CrmLead, self).create(vals)
+
+
     @api.depends("brand_id", "brand_id.is_tag_show")
     def _compute_has_tag_required(self):
         for record in self:
