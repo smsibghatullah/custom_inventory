@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_akahu_bank_account_tree" model="ir.ui.view">
+        <field name="name">akahu.bank.account.tree</field>
+        <field name="model">akahu.bank.account</field>
+        <field name="arch" type="xml">
+            <tree create='false' string="Akahu Bank Accounts">
+                <field name="name"/>
+                <field name="formatted_account"/>
+                <field name="balance_current"/>
+                <field name="balance_currency"/>
+                <field name="status"/>
+                <field name="balance_overdrawn"/>
+                <field name="refreshed_balance"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_akahu_bank_account_form" model="ir.ui.view">
+        <field name="name">akahu.bank.account.form</field>
+        <field name="model">akahu.bank.account</field>
+        <field name="arch" type="xml">
+            <form  create='false' edit='false' string="Akahu Bank Account">
+                <sheet>
+                <div class="oe_button_box" name="button_box">
+                        <button name="sync_bank_accounts" type="object" string="Refresh" class="oe_stat_button" icon="fa-refresh">
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="formatted_account"/>
+                            <field name="type"/>
+                            <field name="status"/>
+                        </group>
+                        <group>
+                            <field name="balance_currency"/>
+                            <field name="balance_current"/>
+                            <field name="balance_available"/>
+                            <field name="balance_overdrawn"/>
+                        </group>
+                        <group>
+                            <field name="holder_name"/>
+                            <field name="connection_name"/>
+                            <field name="connection_logo"/>
+                            <field name="last_refresh"/>
+                        </group>
+                        <group>
+                            <field name="refreshed_balance"/>
+                            <field name="refreshed_meta"/>
+                            <field name="refreshed_transactions"/>
+                            <field name="refreshed_party"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Technical Info">
+                            <group>
+                                <field name="akahu_account_id"/>
+                                <field name="authorisation_id"/>
+                                <field name="credentials_id"/>
+                                <field name="connection_id"/>
+                                <field name="attributes"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_akahu_bank_account" model="ir.actions.act_window">
+        <field name="name">Akahu Bank Accounts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">akahu.bank.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_akahu_bank_accounts"
+              name="Bank Accounts"
+              parent="akahu_bank_integration.menu_akahu_root"
+              action="action_akahu_bank_account"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_akahu_bank_account,akahu.bank.account,model_akahu_bank_account,base.group_user,1,1,1,1
+access_akahu_transaction,akahu.transaction,model_akahu_transaction,base.group_user,1,1,1,1
+access_akahu_transaction_link,akahu.transaction.link,model_akahu_transaction_link,base.group_user,1,1,1,1
+access_match_invoice_wizard,match.invoice.wizard,model_match_invoice_wizard,,1,1,1,0
+access_match_invoice_wizard_line,match.invoice.wizard.line,model_match_invoice_wizard_line,,1,1,1,0
+

@@ -1,0 +1,37 @@
+<odoo>
+        <record id="view_match_invoice_wizard_form" model="ir.ui.view">
+            <field name="name">match.invoice.wizard.form</field>
+            <field name="model">match.invoice.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Posted Invoices Matching Transaction" create="false" edit="false">
+                    <group>
+                        <field name="transaction_ref" readonly="1"/>
+                    </group>
+                    <field name="invoice_line_ids" mode="tree" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="selected"/>
+                            <field name="invoice_id" />
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="amount_total"/>
+                            <field name="amount_residual"/>
+                            <field name="invoice_date"/>
+                            <field name="payment_state"/>
+                        </tree>
+                    </field>
+                    <footer>
+                        <button name="action_create_payments" string="Create Payments" type="object" class="btn-primary"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_match_invoice_wizard" model="ir.actions.act_window">
+            <field name="name">Match Invoices</field>
+            <field name="res_model">match.invoice.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+</odoo>

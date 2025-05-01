@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_akahu_transaction_tree" model="ir.ui.view">
+        <field name="name">akahu.transaction.tree</field>
+        <field name="model">akahu.transaction</field>
+        <field name="arch" type="xml">
+            <tree create='false' string="Transactions">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="amount"/>
+                <field name="type"/>
+                <field name="balance"/>
+                <field name="reference"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_akahu_transaction_form" model="ir.ui.view">
+        <field name="name">akahu.transaction.form</field>
+        <field name="model">akahu.transaction</field>
+        <field name="arch" type="xml">
+            <form create='false' edit='false' string="Transaction">
+             
+                <sheet>
+                <div class="oe_button_box" name="button_box">
+                        <button name="sync_transactions" type="object" string="Refresh" class="oe_stat_button" icon="fa-refresh">
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="created_at"/>
+                            <field name="updated_at"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="balance"/>
+                            <field name="type"/>
+                            <field name="hash"/>
+                        </group>
+                        <group>
+                            <field name="akahu_account_id"/>
+                            <field name="akahu_user_id"/>
+                            <field name="akahu_connection_id"/>
+                        </group>
+                        <group>
+                            <field name="description"/>
+                            <field name="particulars"/>
+                            <field name="code"/>
+                            <field name="reference"/>
+                            <field name="other_account"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_akahu_transaction" model="ir.actions.act_window">
+        <field name="name">Transactions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">akahu.transaction</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No transactions found.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_akahu_transactions"
+              name="Transactions"
+              parent="akahu_bank_integration.menu_akahu_root"
+              action="action_akahu_transaction"
+              sequence="20"/>
+</odoo>
