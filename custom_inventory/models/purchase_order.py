@@ -333,7 +333,7 @@ class PurchaseOrder(models.Model):
         ctx.update({
             'default_model': 'purchase.order',
             'default_res_ids': self.ids,
-            'default_custom_email_to':self.partner_id.email,
+            'partner_child': self.partner_id.child_ids.ids,
             'default_custom_email_from' : self.brand_id.po_email ,
             'default_template_id': self.brand_id.mail_purchase_template_id.id if self.brand_id.mail_purchase_template_id else None,
             'default_composition_mode': 'comment',
@@ -382,7 +382,7 @@ class PurchaseOrder(models.Model):
         ctx.update({
             'default_model': 'purchase.order',
             'default_res_ids': self.ids,
-            'default_custom_email_to':self.partner_id.email,
+            'partner_child': self.partner_id.child_ids.ids,
             'default_custom_email_from' : self.brand_id.po_email ,
             'default_template_id': self.brand_id.mail_purchase_quotation_template_id.id if self.brand_id.mail_purchase_quotation_template_id else None,
             'default_composition_mode': 'comment',

@@ -101,15 +101,21 @@ class CrmLead(models.Model):
         return context
 
 
+
 class MailComposeMessage(models.TransientModel):
     _inherit = "mail.compose.message"
 
-    custom_email_to = fields.Char(string="Custom Email To")
+    custom_email_to = fields.Many2many(
+        'res.partner',
+        'res_partner_email_rel_we',
+        string="Custom Email To"
+    )
+
+
     custom_email_from = fields.Char(string="Custom Email From")
 
     def action_send_mail(self):
         """ Used for action button that do not accept arguments. """
-        print("ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
         print(mail_server,"ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         self._action_send_mail(auto_commit=False)
@@ -154,8 +160,7 @@ class MailComposeMessage(models.TransientModel):
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
                 'body': self.body or '',
                 'email_from': self.custom_email_from,
-                # 'email_to': self.custom_email_to,
-                'partner_ids': self.partner_ids.ids,
+                'partner_ids': self.custom_email_to.ids,
                 'scheduled_date': self.scheduled_date,
                 'subject': self.subject or '',
                 **(
@@ -182,6 +187,10 @@ class MailComposeMessage(models.TransientModel):
             )
 
         messages = self.env['mail.message']
+        email_list = self.custom_email_to.mapped('email')
+        email_string = ','.join(filter(None, email_list)) 
+        print(email_string,"=================>>>>>>>>>><<<<<<<<<<<<<<<<============================11111112222222233333333333")
+
         for res_id, post_values in post_values_all.items():
             if ActiveModel._name == 'mail.thread':
                 post_values.pop('message_type')  # forced to user_notification
@@ -197,10 +206,10 @@ class MailComposeMessage(models.TransientModel):
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
         print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
-        messages.mail_ids.write({
-            'email_to': self.custom_email_to,
-            'recipient_ids': [(5, 0, 0)],
-        })
+        # messages.mail_ids.write({
+        #     'email_to': email_string,
+        #     'recipient_ids': [(5, 0, self.custom_email_to.ids)],
+        # })
         return messages
 
     

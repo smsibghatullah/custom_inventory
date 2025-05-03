@@ -63,6 +63,7 @@ class ResPartner(models.Model):
         for record in self:
             record.current_company_id = self.env.company
 
+
  
 
 

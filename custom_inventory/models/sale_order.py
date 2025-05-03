@@ -471,17 +471,15 @@ class SaleOrder(models.Model):
         }
 
     def action_quotation_send(self):
-        """ Opens a wizard to compose an email, with relevant mail template loaded by default """
         self.ensure_one()
         self.order_line._validate_analytic_distribution()
         lang = self.env.context.get('lang')
-        # mail_template = self._find_mail_template()
-        # if mail_template and mail_template.lang:
-        #     lang = mail_template._render_lang(self.ids)[self.id]
+
+        children = self.partner_id.child_ids
+      
         ctx = {
             'default_model': 'sale.order',
-            'default_custom_email_to':self.partner_id.email,
-            'default_custom_email_from' : self.brand_id.so_email ,
+            'default_custom_email_from': self.brand_id.so_email,
             'default_res_ids': self.ids,
             'default_template_id': self.brand_id.mail_sale_quotation_template_id.id if self.brand_id.mail_sale_quotation_template_id else None,
             'default_composition_mode': 'comment',
@@ -490,7 +488,9 @@ class SaleOrder(models.Model):
             'proforma': self.env.context.get('proforma', False),
             'force_email': True,
             'model_description': self.with_context(lang=lang).type_name,
+            'partner_child': self.partner_id.child_ids.ids,
         }
+
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
@@ -500,6 +500,7 @@ class SaleOrder(models.Model):
             'target': 'new',
             'context': ctx,
         }
+
 
     def action_sale_order_send(self):
         """ Opens a wizard to compose an email, with relevant mail template loaded by default """
@@ -511,7 +512,7 @@ class SaleOrder(models.Model):
         #     lang = mail_template._render_lang(self.ids)[self.id]
         ctx = {
             'default_model': 'sale.order',
-            'default_custom_email_to':self.partner_id.email,
+             'partner_child': self.partner_id.child_ids.ids,
             'default_custom_email_from' : self.brand_id.so_email ,
             'default_res_ids': self.ids,
             'default_template_id': self.brand_id.mail_sale_template_id.id if self.brand_id.mail_sale_template_id else None,
@@ -701,6 +702,19 @@ class SaleOrderLine(models.Model):
         readonly=False
     )
 
+
+    @api.onchange('product_id', 'pricelist_id')
+    def _onchange_product_pricelist(self):
+        for line in self:
+            line._update_price_from_pricelist()
+
+    def _update_price_from_pricelist(self):
+        for line in self:
+            if line.product_id and line.pricelist_id:
+                for item in line.pricelist_id.item_ids:
+                    if line.product_template_id == item.product_tmpl_id:
+                        line.price_unit = item.fixed_price
+
     @api.onchange('product_id', 'product_uom_qty')
     def _check_available_quantity(self):
         for line in self:
@@ -725,23 +739,7 @@ class SaleOrderLine(models.Model):
                     }
 
 
-    @api.onchange('product_id', 'pricelist_id')
-    def _onchange_product_pricelist(self):
-        """
-        Update price_unit based on the selected pricelist and product.
-        """
-        for line in self:
-            line._update_price_from_pricelist()
 
-    def _update_price_from_pricelist(self):
-        """
-        Helper method to update price_unit from the pricelist.
-        """
-        for line in self:
-            if line.product_id and line.pricelist_id:
-                for item in line.pricelist_id.item_ids:
-                    if line.product_template_id == item.product_tmpl_id:
-                       line.price_unit = item.fixed_price
 
     @api.model
     def create(self, vals):
@@ -749,7 +747,6 @@ class SaleOrderLine(models.Model):
         Ensure price is set based on pricelist at creation.
         """
         record = super(SaleOrderLine, self).create(vals)
-        record._update_price_from_pricelist()
         return record
 
     @api.depends('order_id.category_ids')

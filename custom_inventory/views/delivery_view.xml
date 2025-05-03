@@ -74,7 +74,7 @@
                             invisible="composition_mode != 'mass_mail'"/>
                         <label for="custom_email_to" string="Recipient Email"/>
                         <div groups="base.group_user" invisible="composition_mode != 'comment' or subtype_is_log">
-                          <field name="custom_email_to" placeholder="Enter recipient email" required="1"/>
+                          <field name="custom_email_to" widget="many2many_tags" required="1" domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email" />
                         </div>
                         <field name="subject" placeholder="Welcome to MyCompany!" required="True"/>
                     </group>

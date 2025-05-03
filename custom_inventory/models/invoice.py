@@ -174,7 +174,7 @@ class AccountMove(models.Model):
             'target': 'new',
             'context': {
                 'default_invoice_order_id': self.id,
-                'default_recipient_email': self.partner_id.email,
+                'partner_child': self.partner_id.child_ids.ids,
                 'default_subject': f'Invoice {self.name}',
             },
         }
@@ -195,7 +195,7 @@ class AccountMove(models.Model):
                 'context': {
                     'active_ids': self.ids,
                     'default_mail_template_id': self.brand_id.mail_invoice_template_id.id if self.brand_id.mail_invoice_template_id else None,
-                    'default_custom_email_to':self.partner_id.email,
+                    'partner_child': self.partner_id.child_ids.ids,
                     'default_custom_email_from' : self.brand_id.inv_email ,
                 },
             }
@@ -239,7 +239,7 @@ class InvoiceOrderEmailWizard(models.TransientModel):
                 'subject': self.subject or f"Purchase Order {invoice.name}",
                 'body_html': _('Please find attached your Purchase Order.'),
                 'email_from': from_email,
-                'email_to': self.recipient_email,
+                # 'email_to': self.recipient_email,
                 'attachment_ids': [(6, 0, [attachment.id])],
             }
             mail = self.env['mail.mail'].create(mail_values)
@@ -303,7 +303,11 @@ class AccountMoveLine(models.Model):
 class AccountMoveSend(models.TransientModel):
     _inherit = "account.move.send"
 
-    custom_email_to = fields.Char(string="Custom Email To")
+    custom_email_to = fields.Many2many(
+        'res.partner',
+        'res_partner_email_invoice_rel_we',
+        string="Custom Email To"
+    )
     custom_email_from = fields.Char(string="Custom Email From")
 
     def _get_wizard_values(self):
@@ -314,6 +318,37 @@ class AccountMoveSend(models.TransientModel):
             'sp_user_id': self.env.user.id,
             'download': self.checkbox_download,
             'send_mail': self.checkbox_send_mail,
+        }
+
+    @api.model
+    def _get_mail_params(self, move, move_data):
+        # We must ensure the newly created PDF are added. At this point, the PDF has been generated but not added
+        # to 'mail_attachments_widget'.
+        mail_attachments_widget = move_data.get('mail_attachments_widget')
+        seen_attachment_ids = set()
+        to_exclude = {x['name'] for x in mail_attachments_widget if x.get('skip')}
+        for attachment_data in self._get_invoice_extra_attachments_data(move) + mail_attachments_widget:
+            if attachment_data['name'] in to_exclude:
+                continue
+
+            try:
+                attachment_id = int(attachment_data['id'])
+            except ValueError:
+                continue
+
+            seen_attachment_ids.add(attachment_id)
+
+        mail_attachments = [
+            (attachment.name, attachment.raw)
+            for attachment in self.env['ir.attachment'].browse(list(seen_attachment_ids)).exists()
+        ]
+
+        return {
+            'body': move_data['mail_body'],
+            'subject': move_data['mail_subject'],
+            'partner_ids': self.custom_email_to.ids,
+            'attachments': mail_attachments,
+            'author_id': move_data['sp_partner_id'],
         }
 
     @api.model
@@ -367,10 +402,9 @@ class AccountMoveSend(models.TransientModel):
             )
 
         new_message.attachment_ids.invalidate_recordset(['res_id', 'res_model'], flush=False)
-        new_message.mail_ids.write({
-            'email_to': self.custom_email_to,
-            'recipient_ids': [(5, 0, 0)],
-        })
+        # new_message.mail_ids.write({
+        #     'recipient_ids': self.custom_email_to.ids
+        # })
         if new_message.attachment_ids.ids:
             self.env.cr.execute("UPDATE ir_attachment SET res_id = NULL WHERE id IN %s", [tuple(new_message.attachment_ids.ids)])
         new_message.attachment_ids.write({
