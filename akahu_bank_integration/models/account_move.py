@@ -13,26 +13,20 @@ class AccountMove(models.Model):
     transaction_ref = fields.Char(string="Transaction Refrence")  
    
 
-    def action_paid_invoice(self):
-        for invoice in self:
-            if invoice.state != 'posted':
-                raise UserError(f"Invoice {invoice.name} must be posted before creating a payment.")
-            if invoice.payment_state == 'paid':
-                raise UserError(f"Invoice {invoice.name} is already paid.")
-            print(self._context,"lllllllllllllllllllllllllllllllll")
-            wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({
-                'amount': invoice.amount_residual,
-                'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
-                'payment_date': fields.Date.today(),
-            })
-            payments = wizard._create_payments()  
-            AkahuTransaction = self.env['akahu.transaction']
-            match = AkahuTransaction.search([('reference', '=', self.reference)], limit=1)
-            invoice.transaction_ref = match.name
-            if payments:
-                payments.write({'transaction_ref': match.name})
-            
-
+    def action_open_payment_wizard(self):
+        AkahuTransaction = self.env['akahu.transaction']
+        match = AkahuTransaction.search([('reference', '=', self.reference)], limit=1)
+        return {
+            'name': 'Confirm Invoice Payment',
+            'type': 'ir.actions.act_window',
+            'res_model': 'match.invoice.wizard.payment',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_invoice_id': self.id,
+                'default_transaction_amount': match.amount,
+            }
+        }
 
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
@@ -41,6 +35,8 @@ class AccountPayment(models.Model):
     effective_date = fields.Date(string='Effective Date')
     bank_reference = fields.Char(string='Bank Reference') 
     cheque_reference = fields.Char(string='Cheque Reference')
+    attachment = fields.Binary(string="Upload File")
+    attachment_filename = fields.Char("File Name")
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'

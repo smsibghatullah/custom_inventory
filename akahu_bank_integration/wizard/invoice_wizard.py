@@ -8,44 +8,67 @@ class MatchInvoiceWizard(models.TransientModel):
 
     transaction_ref = fields.Char('Transaction Reference')
     invoice_line_ids = fields.One2many('match.invoice.wizard.line', 'wizard_id', string='Invoices')
-
+    attachment = fields.Binary(string="Upload File")
+    attachment_filename = fields.Char("File Name")
 
     def action_create_payments(self):
-        for line in self.invoice_line_ids.filtered(lambda l: l.selected):
-            invoice = line.invoice_id
+        selected_invoices = self.invoice_line_ids.filtered(lambda l: l.selected).mapped('invoice_id')
+        invoices_to_pay = selected_invoices.filtered(lambda inv: inv.state == 'posted' and inv.payment_state != 'paid')
 
-            if invoice.state != 'posted':
-                raise UserError(f"Invoice {invoice.name} must be posted before creating a payment.")
-            if invoice.payment_state == 'paid':
-                raise UserError(f"Invoice {invoice.name} is already paid.")
-            clean_ctx = {
-                'lang': 'en_US',
-                'tz': 'Asia/Karachi',
-                'uid': self.env.uid,
-                'allowed_company_ids': self.env.context.get('allowed_company_ids'),
-                'active_model': 'account.move',
-                'active_ids': invoice.ids,
-            }
+        if not invoices_to_pay:
+            raise UserError("No valid invoices to pay.")
 
-            wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
-                'amount': invoice.amount_residual,
-                'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
-                'payment_date': fields.Date.today(),
-            })
+        partners = invoices_to_pay.mapped('partner_id')
+        if len(partners) > 1:
+            raise UserError("All selected invoices must belong to the same customer.")
+        partner = partners[0]
 
-            payment = wizard._create_payments()
+        match = self.env['akahu.transaction'].search([('reference', '=', self.transaction_ref)], limit=1)
+        if not match:
+            raise UserError("No transaction found with reference: %s" % self.transaction_ref)
 
-            match = self.env['akahu.transaction'].search([('reference', '=', self.transaction_ref)], limit=1)
-            transaction_name = match.name if match else ''
-            transaction_ref = match.reference if match else ''
-            
-            invoice.write({
-                'transaction_ref': transaction_name,
-                'reference': transaction_ref,
-            })
-            if payment:
-                payment.write({'transaction_ref': transaction_name})
+        journal = self.env['account.journal'].search([
+            ('type', '=', 'bank'),
+            ('company_id', '=', self.env.company.id)
+        ], limit=1)
+        if not journal:
+            raise UserError("Bank journal not found.")
+        if not journal.inbound_payment_method_line_ids:
+            raise UserError("The selected journal has no inbound payment methods configured.")
 
+        payment_method = journal.inbound_payment_method_line_ids[0]
+
+        total_amount = match.amount
+
+        payment_vals = {
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': partner.id,
+            'amount': total_amount,
+            'date': fields.Date.today(),
+            'journal_id': journal.id,
+            'payment_method_line_id': payment_method.id,
+            'ref': match.reference,
+        }
+        payment = self.env['account.payment'].sudo().create(payment_vals)
+        payment.action_post()
+        payment_lines = payment.move_id.line_ids.filtered(lambda l: l.account_id.account_type == 'asset_receivable')
+        invoice_lines = invoices_to_pay.mapped('line_ids').filtered(lambda l: l.account_id.account_type == 'asset_receivable')
+        (payment_lines + invoice_lines).reconcile()
+        payment.attachment = self.attachment
+        payment.reconciled_invoice_ids = invoices_to_pay.ids
+        payment.reconciled_invoices_count = len(invoices_to_pay.ids)
+        payment.duplicated_ref_ids = invoices_to_pay.ids
+
+
+        invoices_to_pay.write({
+            'transaction_ref': match.name,
+            'reference': match.reference,
+        })
+
+        payment.write({'transaction_ref': match.name})
+
+        match.action_match_transaction()
 
 
 class MatchInvoiceWizardLine(models.TransientModel):

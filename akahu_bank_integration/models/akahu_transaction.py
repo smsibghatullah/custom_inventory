@@ -37,8 +37,13 @@ class AkahuTransaction(models.Model):
     reference = fields.Char(string="Reference")  
     other_account = fields.Char(string="Other Account") 
     transaction_link_id = fields.Many2one('akahu.transaction.link', string="Transaction Link")
- 
+    match_status = fields.Selection([
+        ('matched', 'Matched'),
+        ('unmatched', 'Unmatched'),
+    ], string="Status", default='unmatched')
 
+   
+ 
     @staticmethod
     def parse_datetime_safe(value):
         """Parse ISO datetime string safely, return None if value is None or malformed."""
@@ -97,15 +102,18 @@ class AkahuTransaction(models.Model):
             for transaction in self:
                 transaction_reference = transaction.reference
                 transaction_amount = transaction.amount
-
                 matching_invoices = self.env['account.move'].search([
+                    '|',
                     ('reference', '=', transaction_reference),
                     ('amount_total', '=', transaction_amount),
-                    ('state', '=', 'posted')  
+                    ('state', '=', 'posted'),
+                    ('move_type', 'in', ['out_invoice', 'in_invoice']),
                 ])
+                print(matching_invoices,"ppppppppppppppppppppppppsssssssssssssmatching_invoicess")
 
                 if matching_invoices:
                     transaction.transaction_link_id.invoice_ids = [(6, 0, matching_invoices.ids)]
+                    transaction.match_status = 'matched'
                 else:
                     transaction.transaction_link_id.invoice_ids = [(6, 0, [])]
             return True

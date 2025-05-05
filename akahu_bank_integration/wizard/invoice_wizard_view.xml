@@ -20,6 +20,8 @@
                         </tree>
                     </field>
                     <footer>
+                        <field name="attachment" filename="attachment_filename" />
+                        <field name="attachment_filename" invisible="1"/>
                         <button name="action_create_payments" string="Create Payments" type="object" class="btn-primary"/>
                         <button string="Close" class="btn-secondary" special="cancel"/>
                     </footer>

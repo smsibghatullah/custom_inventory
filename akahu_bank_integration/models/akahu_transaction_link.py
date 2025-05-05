@@ -22,4 +22,22 @@ class AkahuTransactionLink(models.Model):
         string="Linked Akahu Transactions"
     )
 
+    total_transactions = fields.Integer(string="All Transactions", compute="_compute_transaction_counts")
+    matched_transactions = fields.Integer(string="Matched", compute="_compute_transaction_counts")
+    unmatched_transactions = fields.Integer(string="Unmatched", compute="_compute_transaction_counts")
+    partial_matched_transactions = fields.Integer(string="Partial Matched", compute="_compute_transaction_counts")
+
+    @api.depends('transaction_ids.match_status')
+    def _compute_transaction_counts(self):
+        for rec in self:
+            transactions = rec.transaction_ids
+            rec.total_transactions = len(transactions)
+            rec.matched_transactions = len(transactions.filtered(lambda t: t.match_status == 'matched'))
+            rec.partial_matched_transactions = len(transactions.filtered(lambda t: t.match_status == 'partial'))
+            rec.unmatched_transactions = len(transactions.filtered(lambda t: t.match_status == 'unmatched'))
+
+
+    def action_dummy(self):
+        print('12345')
+
   

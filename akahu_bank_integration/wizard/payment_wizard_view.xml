@@ -1,0 +1,28 @@
+<odoo>
+        <record id="view_match_invoice_payment_wizard_form" model="ir.ui.view">
+            <field name="name">match.invoice.wizard.payment.form</field>
+            <field name="model">match.invoice.wizard.payment</field>
+            <field name="arch" type="xml">
+                <form string="Confirm Invoice Payment">
+                    <group>
+                        <field name="invoice_id" readonly="1"/>
+                        <field name="transaction_amount" readonly="1"/>
+                        <field name="attachment" filename="attachment_filename"/>
+                        <field name="attachment_filename" invisible="1" />
+                    </group>
+                    <footer>
+                        <button string="Confirm Payment" type="object" name="action_confirm_payment" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_match_invoice_payment_wizard" model="ir.actions.act_window">
+            <field name="name">Register Payment</field>
+            <field name="res_model">match.invoice.wizard.payment</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+</odoo>

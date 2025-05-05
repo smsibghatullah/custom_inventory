@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_account_setup_bank_manual_config_inherit" model="ir.ui.view">
+        <field name="name">account.setup.bank.manual.config.inherit.akahu</field>
+        <field name="model">account.setup.bank.manual.config</field>
+        <field name="inherit_id" ref="account.setup_bank_account_wizard"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='acc_number']" position="replace">
+                <field name="akahu_account_ref_id" placeholder="Select Akahu Transaction Account"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>  

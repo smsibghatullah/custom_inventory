@@ -16,15 +16,18 @@ Features:
     'author': 'Dynamic Solution Maker',
     'website': 'https://www.dsmpk.com',
     'category': 'Accounting/Finance',
-    'depends': ['base', 'contacts','account'],
+    'depends': ['base', 'contacts','account','sale'],
     'data': [
+        'data/data.xml',
         'security/ir.model.access.csv',
         'views/menu_views.xml',
         'views/akahu_bank_account_views.xml',
         'views/akahu_transaction_views.xml',
         'views/account_journal_dashboard_kanban_view.xml',
         'views/akahu_transaction_link_views.xml',
-        'wizard/invoice_wizard_view.xml'
+        'wizard/invoice_wizard_view.xml',
+        'wizard/bank_account_wizard_view.xml',
+        'wizard/payment_wizard_view.xml'
     ],
     'installable': True,
     'application': True,
