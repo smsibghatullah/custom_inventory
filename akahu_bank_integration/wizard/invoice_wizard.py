@@ -16,11 +16,11 @@ class MatchInvoiceWizard(models.TransientModel):
         invoices_to_pay = selected_invoices.filtered(lambda inv: inv.state == 'posted' and inv.payment_state != 'paid')
 
         if not invoices_to_pay:
-            raise UserError("No valid invoices to pay.")
+            raise UserError("No valid invoices or bills to pay.")
 
         partners = invoices_to_pay.mapped('partner_id')
         if len(partners) > 1:
-            raise UserError("All selected invoices must belong to the same customer.")
+            raise UserError("All selected invoices/bills must belong to the same partner.")
         partner = partners[0]
 
         match = self.env['akahu.transaction'].search([('reference', '=', self.transaction_ref)], limit=1)
@@ -37,38 +37,66 @@ class MatchInvoiceWizard(models.TransientModel):
             raise UserError("The selected journal has no inbound payment methods configured.")
 
         payment_method = journal.inbound_payment_method_line_ids[0]
-
         total_amount = match.amount
 
-        payment_vals = {
-            'payment_type': 'inbound',
-            'partner_type': 'customer',
-            'partner_id': partner.id,
-            'amount': total_amount,
-            'date': fields.Date.today(),
-            'journal_id': journal.id,
-            'payment_method_line_id': payment_method.id,
-            'ref': match.reference,
-        }
+        if invoices_to_pay[0].move_type in ['in_invoice', 'in_refund']:
+            payment_vals = {
+                'payment_type': 'outbound',
+                'partner_type': 'supplier',
+                'partner_id': partner.id,
+                'amount': match.amount_due if match.match_status == 'partial' else total_amount,
+                'date': fields.Date.today(),
+                'journal_id': journal.id,
+                'payment_method_line_id': payment_method.id,
+                'ref': match.reference,
+            }
+            account_type = 'liability_payable'
+        else:
+            payment_vals = {
+                'payment_type': 'inbound',
+                'partner_type': 'customer',
+                'partner_id': partner.id,
+                'amount': match.amount_due if match.match_status == 'partial' else total_amount,
+                'date': fields.Date.today(),
+                'journal_id': journal.id,
+                'payment_method_line_id': payment_method.id,
+                'ref': match.reference,
+            }
+            account_type = 'asset_receivable'
+
         payment = self.env['account.payment'].sudo().create(payment_vals)
         payment.action_post()
-        payment_lines = payment.move_id.line_ids.filtered(lambda l: l.account_id.account_type == 'asset_receivable')
-        invoice_lines = invoices_to_pay.mapped('line_ids').filtered(lambda l: l.account_id.account_type == 'asset_receivable')
+
+        payment_lines = payment.move_id.line_ids.filtered(lambda l: l.account_id.account_type == account_type)
+        invoice_lines = invoices_to_pay.mapped('line_ids').filtered(lambda l: l.account_id.account_type == account_type)
         (payment_lines + invoice_lines).reconcile()
+
         payment.attachment = self.attachment
         payment.reconciled_invoice_ids = invoices_to_pay.ids
         payment.reconciled_invoices_count = len(invoices_to_pay.ids)
         payment.duplicated_ref_ids = invoices_to_pay.ids
-
+        payment.reconciled_bill_ids = invoices_to_pay.ids
+        payment.reconciled_bills_count = len(invoices_to_pay.ids)
 
         invoices_to_pay.write({
             'transaction_ref': match.name,
             'reference': match.reference,
         })
 
-        payment.write({'transaction_ref': match.name})
+        total_invoice_amount = sum(invoices_to_pay.mapped('amount_total'))
+        if match.amount < total_invoice_amount:
+            match.amount_due = 0.0
+            match.match_status = 'matched'
+        elif match.amount == total_invoice_amount:
+            match.amount_due = 0.0
+            match.match_status = 'matched'
+        else:
+            match.amount_due = match.amount - total_invoice_amount
+            match.match_status = 'partial'
 
+        payment.write({'transaction_ref': match.name})
         match.action_match_transaction()
+
 
 
 class MatchInvoiceWizardLine(models.TransientModel):

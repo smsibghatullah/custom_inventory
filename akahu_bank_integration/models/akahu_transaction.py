@@ -39,8 +39,10 @@ class AkahuTransaction(models.Model):
     transaction_link_id = fields.Many2one('akahu.transaction.link', string="Transaction Link")
     match_status = fields.Selection([
         ('matched', 'Matched'),
+        ('partial', 'Partial Match'),
         ('unmatched', 'Unmatched'),
     ], string="Status", default='unmatched')
+    amount_due = fields.Float(string="Amount Due")
 
    
  
@@ -113,7 +115,6 @@ class AkahuTransaction(models.Model):
 
                 if matching_invoices:
                     transaction.transaction_link_id.invoice_ids = [(6, 0, matching_invoices.ids)]
-                    transaction.match_status = 'matched'
                 else:
                     transaction.transaction_link_id.invoice_ids = [(6, 0, [])]
             return True
@@ -125,6 +126,8 @@ class AkahuTransaction(models.Model):
             ('payment_state', 'in', ['not_paid', 'partial']),
             ('move_type', 'in', ['out_invoice', 'in_invoice']),
         ])
+        if self.match_status == 'matched':
+                raise UserError(f"Transaction {self.name} is already matched.")
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'match.invoice.wizard',

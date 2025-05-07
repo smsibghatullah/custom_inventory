@@ -31,6 +31,7 @@
                             <tree>
                                 <field name="name"/>
                                 <field name="amount"/>
+                                <field name="amount_due"/>
                                 <field name="reference"/>
                                 <field name="type"/>
                                 <field name="date"/>

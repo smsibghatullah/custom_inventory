@@ -21,6 +21,8 @@ class MatchInvoicePaymentWizard(models.TransientModel):
             print(self._context,"lllllllllllllllllllllllllllllllll")
             AkahuTransaction = self.env['akahu.transaction']
             match = AkahuTransaction.search([('reference', '=', self.invoice_id.reference)], limit=1)
+            if match.match_status == 'matched':
+                raise UserError(f"Transaction {match.name} is already matched.")
             clean_ctx = {
                 'lang': 'en_US',
                 'tz': 'Asia/Karachi',
@@ -31,13 +33,22 @@ class MatchInvoicePaymentWizard(models.TransientModel):
             }
 
             wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
-                'amount': match.amount,
+                'amount': match.amount_due if match.match_status == 'partial' else  match.amount ,
                 'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
                 'payment_date': fields.Date.today(),
             })
             payments = wizard._create_payments()  
             payments.attachment = self.attachment
             invoice.transaction_ref = match.name
+            if match.amount < invoice.amount_total:
+                match.amount_due = 0.0
+                match.match_status = 'matched'
+            elif match.amount == invoice.amount_total:
+                match.amount_due = 0.0
+                match.match_status = 'matched'
+            else:
+                match.amount_due = match.amount - invoice.amount_total
+                match.match_status = 'partial'
             if payments:
                 payments.write({'transaction_ref': match.name})
             
