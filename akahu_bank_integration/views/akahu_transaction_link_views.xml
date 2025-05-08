@@ -1,29 +1,29 @@
 <odoo>
-   <record id="view_akahu_transaction_link_form" model="ir.ui.view">
+    <record id="view_akahu_transaction_link_form" model="ir.ui.view">
         <field name="name">akahu.transaction.link.form</field>
         <field name="model">akahu.transaction.link</field>
         <field name="arch" type="xml">
             <form create="false" edit="false" string="Transaction Link">
                 <sheet>
-                  <div class="oe_button_box" name="button_box">
-                            <button type="object" name="action_dummy" class="oe_stat_button" icon="fa-list">
-                                <field string="All" name="total_transactions" widget="statinfo"/>
-                            </button>
-                            <button type="object" name="action_dummy" class="oe_stat_button" icon="fa-check text-success">
-                                <field string="Matched" name="matched_transactions" widget="statinfo"/>
-                            </button>
-                            <button type="object" name="action_dummy" class="oe_stat_button" icon="fa-adjust text-warning"
-                                    style="min-width: 150px; min-height: 80px; font-size: 18px;">
-                                <field string="Partial" name="partial_matched_transactions" widget="statinfo"/>
-                            </button>
-                            <button type="object" name="action_dummy" class="oe_stat_button" icon="fa-times text-danger">
-                                <field string="Unmatched" name="unmatched_transactions" widget="statinfo"/>
-                            </button>
-                        </div>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_filter_all" class="oe_stat_button" icon="fa-list">
+                            <field string="All" name="total_transactions" widget="statinfo"/>
+                        </button>
+                        <button type="object" name="action_filter_matched" class="oe_stat_button" icon="fa-check text-success">
+                            <field string="Matched" name="matched_transactions" widget="statinfo"/>
+                        </button>
+                        <button type="object" name="action_filter_partial" class="oe_stat_button" icon="fa-adjust text-warning"
+                                style="min-width: 150px; min-height: 80px; font-size: 18px;">
+                            <field string="Partial" name="partial_matched_transactions" widget="statinfo"/>
+                        </button>
+                        <button type="object" name="action_filter_unmatched" class="oe_stat_button" icon="fa-times text-danger">
+                            <field string="Unmatched" name="unmatched_transactions" widget="statinfo"/>
+                        </button>
+                    </div>
+
                     <group>
                         <field name="name"/>
                     </group>
-                      
 
                     <separator string="Linked Akahu Transactions"/>
                     <div style="max-height:300px; overflow-y:auto;">
@@ -35,7 +35,7 @@
                                 <field name="reference"/>
                                 <field name="type"/>
                                 <field name="date"/>
-                                <field name="match_status" widget="badge" />
+                                <field name="match_status" widget="badge"/>
                                 <button name="action_match_transaction" class="btn btn-primary" type="object" string="Match" icon="fa-check"/>
                                 <button name="action_match_invoice" class="btn btn-primary" type="object" string="Manual" icon="fa-hand-paper-o"/>
                             </tree>
@@ -58,10 +58,9 @@
                         </field>
                     </div>
                 </sheet>
-            </form> 
+            </form>
         </field>
     </record>
-
 
     <record id="action_akahu_transaction_link" model="ir.actions.act_window">
         <field name="name">Transaction Links</field>

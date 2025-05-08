@@ -2,6 +2,7 @@ from odoo import models, fields, api
 import requests
 import logging
 from datetime import datetime
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -98,16 +99,17 @@ class AccountJournal(models.Model):
 
         if response.status_code == 200:
             transactions = response.json()
+            created_transaction = []  # <- Flag to track creation
 
             for trans_data in transactions.get('items', []):
                 account_id = trans_data.get('_account')
                 matched_account = AkahuAccount.search([('name', '=', self.name)], limit=1)
 
                 if not matched_account:
-                    continue 
+                    continue
 
                 if trans_data.get('_account') != matched_account.akahu_account_id:
-                    continue 
+                    continue
 
                 transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
                 if not transaction_link:
@@ -115,10 +117,12 @@ class AccountJournal(models.Model):
                         'name': f'{matched_account.name}',
                         'akahu_account_id': matched_account.id,
                     })
-                
+
                 reference = trans_data.get('_id')
-                transaction = AkahuTransaction.search([('reference', '=', reference),('akahu_account_id', '=', matched_account.akahu_account_id)], limit=1)
-                print(matched_account.akahu_account_id,"ppppppppssssssssssssddddddddddfffffffffffggggggg",matched_account.name,transaction)
+                transaction = AkahuTransaction.search([
+                    ('reference', '=', reference),
+                    ('akahu_account_id', '=', matched_account.akahu_account_id)
+                ], limit=1)
 
                 if not transaction:
                     transaction_type = 'INCOME' if trans_data.get('type') == 'credit' else 'PAYMENT'
@@ -126,6 +130,9 @@ class AccountJournal(models.Model):
                     transaction = AkahuTransaction.create({
                         'name': trans_data.get('description'),
                         'amount': trans_data.get('amount'),
+                        'amount_due': trans_data.get('amount'), 
+                        'amount_paid': 0.0,
+                        'match_status': 'unmatched',
                         'date': self.parse_datetime_safe(trans_data.get('date')),
                         'created_at': self.parse_datetime_safe(trans_data.get('created_at')),
                         'updated_at': self.parse_datetime_safe(trans_data.get('updated_at')),
@@ -140,34 +147,30 @@ class AccountJournal(models.Model):
                         'particulars': trans_data.get('meta', {}).get('particulars'),
                         'code': trans_data.get('meta', {}).get('code'),
                         'other_account': trans_data.get('meta', {}).get('other_account'),
-                        'transaction_link_id':transaction_link.id
+                        'transaction_link_id': transaction_link.id
                     })
+                     
 
-                transaction_link.write({
-                        'invoice_ids': [(5, 0, 0)]
-                    })    
+                transaction_link.write({'invoice_ids': [(5, 0, 0)]})
+                created_transaction.append(transaction_link.id)
 
                 if transaction.id not in transaction_link.transaction_ids.ids:
                     transaction_link.write({
                         'transaction_ids': [(4, transaction.id)],
                     })
 
+            if created_transaction == []:
+                raise UserError("This account has no transactions.")
+
             return {
                 'type': 'ir.actions.act_window',
                 'name': 'Transaction Link',
                 'res_model': 'akahu.transaction.link',
                 'view_mode': 'form',
-                'res_id': transaction_link.id,  
+                'res_id': transaction_link.id,
                 'target': 'current'
             }
 
         else:
             _logger.error('Failed to fetch transactions: %s', response.text)
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Error',
-                'res_model': 'ir.ui.view',
-                'view_mode': 'form',
-                'view_id': False,
-                'target': 'new'
-            }
+            raise UserError("Failed to fetch transactions from Akahu API.")

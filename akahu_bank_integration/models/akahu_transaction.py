@@ -43,6 +43,7 @@ class AkahuTransaction(models.Model):
         ('unmatched', 'Unmatched'),
     ], string="Status", default='unmatched')
     amount_due = fields.Float(string="Amount Due")
+    amount_paid = fields.Float(string="Amount Paid")
 
    
  

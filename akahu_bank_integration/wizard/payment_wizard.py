@@ -18,38 +18,40 @@ class MatchInvoicePaymentWizard(models.TransientModel):
                 raise UserError(f"Invoice {invoice.name} must be posted before creating a payment.")
             if invoice.payment_state == 'paid':
                 raise UserError(f"Invoice {invoice.name} is already paid.")
-            print(self._context,"lllllllllllllllllllllllllllllllll")
+
             AkahuTransaction = self.env['akahu.transaction']
-            match = AkahuTransaction.search([('reference', '=', self.invoice_id.reference)], limit=1)
+            match = AkahuTransaction.search([('reference', '=', invoice.reference)], limit=1)
+
             if match.match_status == 'matched':
                 raise UserError(f"Transaction {match.name} is already matched.")
+
             clean_ctx = {
                 'lang': 'en_US',
                 'tz': 'Asia/Karachi',
                 'uid': self.env.uid,
                 'allowed_company_ids': self.env.context.get('allowed_company_ids'),
                 'active_model': 'account.move',
-                'active_ids': self.invoice_id.id,
+                'active_ids': invoice.id,
             }
 
+            payment_amount = min(invoice.amount_total, match.amount_due or match.amount)
+
             wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
-                'amount': match.amount_due if match.match_status == 'partial' else  match.amount ,
+                'amount': payment_amount,
                 'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
                 'payment_date': fields.Date.today(),
             })
-            payments = wizard._create_payments()  
+            payments = wizard._create_payments()
             payments.attachment = self.attachment
             invoice.transaction_ref = match.name
-            if match.amount < invoice.amount_total:
-                match.amount_due = 0.0
+
+            match.amount_paid += payment_amount
+            match.amount_due = match.amount - match.amount_paid
+            if match.amount_due <= 0:
                 match.match_status = 'matched'
-            elif match.amount == invoice.amount_total:
                 match.amount_due = 0.0
-                match.match_status = 'matched'
             else:
-                match.amount_due = match.amount - invoice.amount_total
                 match.match_status = 'partial'
+
             if payments:
                 payments.write({'transaction_ref': match.name})
-            
-

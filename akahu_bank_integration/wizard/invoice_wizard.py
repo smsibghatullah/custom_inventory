@@ -38,6 +38,7 @@ class MatchInvoiceWizard(models.TransientModel):
 
         payment_method = journal.inbound_payment_method_line_ids[0]
         total_amount = match.amount
+        total_invoice_amount = sum(invoices_to_pay.mapped('amount_total'))
 
         if invoices_to_pay[0].move_type in ['in_invoice', 'in_refund']:
             payment_vals = {
@@ -83,15 +84,14 @@ class MatchInvoiceWizard(models.TransientModel):
             'reference': match.reference,
         })
 
-        total_invoice_amount = sum(invoices_to_pay.mapped('amount_total'))
-        if match.amount < total_invoice_amount:
-            match.amount_due = 0.0
-            match.match_status = 'matched'
-        elif match.amount == total_invoice_amount:
+        
+        match.amount_paid += total_invoice_amount
+        match.amount_due = match.amount - match.amount_paid
+
+        if match.amount_due <= 0:
             match.amount_due = 0.0
             match.match_status = 'matched'
         else:
-            match.amount_due = match.amount - total_invoice_amount
             match.match_status = 'partial'
 
         payment.write({'transaction_ref': match.name})

@@ -16,6 +16,8 @@ class AccountMove(models.Model):
     def action_open_payment_wizard(self):
         AkahuTransaction = self.env['akahu.transaction']
         match = AkahuTransaction.search([('reference', '=', self.reference)], limit=1)
+        if match.match_status == 'matched':
+                raise UserError(f"Transaction {match.name} is already matched.")
         return {
             'name': 'Confirm Invoice Payment',
             'type': 'ir.actions.act_window',
