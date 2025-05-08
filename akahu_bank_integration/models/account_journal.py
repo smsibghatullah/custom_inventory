@@ -2,6 +2,7 @@ from odoo import models, fields, api
 import requests
 import logging
 from datetime import datetime
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ class AccountJournal(models.Model):
         AkahuAccount = self.env['akahu.bank.account']
         AkahuTransaction = self.env['akahu.transaction']
         TransactionLink = self.env['akahu.transaction.link']
+        created_transaction = []
 
         headers = {
             'Authorization': 'Bearer user_token_cm9y2t9w2000208l1c7ts2m2i',
@@ -146,13 +148,16 @@ class AccountJournal(models.Model):
                         'invoice_ids': [(5, 0, 0)]
                     })  
                 print(transaction.id,"vvvvvvvvvvvvvvvvvvvvvvvvvvxxxxcccccccccccccccccccc")  
+                created_transaction.append(transaction_link.id)
 
                 if transaction.id not in transaction_link.transaction_ids.ids:
                     transaction_link.write({
                         'transaction_ids': [(4, transaction.id)],
                         'all_transaction_ids': [(4, transaction.id)],
                     })
-            print("Transactions in link:", transaction_link.transaction_ids.ids)
+
+            if created_transaction == []:
+                raise UserError(f"Account {self.name} has no transactions.")
 
             return {
                 'type': 'ir.actions.act_window',
