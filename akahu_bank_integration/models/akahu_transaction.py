@@ -122,13 +122,21 @@ class AkahuTransaction(models.Model):
 
     def action_match_invoice(self):
         self.ensure_one()
+
+        if self.match_status == 'matched':
+            raise UserError(f"Transaction {self.name} is already matched.")
+
+        if self.amount > 0:
+            move_types = ['out_invoice', 'in_refund']
+        else:
+            move_types = ['in_invoice', 'out_refund']
+
         invoices = self.env['account.move'].search([
             ('state', '=', 'posted'),
             ('payment_state', 'in', ['not_paid', 'partial']),
-            ('move_type', 'in', ['out_invoice', 'in_invoice']),
+            ('move_type', 'in', move_types),
         ])
-        if self.match_status == 'matched':
-                raise UserError(f"Transaction {self.name} is already matched.")
+
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'match.invoice.wizard',
@@ -142,4 +150,5 @@ class AkahuTransaction(models.Model):
                 ]
             },
         }
+
 

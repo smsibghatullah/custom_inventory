@@ -40,12 +40,12 @@ class MatchInvoiceWizard(models.TransientModel):
         total_amount = match.amount
         total_invoice_amount = sum(invoices_to_pay.mapped('amount_total'))
 
-        if invoices_to_pay[0].move_type in ['in_invoice', 'in_refund']:
+        if invoices_to_pay[0].move_type in ['in_invoice', 'out_refund']:
             payment_vals = {
-                'payment_type': 'outbound',
+                'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'supplier',
                 'partner_id': partner.id,
-                'amount': match.amount_due if match.match_status == 'partial' else total_amount,
+                'amount': abs(match.amount_due if match.match_status == 'partial' else total_amount),
                 'date': fields.Date.today(),
                 'journal_id': journal.id,
                 'payment_method_line_id': payment_method.id,
@@ -54,10 +54,10 @@ class MatchInvoiceWizard(models.TransientModel):
             account_type = 'liability_payable'
         else:
             payment_vals = {
-                'payment_type': 'inbound',
+                'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'customer',
                 'partner_id': partner.id,
-                'amount': match.amount_due if match.match_status == 'partial' else total_amount,
+                'amount': abs(match.amount_due if match.match_status == 'partial' else total_amount),
                 'date': fields.Date.today(),
                 'journal_id': journal.id,
                 'payment_method_line_id': payment_method.id,
@@ -85,12 +85,17 @@ class MatchInvoiceWizard(models.TransientModel):
         })
 
         
-        match.amount_paid += total_invoice_amount
+        match.amount_paid += total_invoice_amount if match.amount >= 0 else -total_invoice_amount
         match.amount_due = match.amount - match.amount_paid
 
-        if match.amount_due <= 0:
+        if match.amount >= 0 and match.amount_due < 0:
             match.amount_due = 0.0
+        elif match.amount < 0 and match.amount_due > 0:
+            match.amount_due = 0.0
+
+        if abs(match.amount_due) < 0.0001:
             match.match_status = 'matched'
+            match.amount_due = 0.0
         else:
             match.match_status = 'partial'
 

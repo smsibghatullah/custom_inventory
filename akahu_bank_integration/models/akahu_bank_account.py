@@ -150,7 +150,7 @@ class AkahuAllBankAccount(models.Model):
                 ], limit=1)
 
                 vals = {
-                    'name': account_data.get('name'),
+                    'name': account_data.get('formatted_account'),
                     'akahu_account_id': akahu_account_id,
                     'formatted_account': account_data.get('formatted_account'),
                     'type': account_data.get('type'),

@@ -34,24 +34,29 @@ class MatchInvoicePaymentWizard(models.TransientModel):
                 'active_ids': invoice.id,
             }
 
-            payment_amount = min(invoice.amount_total, match.amount_due or match.amount)
+            payment_amount = abs(match.amount_due)
 
             wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
                 'amount': payment_amount,
                 'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
                 'payment_date': fields.Date.today(),
             })
+
             payments = wizard._create_payments()
             payments.attachment = self.attachment
             invoice.transaction_ref = match.name
 
-            match.amount_paid += payment_amount
+            match.amount_paid += invoice.amount_total if match.amount >= 0 else -invoice.amount_total
             match.amount_due = match.amount - match.amount_paid
-            if match.amount_due <= 0:
+            print(match.amount_due,match.amount_paid,match.amount,"pppppppppppppppppppppppppppppppppdddddddddddddddddddd")
+
+            if match.amount >= 0 and match.amount_due < 0:
+                match.amount_due = 0.0
+            elif match.amount < 0 and match.amount_due > 0:
+                match.amount_due = 0.0
+
+            if abs(match.amount_due) < 0.0001:
                 match.match_status = 'matched'
                 match.amount_due = 0.0
             else:
                 match.match_status = 'partial'
-
-            if payments:
-                payments.write({'transaction_ref': match.name})
