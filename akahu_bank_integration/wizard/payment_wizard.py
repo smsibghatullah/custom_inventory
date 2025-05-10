@@ -34,7 +34,7 @@ class MatchInvoicePaymentWizard(models.TransientModel):
                 'active_ids': invoice.id,
             }
 
-            payment_amount = abs(match.amount_due)
+            payment_amount = min(abs(match.amount_due), abs(invoice.amount_residual))
 
             wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
                 'amount': payment_amount,
@@ -46,7 +46,7 @@ class MatchInvoicePaymentWizard(models.TransientModel):
             payments.attachment = self.attachment
             invoice.transaction_ref = match.name
 
-            match.amount_paid += invoice.amount_total if match.amount >= 0 else -invoice.amount_total
+            match.amount_paid += invoice.amount_residual if match.amount >= 0 else -invoice.amount_residual
             match.amount_due = match.amount - match.amount_paid
             print(match.amount_due,match.amount_paid,match.amount,"pppppppppppppppppppppppppppppppppdddddddddddddddddddd")
 

@@ -38,14 +38,18 @@ class MatchInvoiceWizard(models.TransientModel):
 
         payment_method = journal.inbound_payment_method_line_ids[0]
         total_amount = match.amount
-        total_invoice_amount = sum(invoices_to_pay.mapped('amount_total'))
+        total_invoice_amount = sum(invoices_to_pay.mapped('amount_residual'))
+        payment_amount = min(
+            abs(match.amount_due if match.match_status == 'partial' else total_amount),
+            abs(total_invoice_amount)
+        )
 
         if invoices_to_pay[0].move_type in ['in_invoice', 'out_refund']:
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'supplier',
                 'partner_id': partner.id,
-                'amount': abs(match.amount_due if match.match_status == 'partial' else total_amount),
+                'amount': payment_amount,
                 'date': fields.Date.today(),
                 'journal_id': journal.id,
                 'payment_method_line_id': payment_method.id,
@@ -57,7 +61,7 @@ class MatchInvoiceWizard(models.TransientModel):
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'customer',
                 'partner_id': partner.id,
-                'amount': abs(match.amount_due if match.match_status == 'partial' else total_amount),
+                'amount': payment_amount,
                 'date': fields.Date.today(),
                 'journal_id': journal.id,
                 'payment_method_line_id': payment_method.id,
