@@ -12,7 +12,8 @@ class AkahuTransactionLink(models.Model):
         'akahu_link_account_move_rel',
         'link_id',
         'invoice_id',
-        string="Linked Invoices"
+        string="Linked Invoices",
+        default=lambda self: self._default_invoice_ids()
     )
 
     all_transaction_ids = fields.Many2many(
@@ -41,6 +42,8 @@ class AkahuTransactionLink(models.Model):
     matched_transactions = fields.Integer(string="Matched", compute="_compute_transaction_counts")
     unmatched_transactions = fields.Integer(string="Unmatched", compute="_compute_transaction_counts")
     partial_matched_transactions = fields.Integer(string="Partial Matched", compute="_compute_transaction_counts")
+        
+
 
     @api.depends('all_transaction_ids.match_status')
     def _compute_transaction_counts(self):
@@ -77,3 +80,4 @@ class AkahuTransactionLink(models.Model):
     def action_filter_unmatched(self):
         self.write({'filter_match_status': 'unmatched'})
         self.invoice_ids = [(6, 0, [])]
+

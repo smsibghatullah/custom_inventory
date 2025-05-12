@@ -44,9 +44,48 @@ class MatchInvoiceWizard(models.TransientModel):
             abs(total_invoice_amount)
         )
 
-        if invoices_to_pay[0].move_type in ['in_invoice', 'out_refund']:
+        if invoices_to_pay[0].move_type in ['in_invoice']:
+                payment_vals = {
+                    'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
+                    'partner_type': 'supplier',
+                    'partner_id': partner.id,
+                    'amount': payment_amount,
+                    'date': fields.Date.today(),
+                    'journal_id': journal.id,
+                    'payment_method_line_id': payment_method.id,
+                    'ref': match.reference,
+                }
+                account_type = 'liability_payable'
+
+        elif invoices_to_pay[0].move_type in ['out_refund']:
+            payment_vals = {
+                'payment_type': 'outbound' if match.amount_due > 0 else 'inbound', 
+                'partner_type': 'customer',
+                'partner_id': partner.id,
+                'amount': payment_amount,
+                'date': fields.Date.today(),
+                'journal_id': journal.id,
+                'payment_method_line_id': payment_method.id,
+                'ref': match.reference,
+            }
+            account_type = 'asset_receivable'
+
+        elif invoices_to_pay[0].move_type in ['out_invoice']:
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
+                'partner_type': 'customer',
+                'partner_id': partner.id,
+                'amount': payment_amount,
+                'date': fields.Date.today(),
+                'journal_id': journal.id,
+                'payment_method_line_id': payment_method.id,
+                'ref': match.reference,
+            }
+            account_type = 'asset_receivable'
+
+        elif invoices_to_pay[0].move_type in ['in_refund']:
+            payment_vals = {
+                'payment_type': 'inbound' if match.amount_due > 0 else 'outbound', 
                 'partner_type': 'supplier',
                 'partner_id': partner.id,
                 'amount': payment_amount,
@@ -56,6 +95,7 @@ class MatchInvoiceWizard(models.TransientModel):
                 'ref': match.reference,
             }
             account_type = 'liability_payable'
+
         else:
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
@@ -68,6 +108,7 @@ class MatchInvoiceWizard(models.TransientModel):
                 'ref': match.reference,
             }
             account_type = 'asset_receivable'
+
 
         payment = self.env['account.payment'].sudo().create(payment_vals)
         payment.action_post()
@@ -105,7 +146,6 @@ class MatchInvoiceWizard(models.TransientModel):
 
         payment.write({'transaction_ref': match.name})
         match.action_match_transaction()
-
 
 
 class MatchInvoiceWizardLine(models.TransientModel):

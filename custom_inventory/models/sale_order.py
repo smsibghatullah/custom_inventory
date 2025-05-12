@@ -6,6 +6,7 @@ import base64
 from odoo.fields import Command
 import random
 from collections import defaultdict
+from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url, is_html_empty
 
 
 class SaleOrder(models.Model):
@@ -71,6 +72,31 @@ class SaleOrder(models.Model):
     )
     bci_project = fields.Char(string='BCI Project')
     customer_description = fields.Char(string="Customer Description")
+
+    def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
+                                                   force_email_company=False, force_email_lang=False):
+        render_context = super()._notify_by_email_prepare_rendering_context(
+            message, msg_vals, model_description=model_description,
+            force_email_company=force_email_company, force_email_lang=force_email_lang
+        )
+        lang_code = render_context.get('lang')
+        subtitles = [
+            render_context['record'].name,
+        ]
+
+        if self.amount_total:
+            # Do not show the price in subtitles if zero (e.g. e-commerce orders are created empty)
+            subtitles.append(
+                format_amount(self.env, self.amount_total, self.currency_id, lang_code=lang_code),
+            )
+
+        if self.validity_date and self.state in ['draft', 'sent']:
+            # formatted_date = format_date(self.env, self.validity_date, lang_code=lang_code)
+            formatted_date = self.validity_date.strftime('%d/%m/%Y')
+            subtitles.append(_("Expires on %(date)s", date=formatted_date))
+
+        render_context['subtitles'] = subtitles
+        return render_context
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
