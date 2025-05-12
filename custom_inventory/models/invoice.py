@@ -195,7 +195,7 @@ class AccountMove(models.Model):
                 'context': {
                     'active_ids': self.ids,
                     'default_mail_template_id': self.brand_id.mail_invoice_template_id.id if self.brand_id.mail_invoice_template_id else None,
-                    'partner_child': self.partner_id.child_ids.ids,
+                    'partner_child': [self.partner_id.id] + self.partner_id.child_ids.ids,
                     'default_custom_email_from' : self.brand_id.inv_email ,
                 },
             }

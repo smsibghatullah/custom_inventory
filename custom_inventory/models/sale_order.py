@@ -514,7 +514,7 @@ class SaleOrder(models.Model):
             'proforma': self.env.context.get('proforma', False),
             'force_email': True,
             'model_description': self.with_context(lang=lang).type_name,
-            'partner_child': self.partner_id.child_ids.ids,
+            'partner_child': [self.partner_id.id] + children.ids,
         }
 
         return {
@@ -533,12 +533,13 @@ class SaleOrder(models.Model):
         self.ensure_one()
         self.order_line._validate_analytic_distribution()
         lang = self.env.context.get('lang')
+        children = self.partner_id.child_ids
         # mail_template = self._find_mail_template()
         # if mail_template and mail_template.lang:
         #     lang = mail_template._render_lang(self.ids)[self.id]
         ctx = {
             'default_model': 'sale.order',
-             'partner_child': self.partner_id.child_ids.ids,
+             'partner_child': [self.partner_id.id] + children.ids,
             'default_custom_email_from' : self.brand_id.so_email ,
             'default_res_ids': self.ids,
             'default_template_id': self.brand_id.mail_sale_template_id.id if self.brand_id.mail_sale_template_id else None,
