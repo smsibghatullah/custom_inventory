@@ -39,12 +39,14 @@ class MatchInvoiceWizard(models.TransientModel):
         payment_method = journal.inbound_payment_method_line_ids[0]
         total_amount = match.amount
         total_invoice_amount = sum(invoices_to_pay.mapped('amount_residual'))
+        print(total_invoice_amount,"op==================================<><><><<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         payment_amount = min(
             abs(match.amount_due if match.match_status == 'partial' else total_amount),
             abs(total_invoice_amount)
         )
 
         if invoices_to_pay[0].move_type in ['in_invoice']:
+                print('1==========================================')
                 payment_vals = {
                     'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                     'partner_type': 'supplier',
@@ -58,8 +60,9 @@ class MatchInvoiceWizard(models.TransientModel):
                 account_type = 'liability_payable'
 
         elif invoices_to_pay[0].move_type in ['out_refund']:
+            print('2==========================================')            
             payment_vals = {
-                'payment_type': 'outbound' if match.amount_due > 0 else 'inbound', 
+                'payment_type': 'outbound', 
                 'partner_type': 'customer',
                 'partner_id': partner.id,
                 'amount': payment_amount,
@@ -71,6 +74,7 @@ class MatchInvoiceWizard(models.TransientModel):
             account_type = 'asset_receivable'
 
         elif invoices_to_pay[0].move_type in ['out_invoice']:
+            print('3==========================================')
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'customer',
@@ -84,6 +88,7 @@ class MatchInvoiceWizard(models.TransientModel):
             account_type = 'asset_receivable'
 
         elif invoices_to_pay[0].move_type in ['in_refund']:
+            print('4==================================')
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound', 
                 'partner_type': 'supplier',
@@ -97,6 +102,7 @@ class MatchInvoiceWizard(models.TransientModel):
             account_type = 'liability_payable'
 
         else:
+            print('5==========================================')
             payment_vals = {
                 'payment_type': 'inbound' if match.amount_due > 0 else 'outbound',
                 'partner_type': 'customer',
@@ -146,7 +152,17 @@ class MatchInvoiceWizard(models.TransientModel):
 
         payment.write({'transaction_ref': match.name})
         match.action_match_transaction()
-
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Payment Success',
+                'message': 'Your payment was successfully processed.',
+                'type': 'success',  # types: success, warning, danger, info
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
 
 class MatchInvoiceWizardLine(models.TransientModel):
     _name = 'match.invoice.wizard.line'

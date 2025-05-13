@@ -35,17 +35,6 @@ class MatchInvoicePaymentWizard(models.TransientModel):
             }
 
             payment_amount = min(abs(match.amount_due), abs(invoice.amount_residual))
-
-            wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
-                'amount': payment_amount,
-                'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
-                'payment_date': fields.Date.today(),
-            })
-
-            payments = wizard._create_payments()
-            payments.attachment = self.attachment
-            invoice.transaction_ref = match.name
-
             match.amount_paid += invoice.amount_residual if match.amount >= 0 else -invoice.amount_residual
             match.amount_due = match.amount - match.amount_paid
             print(match.amount_due,match.amount_paid,match.amount,"pppppppppppppppppppppppppppppppppdddddddddddddddddddd")
@@ -60,3 +49,27 @@ class MatchInvoicePaymentWizard(models.TransientModel):
                 match.amount_due = 0.0
             else:
                 match.match_status = 'partial'
+
+            wizard = self.env['account.payment.register'].with_context(clean_ctx).create({
+                'amount': payment_amount,
+                'journal_id': self.env['account.journal'].search([('type', '=', 'bank')], limit=1).id,
+                'payment_date': fields.Date.today(),
+            })
+
+            payments = wizard._create_payments()
+            payments.attachment = self.attachment
+            invoice.transaction_ref = match.name
+            match.action_match_transaction()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Payment Success',
+                    'message': 'Your payment was successfully processed.',
+                    'type': 'success',  # types: success, warning, danger, info
+                    'sticky': False,
+                    'next': {'type': 'ir.actions.act_window_close'},
+                }
+            }
+
+

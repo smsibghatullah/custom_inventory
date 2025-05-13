@@ -104,13 +104,20 @@ class AkahuTransaction(models.Model):
     def action_match_transaction(self):
             for transaction in self:
                 transaction_reference = transaction.reference
-                transaction_amount = transaction.amount
+                transaction_amount = round(transaction.amount_due, 2)
+                if self.amount > 0:
+                    move_types = ['out_invoice', 'in_refund']
+                else:
+                    move_types = ['in_invoice', 'out_refund']
                 matching_invoices = self.env['account.move'].search([
+                    '&',
+                        '&',
+                            ('state', '=', 'posted'),
+                            ('payment_state', 'in', ['not_paid', 'partial']),
+                        ('move_type', 'in', move_types),
                     '|',
-                    ('reference', '=', transaction_reference),
-                    ('amount_total', '=', transaction_amount),
-                    ('state', '=', 'posted'),
-                    ('move_type', 'in', ['out_invoice', 'in_invoice']),
+                        ('reference', '=', transaction_reference),
+                        ('amount_total', '=', transaction_amount),
                 ])
                 print(matching_invoices,"ppppppppppppppppppppppppsssssssssssssmatching_invoicess")
 

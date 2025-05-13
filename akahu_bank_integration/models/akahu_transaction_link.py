@@ -13,7 +13,6 @@ class AkahuTransactionLink(models.Model):
         'link_id',
         'invoice_id',
         string="Linked Invoices",
-        default=lambda self: self._default_invoice_ids()
     )
 
     all_transaction_ids = fields.Many2many(
