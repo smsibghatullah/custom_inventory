@@ -3,7 +3,7 @@
         <field name="name">akahu.transaction.link.form</field>
         <field name="model">akahu.transaction.link</field>
         <field name="arch" type="xml">
-            <form create="false" edit="false" string="Transaction Link">
+            <form create="false" edit="false" string="Transaction Link" context="{'clear_invoice_ids_on_load': True}">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button type="object" name="action_filter_all" class="oe_stat_button" icon="fa-list">

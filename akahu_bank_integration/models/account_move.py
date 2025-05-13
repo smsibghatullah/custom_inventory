@@ -27,7 +27,7 @@ class AccountMove(models.Model):
             'target': 'new',
             'context': {
                 'default_invoice_id': self.id,
-                'default_transaction_amount': match.amount_due if match.match_status == 'partial' else match.amount,
+                'default_transaction_amount': match.amount_due,
             }
         }
 
