@@ -37,11 +37,11 @@ class AccountJournal(models.Model):
             accounts = response.json().get('items', [])
 
             for account_data in accounts:
-                if account_data.get('name') != self.name:
+                if account_data.get('formatted_account') != self.bank_account_id.acc_number:
                     continue  
 
                 vals = {
-                    'name': account_data.get('formatted_account'),
+                    'name': account_data.get('name'),
                     'akahu_account_id': account_data.get('_id'),
                     'formatted_account': account_data.get('formatted_account'),
                     'type': account_data.get('type'),
@@ -103,7 +103,7 @@ class AccountJournal(models.Model):
 
             for trans_data in transactions.get('items', []):
                 account_id = trans_data.get('_account')
-                matched_account = AkahuAccount.search([('name', '=', self.name)], limit=1)
+                matched_account = AkahuAccount.search([('formatted_account', '=', self.bank_account_id.acc_number)], limit=1)
 
                 if not matched_account or trans_data.get('_account') != matched_account.akahu_account_id:
                     continue 
