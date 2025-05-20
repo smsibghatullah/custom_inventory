@@ -94,17 +94,30 @@
                             <page string="Shift Assignments">
                                 <field name="main_shift_assignment_id" readonly="state != 'draft'">
                                     <tree editable="bottom">
+                                        <field name="name" readonly="1" />
                                         <field name="project_id" required="1" readonly="state != 'draft'"  options="{'no_create': True}"/>
                                         <field name="task_id" required="1" readonly="state != 'draft'"  options="{'no_create': True}"/>
                                         <field name="supervisor_ids" required="1"  options="{'no_create': True}" readonly="state != 'draft'" widget="many2many_tags" string="Supervisors" domain="[('id', 'not in', employee_ids)]"/>
                                         <field name="employee_ids" required="1"  options="{'no_create': True}" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
-                                        <field name="survey_id" string="Survey Form"  options="{'no_create': True}" widget="many2many_tags" required="1" readonly="state != 'draft'" />
+                                        <field name="project_survey_ids"   options="{'no_create': True}" widget="many2many_tags" required="1" readonly="state != 'draft'" />
+                                        <field name="task_survey_ids"  options="{'no_create': True}" widget="many2many_tags" required="1" readonly="state != 'draft'" />
                                         <field name="state" readonly="1" />
                                     </tree>
                                 </field>
                             </page>
-
-                           
+                            <page string="Survey Status">
+                                <field name="survey_status_ids" readonly="1">
+                                    <tree>
+                                        <field name="employee_id"/>
+                                        <field name="shift_id" />
+                                        <field name="project_id" invisible="project_id == False" />
+                                        <field name="task_id" invisible="task_id == False" />
+                                        <field name="survey_type"/>
+                                        <field name="survey_id"/>
+                                        <field name="status"/>
+                                    </tree>
+                                </field>
+                            </page>
                         </notebook>
                     </sheet>
                 </form>

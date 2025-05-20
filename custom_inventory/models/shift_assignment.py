@@ -12,6 +12,11 @@ class ShiftRole(models.Model):
         ('done', 'Done')
     ], string="Status", default='draft')
     main_shift_assignment_id = fields.One2many('shift.assignment', 'main_shift_assignment_id', string="Shift Assigments")
+    survey_status_ids = fields.One2many(
+        'shift.assignment.survey.status',
+        'shift_main_id',
+        string="Survey Statuses",
+    )
    
 
     def action_waiting_for_checkin(self):
@@ -33,6 +38,7 @@ class ShiftAssignment(models.Model):
     _description = 'Shift Assignment for Project Management'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    name = fields.Char(string="Name", required=True, copy=False, readonly=True, default='New')
     project_id = fields.Many2one('project.project', string='Project')
     task_id = fields.Many2one(
         'project.task', 
@@ -53,7 +59,21 @@ class ShiftAssignment(models.Model):
         'employee_id', 
         string='Employees', 
     )
-    survey_id = fields.Many2many('survey.survey', string='Survey Form')
+    survey_id = fields.Many2many('survey.survey', string='Survey Forms')
+    project_survey_ids = fields.Many2many(
+        'survey.survey',
+        'shift_assignment_project_survey_rel',
+        'shift_id',
+        'survey_id',
+        string='Project Survey Form(s)'
+    )
+    task_survey_ids = fields.Many2many(
+        'survey.survey',
+        'shift_assignment_task_survey_rel',
+        'shift_id',
+        'survey_id',
+        string='Task Survey Form(s)'
+    )
 
     team_checkin_required = fields.Boolean(string="Team Check-in Required")
     state = fields.Selection([
@@ -63,18 +83,101 @@ class ShiftAssignment(models.Model):
     ], string="Status", default='draft')
     main_shift_assignment_id = fields.Many2one('shift.assignment.main', string='Shift Assignment', required=True)
     attendance_ids = fields.One2many('shift.attendance', 'shift_id', string="Attendance Records")
+    survey_status_ids = fields.One2many(
+        'shift.assignment.survey.status',
+        'shift_id',
+        string="Survey Statuses",
+    )
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', 'New') == 'New':
+            vals['name'] = self.env['ir.sequence'].next_by_code('shift.assignment') or 'New'
+        record = super(ShiftAssignment, self).create(vals)
+
+        status_data = []
+        all_surveys = [
+            ('project', record.project_survey_ids),
+            ('task', record.task_survey_ids)
+        ]
+        all_employees = record.employee_ids | record.supervisor_ids
+        for survey_type, surveys in all_surveys:
+            for emp in all_employees:
+                for survey in surveys:
+                    status_entry = {
+                        'employee_id': emp.id,
+                        'survey_id': survey.id,
+                        'status': 'not_filled',  
+                        'survey_type': survey_type,
+                        'shift_id': record.id,
+                        'shift_main_id': record.main_shift_assignment_id.id,
+                    }
+
+                    if survey_type == 'project':
+                        status_entry['project_id'] = record.project_id.id
+                    elif survey_type == 'task':
+                        status_entry['task_id'] = record.task_id.id
+
+                    status_data.append(status_entry)
+
+        if status_data:
+            self.env['shift.assignment.survey.status'].create(status_data)
+
+        return record
+
+
 
     @api.model
     def write(self, vals):
-        """Check if all shift assignments are done when state changes"""
         result = super(ShiftAssignment, self).write(vals)
-        print("pppppppppppppppppppppppppppppppppppppppp=====================>>>>>>>>>>>>>>>>>>.mubeen>>>>>>>>>>>>>>>>>")
-        if  self.state == 'done' or vals['state'] == 'done':
-            for record in self:
+
+        for record in self:
+            all_surveys = [
+                ('project', record.project_survey_ids),
+                ('task', record.task_survey_ids)
+            ]
+
+            for survey_type, surveys in all_surveys:
+                for emp in record.employee_ids:
+                    for survey in surveys:
+                        existing_status = self.env['shift.assignment.survey.status'].search([
+                            ('employee_id', '=', emp.id),
+                            ('survey_id', '=', survey.id),
+                            ('survey_type', '=', survey_type),
+                            ('shift_id', '=', record.id),
+                        ], limit=1)
+
+                        if existing_status:
+                            existing_status.write({
+                                'status': existing_status.status or 'draft',
+                                'shift_main_id': record.main_shift_assignment_id.id,
+                            })
+                        else:
+                            self.env['shift.assignment.survey.status'].create({
+                                'employee_id': emp.id,
+                                'survey_id': survey.id,
+                                'status': 'draft',
+                                'survey_type': survey_type,
+                                'shift_id': record.id,
+                                'shift_main_id': record.main_shift_assignment_id.id,
+                            })
+
+
+            if vals.get('state') == 'done' or record.state == 'done':
                 for attendance in record.attendance_ids:
                     if attendance.check_in and not attendance.check_out:
                         attendance.check_out = fields.Datetime.now()
-                        print(attendance.check_out,"pppppppppppppppppppppppppppppppppppppppp=====================>>>>>>>>>>>>>>>>>>.mubeen>>>>>>>>>>>>>>>>>")
+
+                if record.task_id and record.project_id:
+                    done_stage = self.env['project.task.type'].search([
+                        ('name', '=', 'Done'),
+                        ('project_ids', 'in', record.project_id.id)
+                    ], limit=1)
+                    if done_stage:
+                        record.task_id.stage_id = done_stage.id
+                    record.task_id.state = '1_done'
+
+        self.mapped('main_shift_assignment_id').check_and_update_state()
         return result
 
   
@@ -110,5 +213,30 @@ class ShiftAttendance(models.Model):
                     })
             else:
                 record.duration = 0.0
+
+class ShiftSurveyStatus(models.Model):
+    _name = 'shift.assignment.survey.status'
+    _description = 'Survey Status for Employee (Shift-Based)'
+
+    employee_id = fields.Many2one('hr.employee', string="Employee")
+    survey_id = fields.Many2one('survey.survey', string="Survey")
+    status = fields.Selection([
+        ('not_filled', 'Not Filled'),
+        ('partial', 'Partially Filled'),
+        ('filled', 'Filled')
+    ], string="Survey Status")
+    shift_id = fields.Many2one('shift.assignment', string="Shift Assignment")
+    shift_main_id = fields.Many2one('shift.assignment.main', string="Shift main Assignment")
+    survey_type = fields.Selection([
+        ('project', 'Project Survey'),
+        ('task', 'Task Survey')
+    ], string="Survey Type")
+    project_id = fields.Many2one('project.project', string='Project')
+    task_id = fields.Many2one(
+        'project.task', 
+        string='Task', 
+    )
+
+
 
   

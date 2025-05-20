@@ -1,6 +1,7 @@
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError,ValidationError
 import base64
+from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url, is_html_empty
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
@@ -63,6 +64,36 @@ class AccountMove(models.Model):
         help='Select the Categories associated with the selected brand'
     )
     customer_description = fields.Char(string="Customer Description")
+    formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates", store=True)
+    formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates", store=True)
+
+    @api.depends('invoice_date', 'invoice_date_due')
+    def _compute_formatted_dates(self):
+        for rec in self:
+            rec.formatted_invoice_date = rec.invoice_date.strftime('%d/%m/%Y') if rec.invoice_date else ''
+            rec.formatted_due_date = rec.invoice_date_due.strftime('%d/%m/%Y') if rec.invoice_date_due else ''
+
+    def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
+                                                   force_email_company=False, force_email_lang=False):
+        render_context = super()._notify_by_email_prepare_rendering_context(
+            message, msg_vals, model_description=model_description,
+            force_email_company=force_email_company, force_email_lang=force_email_lang
+        )
+        subtitles = [render_context['record'].name]
+        if (
+            self.invoice_date_due
+            and self.is_invoice(include_receipts=True)
+            and self.payment_state not in ('in_payment', 'paid')
+        ):
+            subtitles.append(_('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
+                           amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
+                           date=self.invoice_date_due.strftime('%d/%m/%Y')
+                          ))
+        else:
+            subtitles.append(format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')))
+        render_context['subtitles'] = subtitles
+        return render_context
+
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):

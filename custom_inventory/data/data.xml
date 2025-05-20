@@ -1,5 +1,13 @@
 <odoo>
     <data>
+       <record id="seq_shift_assignment" model="ir.sequence">
+            <field name="name">Shift Assignment</field>
+            <field name="code">shift.assignment</field>
+            <field name="prefix">SHIFT</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
         <record id="paperformat_scrap_reports" model="report.paperformat">
             <field name="name">Scrap Reports</field>
             <field name="default" eval="True"/>

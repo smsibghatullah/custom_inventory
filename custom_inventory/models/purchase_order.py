@@ -6,6 +6,7 @@ import base64
 from odoo.fields import Command
 import random
 from collections import defaultdict
+from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url, is_html_empty
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -53,6 +54,27 @@ class PurchaseOrder(models.Model):
          required=True,
         help='Select the Categories associated with the selected brand'
     )
+
+    def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
+                                                   force_email_company=False, force_email_lang=False):
+        render_context = super()._notify_by_email_prepare_rendering_context(
+            message, msg_vals, model_description=model_description,
+            force_email_company=force_email_company, force_email_lang=force_email_lang
+        )
+        subtitles = [render_context['record'].name]
+        # don't show price on RFQ mail
+        if self.state not in ['draft', 'sent']:
+            if self.date_order:
+                subtitles.append(_('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
+                                   amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
+                                   date=self.date_order.strftime('%d/%m/%Y')
+                                   ))
+            else:
+                subtitles.append(format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')))
+        render_context['subtitles'] = subtitles
+        return render_context
+
+
     @api.depends("tag_ids")
     def _compute_available_tags(self):
         for record in self:
