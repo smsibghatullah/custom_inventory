@@ -63,6 +63,15 @@ class ResPartner(models.Model):
         for record in self:
             record.current_company_id = self.env.company
 
+    @api.depends('name', 'email')
+    def _compute_display_name(self):
+        context = self.env.context
+        for rec in self:
+            if context.get('show_email_only') and rec.email:
+                rec.display_name = rec.email
+            else:
+                rec.display_name = rec.name or ''
+
 
  
 
