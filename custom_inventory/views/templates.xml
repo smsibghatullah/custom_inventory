@@ -801,14 +801,14 @@
                     <tr t-if="o.invoice_date" name="invoice_date">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="o.formatted_invoice_date" >1-Feb-2024</span>
+                            <span t-field="o.formatted_invoice_date" ></span>
                         </td>
                     </tr>
                      <tr t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'">
                         <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Due Date</td>
                         <td t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'"   style="border: 1px solid black; padding: 5px;">
                             <div name="due_date">
-                            <span t-field="o.formatted_due_date">3-Jan-2025</span>
+                            <span t-field="o.formatted_due_date"></span>
                             </div>
                         </td>
                     </tr>

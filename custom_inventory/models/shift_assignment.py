@@ -136,9 +136,9 @@ class ShiftAssignment(models.Model):
                 ('project', record.project_survey_ids),
                 ('task', record.task_survey_ids)
             ]
-
+            all_employees = record.employee_ids | record.supervisor_ids
             for survey_type, surveys in all_surveys:
-                for emp in record.employee_ids:
+                for emp in all_employees:
                     for survey in surveys:
                         existing_status = self.env['shift.assignment.survey.status'].search([
                             ('employee_id', '=', emp.id),
@@ -149,17 +149,19 @@ class ShiftAssignment(models.Model):
 
                         if existing_status:
                             existing_status.write({
-                                'status': existing_status.status or 'draft',
+                                # 'status': existing_status.status or 'not_filled',
                                 'shift_main_id': record.main_shift_assignment_id.id,
                             })
                         else:
                             self.env['shift.assignment.survey.status'].create({
                                 'employee_id': emp.id,
                                 'survey_id': survey.id,
-                                'status': 'draft',
+                                'status': 'not_filled',
                                 'survey_type': survey_type,
                                 'shift_id': record.id,
                                 'shift_main_id': record.main_shift_assignment_id.id,
+                                'task_id':record.task_id.id  if survey_type == 'task' else [],
+                                'project_id':record.project_id.id  if survey_type == 'project' else []
                             })
 
 

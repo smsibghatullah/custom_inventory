@@ -158,12 +158,25 @@ class AccountMove(models.Model):
                 message_type='notification',
                 author_id=user.partner_id.id
             )
+        order.formatted_invoice_date = order.invoice_date.strftime('%d/%m/%Y') if order.invoice_date else ''
+        order.formatted_due_date = order.invoice_date_due.strftime('%d/%m/%Y') if order.invoice_date_due else ''
         return order
 
     def write(self, vals):
         user = self.env.user
         result = super(AccountMove, self).write(vals)
+            
         for order in self:
+            self.env.cr.execute("""
+                UPDATE account_move 
+                SET formatted_invoice_date = %s,
+                    formatted_due_date = %s
+                WHERE id = %s
+            """, (
+                order.invoice_date.strftime('%d/%m/%Y') if order.invoice_date else '',
+                order.invoice_date_due.strftime('%d/%m/%Y') if order.invoice_date_due else '',
+                order.id
+            ))
             if 'reference' in vals:
                     order.message_post(
                         body=f"Invoice with Reference: {order.reference}",
