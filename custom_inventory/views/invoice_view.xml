@@ -225,7 +225,7 @@
                         <group invisible="not display_mail_composer">
                            <label for="custom_email_to" string="Recipient Email"/>
                         <div >
-                          <field name="custom_email_to" widget="many2many_tags" domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email" required="1"/>
+                          <field name="custom_email_to" context="{'show_email_only': True}" widget="many2many_tags" domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email" required="1"/>
                         </div>
                             <field name="mail_subject"
                                 placeholder="Subject..."

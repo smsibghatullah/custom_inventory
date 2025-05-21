@@ -228,6 +228,14 @@ class AccountMove(models.Model):
 
             if any(not x.is_sale_document(include_receipts=True) for x in self):
                 raise UserError(_("You can only send sales documents"))
+            email_partner_ids = []
+
+            if self.partner_id.is_company:
+                email_partner_ids = [self.partner_id.id] + self.partner_id.child_ids.ids
+            elif self.partner_id.parent_id:
+                email_partner_ids = [self.partner_id.parent_id.id] + self.partner_id.parent_id.child_ids.ids
+            else:
+                email_partner_ids = [self.partner_id.id]
 
             return {
                 'name': _("Send"),
@@ -239,7 +247,7 @@ class AccountMove(models.Model):
                 'context': {
                     'active_ids': self.ids,
                     'default_mail_template_id': self.brand_id.mail_invoice_template_id.id if self.brand_id.mail_invoice_template_id else None,
-                    'partner_child': [self.partner_id.id] + self.partner_id.child_ids.ids,
+                    'partner_child': email_partner_ids,
                     'default_custom_email_from' : self.brand_id.inv_email ,
                 },
             }

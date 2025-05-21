@@ -352,10 +352,18 @@ class PurchaseOrder(models.Model):
         except ValueError:
             compose_form_id = False
         ctx = dict(self.env.context or {})
+        email_partner_ids = []
+
+        if self.partner_id.is_company:
+            email_partner_ids = [self.partner_id.id] + self.partner_id.child_ids.ids
+        elif self.partner_id.parent_id:
+            email_partner_ids = [self.partner_id.parent_id.id] + self.partner_id.parent_id.child_ids.ids
+        else:
+            email_partner_ids = [self.partner_id.id]
         ctx.update({
             'default_model': 'purchase.order',
             'default_res_ids': self.ids,
-            'partner_child': [self.partner_id.id] + self.partner_id.child_ids.ids,
+            'partner_child': email_partner_ids,
             'default_custom_email_from' : self.brand_id.po_email ,
             'default_template_id': self.brand_id.mail_purchase_template_id.id if self.brand_id.mail_purchase_template_id else None,
             'default_composition_mode': 'comment',
@@ -401,10 +409,18 @@ class PurchaseOrder(models.Model):
         except ValueError:
             compose_form_id = False
         ctx = dict(self.env.context or {})
+        email_partner_ids = []
+
+        if self.partner_id.is_company:
+            email_partner_ids = [self.partner_id.id] + self.partner_id.child_ids.ids
+        elif self.partner_id.parent_id:
+            email_partner_ids = [self.partner_id.parent_id.id] + self.partner_id.parent_id.child_ids.ids
+        else:
+            email_partner_ids = [self.partner_id.id]
         ctx.update({
             'default_model': 'purchase.order',
             'default_res_ids': self.ids,
-            'partner_child': [self.partner_id.id] + self.partner_id.child_ids.ids,
+            'partner_child': email_partner_ids,
             'default_custom_email_from' : self.brand_id.po_email ,
             'default_template_id': self.brand_id.mail_purchase_quotation_template_id.id if self.brand_id.mail_purchase_quotation_template_id else None,
             'default_composition_mode': 'comment',

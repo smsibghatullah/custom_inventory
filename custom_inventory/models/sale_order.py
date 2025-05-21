@@ -502,6 +502,14 @@ class SaleOrder(models.Model):
         lang = self.env.context.get('lang')
 
         children = self.partner_id.child_ids
+        email_partner_ids = []
+
+        if self.partner_id.is_company:
+            email_partner_ids = [self.partner_id.id] + self.partner_id.child_ids.ids
+        elif self.partner_id.parent_id:
+            email_partner_ids = [self.partner_id.parent_id.id] + self.partner_id.parent_id.child_ids.ids
+        else:
+            email_partner_ids = [self.partner_id.id]
       
         ctx = {
             'default_model': 'sale.order',
@@ -514,7 +522,7 @@ class SaleOrder(models.Model):
             'proforma': self.env.context.get('proforma', False),
             'force_email': True,
             'model_description': self.with_context(lang=lang).type_name,
-            'partner_child': [self.partner_id.id] + children.ids,
+            'partner_child': email_partner_ids,
         }
 
         return {
@@ -534,12 +542,20 @@ class SaleOrder(models.Model):
         self.order_line._validate_analytic_distribution()
         lang = self.env.context.get('lang')
         children = self.partner_id.child_ids
+        email_partner_ids = []
+
+        if self.partner_id.is_company:
+            email_partner_ids = [self.partner_id.id] + self.partner_id.child_ids.ids
+        elif self.partner_id.parent_id:
+            email_partner_ids = [self.partner_id.parent_id.id] + self.partner_id.parent_id.child_ids.ids
+        else:
+            email_partner_ids = [self.partner_id.id]
         # mail_template = self._find_mail_template()
         # if mail_template and mail_template.lang:
         #     lang = mail_template._render_lang(self.ids)[self.id]
         ctx = {
             'default_model': 'sale.order',
-             'partner_child': [self.partner_id.id] + children.ids,
+             'partner_child': email_partner_ids,
             'default_custom_email_from' : self.brand_id.so_email ,
             'default_res_ids': self.ids,
             'default_template_id': self.brand_id.mail_sale_template_id.id if self.brand_id.mail_sale_template_id else None,
