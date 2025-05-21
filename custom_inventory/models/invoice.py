@@ -64,8 +64,8 @@ class AccountMove(models.Model):
         help='Select the Categories associated with the selected brand'
     )
     customer_description = fields.Char(string="Customer Description")
-    formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates", store=True)
-    formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates", store=True)
+    formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates")
+    formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates")
 
     @api.depends('invoice_date', 'invoice_date_due')
     def _compute_formatted_dates(self):
