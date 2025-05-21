@@ -1,0 +1,24 @@
+<odoo>
+        <record id="view_invoice_attachment_wizard_form" model="ir.ui.view">
+            <field name="name">invoice.attachment.wizard.form</field>
+            <field name="model">invoice.attachment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Invoice Attachments">
+                    <group>
+                        <field name="invoice_id" readonly="1"/>
+                        <field name="attachment_ids" widget="many2many_binary" readonly='1'/>
+                    </group>
+                    <footer>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_invoice_attachment_wizard" model="ir.actions.act_window">
+            <field name="name">Invoice Attachments</field>
+            <field name="res_model">invoice.attachment.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+</odoo>

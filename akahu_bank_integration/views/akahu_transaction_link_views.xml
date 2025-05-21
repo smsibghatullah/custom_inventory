@@ -53,6 +53,11 @@
                                 <field name="amount_residual"/>
                                 <field name="invoice_date"/>
                                 <field name="payment_state"/>
+                                <button name="action_open_attachment_wizard"
+                                    type="object"
+                                    string="View Attachments"
+                                    class="btn btn-secondary p-1"
+                                    icon="fa-paperclip"/>
                                 <button name="action_open_payment_wizard" class="btn btn-primary p-1" type="object" string="Create Payment" icon="fa-credit-card"/>
                             </tree>
                         </field>
@@ -70,4 +75,5 @@
 
     <menuitem id="menu_akahu_transaction_link_root" name="Akahu Transaction Links"
               parent="akahu_bank_integration.menu_akahu_root" action="action_akahu_transaction_link"/>
+
 </odoo>

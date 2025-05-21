@@ -11,6 +11,26 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     transaction_ref = fields.Char(string="Transaction Refrence")  
+
+    def action_open_attachment_wizard(self):
+        self.ensure_one()
+        attachments = self.env['ir.attachment'].search([
+                ('res_model', '=', 'account.move'),
+                ('res_id', '=', self.id)
+            ])
+        print(attachments,"=======================================================")
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'invoice.attachment.wizard',
+            'view_mode': 'form',
+            'view_id': self.env.ref('akahu_bank_integration.view_invoice_attachment_wizard_form').id,
+            'target': 'new',
+            'context': {
+                'active_id': self.id,
+                'default_invoice_id': self.id,
+                'default_attachment_ids': [(6, 0, attachments.ids)]
+            }
+        }
    
 
     def action_open_payment_wizard(self):

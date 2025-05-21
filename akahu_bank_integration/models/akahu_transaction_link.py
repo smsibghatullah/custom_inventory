@@ -80,3 +80,6 @@ class AkahuTransactionLink(models.Model):
         self.write({'filter_match_status': 'unmatched'})
         self.invoice_ids = [(6, 0, [])]
 
+
+
+

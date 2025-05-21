@@ -101,6 +101,8 @@
                                         <field name="employee_ids" required="1"  options="{'no_create': True}" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
                                         <field name="project_survey_ids"   options="{'no_create': True}" widget="many2many_tags" required="1" readonly="state != 'draft'" />
                                         <field name="task_survey_ids"  options="{'no_create': True}" widget="many2many_tags" required="1" readonly="state != 'draft'" />
+                                        <field name="project_survey_required"  />
+                                        <field name="task_survey_required"  />
                                         <field name="state" readonly="1" />
                                     </tree>
                                 </field>

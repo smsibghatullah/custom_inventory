@@ -74,6 +74,9 @@ class ShiftAssignment(models.Model):
         'survey_id',
         string='Task Survey Form(s)'
     )
+    project_survey_required = fields.Boolean(string="Project Survey Mandatory")
+    task_survey_required = fields.Boolean(string="Task Survey Mandatory")
+
 
     team_checkin_required = fields.Boolean(string="Team Check-in Required")
     state = fields.Selection([

@@ -27,7 +27,8 @@ Features:
         'views/akahu_transaction_link_views.xml',
         'wizard/invoice_wizard_view.xml',
         'wizard/bank_account_wizard_view.xml',
-        'wizard/payment_wizard_view.xml'
+        'wizard/payment_wizard_view.xml',
+        'wizard/attachment_wizard_view.xml'
     ],
     'installable': True,
     'application': True,
