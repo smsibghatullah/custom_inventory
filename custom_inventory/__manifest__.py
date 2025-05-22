@@ -26,7 +26,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'category': 'Inventory',
     'version': '1.0',
 
-    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery','project','survey','product','maintenance','hr_maintenance','gsk_automatic_mail_server','hide_menu_user'],
+    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery','project','survey','product','maintenance','hr_maintenance','gsk_automatic_mail_server','hide_menu_user','hr_attendance'],
 
     'data': [
         
@@ -47,7 +47,8 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/res_company_view.xml',
         'views/maintaince_equipment_view.xml',
         'views/res_users_view.xml',
-        'views/product_category_view.xml'
+        'views/product_category_view.xml',
+        'views/hr_attendance_view.xml'
     ],
 
   
