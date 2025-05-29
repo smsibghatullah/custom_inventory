@@ -21,7 +21,7 @@ class ResUsers(models.Model):
         'sku_type_id',
         string='Categories',
         help='Select the SKU Categories associated with this user',
-        domain="[('company_id', 'in', company_ids)]",
+        domain="[('company_ids', 'in', company_ids)]",
     )
 
 
@@ -48,7 +48,7 @@ class ResPartner(models.Model):
         'brand.master',
         'res_partner_brand_rel_we',
         string='Brands',
-        domain="[('company_id', '=', current_company_id)]",
+        domain="[('company_ids', 'in', current_company_id)]",
         help='Select the Brands'
     )
 

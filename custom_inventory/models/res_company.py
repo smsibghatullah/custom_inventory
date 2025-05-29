@@ -3,12 +3,15 @@ from odoo import models, fields,api
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    brand_ids = fields.One2many(
-        'brand.master',  
-        'company_id', 
+    brand_ids = fields.Many2many(
+        'brand.master',
+        'brand_company_rel',
+        'company_id',
+        'brand_id',
         string='Brands',
         help='Select the brands associated with this company'
     )
+
 
     tag_ids = fields.Many2many(
         'crm.tag',
@@ -19,12 +22,15 @@ class ResCompany(models.Model):
         help='Select the Tags associated with this user',
     )
 
-    category_ids = fields.One2many(
-        'sku.type.master',  
-        'company_id', 
+    category_ids = fields.Many2many(
+        'sku.type.master',
+        'sku_category_company_rel',
+        'company_id',
+        'category_id',
         string='Categories',
         help='Select the Categories associated with this company'
     )
+
 
     @api.onchange('tag_ids')
     def _onchange_tag_ids(self):

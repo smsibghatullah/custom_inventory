@@ -30,7 +30,13 @@ class BrandMaster(models.Model):
         default=False,
         help="Indicates whether this line represents a tag-related item."
     )
-    company_id = fields.Many2one('res.company', string="Company")
+    company_ids = fields.Many2many(
+        'res.company',
+        'brand_company_rel',
+        'brand_id',
+        'company_id',
+        string="Companies using this tag"
+    )
     purchase_text_fields = fields.One2many('purchase.dynamic.field.text', 'brand_id', string='Purchase Text Fields')
     purchase_checkbox_fields = fields.One2many('purchase.dynamic.field.checkbox', 'brand_id', string='Purchase Checkbox Fields')
     purchase_selection_fields = fields.One2many('purchase.dynamic.field.selection.key', 'brand_id', string='Purchase Selection Fields')

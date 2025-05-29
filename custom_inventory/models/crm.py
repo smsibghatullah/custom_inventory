@@ -12,7 +12,7 @@ class CrmLead(models.Model):
     brand_id = fields.Many2one(
         'brand.master',
         string='Brand',
-         domain="[('company_id', '=', company_id)]",
+         domain="[('company_ids', 'in', company_id)]",
         help='Select the brand associated with this sale order'
     )
 
