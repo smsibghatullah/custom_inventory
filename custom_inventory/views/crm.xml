@@ -193,7 +193,7 @@
         </record>
 
     
-               <record id="crm.crm_case_kanban_view_leads" model="ir.ui.view">
+        <record id="crm.crm_case_kanban_view_leads" model="ir.ui.view">
             <field name="name">crm.lead.kanban.lead</field>
             <field name="model">crm.lead</field>
             <field name="priority" eval="1"/>
