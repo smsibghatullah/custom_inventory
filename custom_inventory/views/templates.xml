@@ -36,7 +36,7 @@
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
 
         <t t-set="forced_vat" t-value="doc.fiscal_position_id.foreign_vat"/>          
-       <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+       <div class="page" style="font-size: 15px;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
        <div class="oe_structure"/>
        <!-- Brand Logo and name -->
        <div style="position: fixed; top: 0; left: 0; padding: 10px;">
@@ -736,11 +736,12 @@
 </template>
 
 <template id="account.report_invoice_document">
+<t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
-                <div class="page" style="font-size: 14pt;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+                <div class="page" style="font-size: 15px;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
                 
                 <div class="oe_structure"/>
                 <div style="position: fixed; top: 0; left: 0; padding: 10px;">
@@ -790,7 +791,7 @@
             </div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
+            <div style="width: 35%;margin-left: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
@@ -825,6 +826,7 @@
                 </table>
             </div>
         </div>
+        <br/>
 
         <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
         <!-- Product and Order line table -->
@@ -870,14 +872,15 @@
         </tbody>
         </table>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-        <!-- Left side -->
-            <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; width: 100%;">
+    
+            <!-- Left Side -->
+            <div style="width: 60%;">
                 <p style="font-size: 15px;">Thank you for your business!</p>
             </div>
 
-            <!-- Right side (Total Calculation) -->
-            <div style="text-align: right;">
+            <!-- Right Side (Total Calculation) -->
+            <div style="width: 35%; text-align: right; margin-left: auto;">
                 <table style="border-collapse: collapse; font-size: 15px;">
                     <tr>
                         <td style="padding: 5px;">Sub Total</td>
@@ -906,7 +909,7 @@
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
             <p style="font-size: 15px;">Bank Deposit</p>
 
-            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+            <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
               <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
             </div>
         </div>
@@ -939,6 +942,7 @@
 
         </div>
                 
+            </t>
             </t>
         </template>
 
