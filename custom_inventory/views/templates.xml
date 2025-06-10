@@ -30,7 +30,7 @@
 
 <template id="sale.report_saleorder_document">
 <t t-call="web.html_container">
-    <t t-call="web.external_layout">
+    <!-- <t t-call="web.external_layout"> -->
 
 
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
@@ -389,7 +389,7 @@
               x        <span t-field="doc.signed_by">Oscar Morgan</span>
                 </div>
             </div>
-    </t>
+    <!-- </t> -->
     </t>
 </template>
 
@@ -397,8 +397,8 @@
 
     
 
-<template id="purchase.report_purchaseorder_document">
-    <t t-call="web.external_layout">
+    <template id="purchase.report_purchaseorder_document">
+       <t t-call="web.html_container">
 
         <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
      
@@ -730,11 +730,11 @@
                                             </t>
                                 </div>
         </div>
-    </t>
-</template>
+      </t>
+    </template>
 
-<template id="account.report_invoice_document">
-            <t t-call="web.external_layout">
+    <template id="account.report_invoice_document">
+            <t t-call="web.html_container">
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
@@ -938,9 +938,9 @@
         </div>
                 
             </t>
-        </template>
+    </template>
 
-            <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+    <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
         <xpath expr="//div[hasclass('page')]/h2" position="replace">
             <h2>
                
@@ -949,8 +949,8 @@
     </template>
 
 
-<template id="purchase.report_purchasequotation_document">
-            <t t-call="web.external_layout">
+    <template id="purchase.report_purchasequotation_document">
+            <t t-call="web.html_container">
                 <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
@@ -1284,7 +1284,7 @@
             </t>
     </template>
 
-<template id="mail.mail_notification_layout" name="Mail: mail notification layout template" >
+    <template id="mail.mail_notification_layout" name="Mail: mail notification layout template" >
                     <html t-att-lang="lang">
                     <head>
                         <meta http-equiv="Content-Type" content="text/html charset=UTF-8"/>
