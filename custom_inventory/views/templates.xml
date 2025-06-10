@@ -350,7 +350,7 @@
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
             <p style="font-size: 15px;">Bank Deposit</p>
 
-            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+            <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
               <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
             </div>
         </div>
@@ -705,7 +705,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
@@ -904,7 +904,7 @@
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
             <p style="font-size: 15px;">Bank Deposit</p>
 
-            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+            <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
               <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
             </div>
         </div>
@@ -1256,7 +1256,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
