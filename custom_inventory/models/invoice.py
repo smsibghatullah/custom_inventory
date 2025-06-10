@@ -326,14 +326,14 @@ class AccountMoveLine(models.Model):
         """
         for line in self:
             for line in self:
-                if not line.move_id.bom_id:
-                    if line.move_id and line.move_id.category_ids:
-                        line.category_ids = line.move_id.category_ids.ids
-                    else:
-                        line.category_ids = []
+                # if not line.move_id.bom_id:
+                if line.move_id and line.move_id.category_ids:
+                    line.category_ids = line.move_id.category_ids.ids
                 else:
-                    category_ids = self.env['sku.type.master'].search([]) 
-                    line.category_ids = category_ids
+                    line.category_ids = []
+                # else:
+                #     category_ids = self.env['sku.type.master'].search([]) 
+                #     line.category_ids = category_ids
             
     
             
@@ -341,14 +341,14 @@ class AccountMoveLine(models.Model):
     @api.onchange('product_id')
     def _compute_product_template_id(self):
         for line in self:
-            if not line.move_id.bom_id:
-                if line.move_id and line.move_id.category_ids:
-                    self.category_ids = line.move_id.category_ids.ids
-                else:
-                    line.category_ids = []
+            # if not line.move_id.bom_id:
+            if line.move_id and line.move_id.category_ids:
+                self.category_ids = line.move_id.category_ids.ids
             else:
-                category_ids = self.env['sku.type.master'].search([]) 
-                line.category_ids = category_ids
+                line.category_ids = []
+            # else:
+            #     category_ids = self.env['sku.type.master'].search([]) 
+            #     line.category_ids = category_ids
     
             
     

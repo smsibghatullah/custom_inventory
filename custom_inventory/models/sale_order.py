@@ -798,12 +798,12 @@ class SaleOrderLine(models.Model):
             print(f"Order ID: {line.order_id.id}, BOM ID: {line.order_id.bom_id}")
             print(f"Before Compute: {line.category_ids}")
 
-            if not line.order_id.bom_id:
-                if line.order_id and line.order_id.category_ids:
-                    line.category_ids = line.order_id.category_ids.ids
-            else:
-                category_ids = self.env['sku.type.master'].search([]) 
-                line.category_ids = category_ids
+            # if not line.order_id.bom_id:
+            if line.order_id and line.order_id.category_ids:
+                line.category_ids = line.order_id.category_ids.ids
+            # else:
+            #     category_ids = self.env['sku.type.master'].search([]) 
+            #     line.category_ids = category_ids
 
             print(f"After Compute: {line.category_ids}")
 
@@ -817,12 +817,12 @@ class SaleOrderLine(models.Model):
     def _compute_product_template_id(self):
         print('kkkkkkkkkkkkkkkkkkkkk')
         for line in self:
-            if not line.order_id.bom_id:
-                if line.order_id and line.order_id.category_ids:
-                    line.category_ids = line.order_id.category_ids.ids
-            else:
-                category_ids = self.env['sku.type.master'].search([]) 
-                line.category_ids = category_ids
+            # if not line.order_id.bom_id:
+            if line.order_id and line.order_id.category_ids:
+                line.category_ids = line.order_id.category_ids.ids
+            # else:
+            #     category_ids = self.env['sku.type.master'].search([]) 
+            #     line.category_ids = category_ids
 
             line.product_template_id = line.product_id.product_tmpl_id
             print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
