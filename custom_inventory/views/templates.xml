@@ -400,11 +400,12 @@
     
 
 <template id="purchase.report_purchaseorder_document">
+  <t t-call="web.html_container">
     <t t-call="web.external_layout">
 
         <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
      
-        <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+        <div class="page" style="font-size: 15px;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
         <div class="oe_structure"/>
         <div style="position: fixed; top: 0; left: 0; padding: 10px;">
                 <t t-if="o.brand_id">
@@ -464,7 +465,7 @@
             </div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
+            <div style="width: 35%;margin-left: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr t-if="o.user_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
@@ -671,14 +672,15 @@
                             </tbody>
                             </table>
 
-                            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                                <!-- Left side -->
-                                    <div>
+                                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; width: 100%;">
+    
+                                    <!-- Left Side -->
+                                    <div style="width: 60%;">
                                         <p style="font-size: 15px;">Thank you for your business!</p>
                                     </div>
 
-                                    <!-- Right side (Total Calculation) -->
-                                    <div style="text-align: right;">
+                                    <!-- Right Side (Total Calculation) -->
+                                    <div style="width: 35%; text-align: right; margin-left: auto;">
                                         <table style="border-collapse: collapse; font-size: 15px;">
                                             <tr>
                                                 <td style="padding: 5px;">Sub Total</td>
@@ -707,7 +709,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
@@ -732,6 +734,7 @@
                                             </t>
                                 </div>
         </div>
+    </t>
     </t>
 </template>
 
@@ -956,10 +959,11 @@
 
 
 <template id="purchase.report_purchasequotation_document">
+  <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
-                <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+                <div class="page" style="font-size: 15px;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
         <div class="oe_structure"/>
         <div style="position: fixed; top: 0; left: 0; padding: 10px;">
                 <t t-if="o.brand_id">
@@ -1019,7 +1023,7 @@
             </div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
+            <div style="width: 35%;margin-left: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr t-if="o.user_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
@@ -1226,14 +1230,15 @@
                             </tbody>
                             </table>
 
-                            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                                <!-- Left side -->
-                                    <div>
-                                        <p style="font-size: 15px;">Thank you for your business!</p>
-                                    </div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; width: 100%;">
+    
+                                <!-- Left Side -->
+                                <div style="width: 60%;">
+                                    <p style="font-size: 15px;">Thank you for your business!</p>
+                                </div>
 
-                                    <!-- Right side (Total Calculation) -->
-                                    <div style="text-align: right;">
+                                <!-- Right Side (Total Calculation) -->
+                                <div style="width: 35%; text-align: right; margin-left: auto;">
                                         <table style="border-collapse: collapse; font-size: 15px;">
                                             <tr>
                                                 <td style="padding: 5px;">Sub Total</td>
@@ -1262,7 +1267,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
@@ -1287,6 +1292,7 @@
                                             </t>
                                 </div>
         </div>
+            </t>
             </t>
     </template>
 
