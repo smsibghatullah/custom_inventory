@@ -30,7 +30,7 @@
 
 <template id="sale.report_saleorder_document">
 <t t-call="web.html_container">
-    <!-- <t t-call="web.external_layout"> -->
+    <t t-call="web.external_layout">
 
 
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
@@ -87,15 +87,13 @@
             <span t-field="doc.partner_id.vat" style="font-weight: bold;"/>
         </p>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="width: 60%;">
-            
-
-           
-            </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+    
+            <!-- Left Side: Empty Space or Content -->
+            <div style="width: 60%;"></div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;">
+            <div style="width: 35%; margin-left: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr t-if="doc.state in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
@@ -108,14 +106,14 @@
                     <tr t-if="doc.date_order">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="doc.formatted_date_order" >20-Feb-2025</span>
+                            <span t-field="doc.formatted_date_order">20-Feb-2025</span>
                         </td>
                     </tr>
-                     <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
-                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
-                        <td t-if="doc.validity_date and doc.state in ['draft', 'sent']"  style="border: 1px solid black; padding: 5px;">
+                    <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
+                        <td style="border: 1px solid black; padding: 5px;">
                             <div name="expiration_date">
-                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
+                                <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
                             </div>
                         </td>
                     </tr>
@@ -123,13 +121,14 @@
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
                     </tr>
-                     <tr t-if="doc.payment_term_id">
+                    <tr t-if="doc.payment_term_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.payment_term_id"></span></td>
                     </tr>
                 </table>
             </div>
         </div>
+
         <br/>
         <table style="margin-bottom: 10px;  width: 100%;">
             <t t-set="valid_fields" t-value="[field for field in doc.text_fields if field.text_value]" />
@@ -260,60 +259,62 @@
 
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
-        <table style="width: 100%;text-align: center;">
-        <thead>
-            <tr>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
-                <t t-if="doc.brand_id.is_tax_show">
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
-                </t>
-                 <t t-if="doc.discount_amount">
-                 <td style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</td>
-                 </t>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
-            </tr>
-        </thead>
-        <tbody class="sale_tbody">
-           <t t-set="index" t-value="0"/> 
-           <t t-foreach="lines_to_report" t-as="line">
-           <t t-set="index" t-value="index + 1"/>
-                <tr style="page-break-inside: avoid; break-inside: avoid;">
-                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+        
+        <table style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">#</th>
+                    <th style="width: 35%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Product</th>
+                    <th style="width: 35%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Item / Description</th>
                     <t t-if="doc.brand_id.is_tax_show">
-                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
-                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
-                            <span t-out="taxes">Tax 15%</span>
-                    </td>
-                    </t> 
-                    <t t-if="doc.discount_amount">
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                        <th style="width: 20%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Tax</th>
                     </t>
-                    <td style="border: 1px solid black; padding: 10px;">
-                            <span t-field="line.product_uom_qty">0.00</span>
-                            <span t-field="line.product_uom">units</span>
-                    </td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                    <t t-if="doc.discount_amount">
+                        <th style="width: 10%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Discount(%)</th>
+                    </t>
+                    <th style="width: 5%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Qty</th>
+                    <th style="width: 5%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Rate</th>
+                    <th style="width: 5%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Amount</th>
                 </tr>
-            </t>
-        </tbody>
+            </thead>
+            <tbody class="sale_tbody">
+            <t t-set="index" t-value="0"/> 
+            <t t-foreach="lines_to_report" t-as="line">
+            <t t-set="index" t-value="index + 1"/>
+                    <tr>
+                        <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
+                        <td style="word-break: break-word; white-space: normal;border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
+                        <td style="word-break: break-word; white-space: normal;border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
+                        <t t-if="doc.brand_id.is_tax_show">
+                        <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_id])"/>
+                        <td style="word-break: break-word; white-space: normal;border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
+                                <span t-out="taxes">Tax 15%</span>
+                        </td>
+                        </t> 
+                        <t t-if="doc.discount_amount">
+                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
+                        </t>
+                        <td style="border: 1px solid black; padding: 10px;">
+                                <span t-field="line.product_uom_qty">0.00</span>
+                                <span t-field="line.product_uom">units</span>
+                        </td>
+                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
+                        <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
+                    </tr>
+                </t>
+            </tbody>
         </table>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-        <!-- Left side -->
-            <div>
+       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; width: 100%;">
+    
+            <!-- Left Side -->
+            <div style="width: 60%;">
                 <p style="font-size: 15px;">Thank you for your business!</p>
             </div>
 
-            <!-- Right side (Total Calculation) -->
-            <div style="text-align: right;">
-                <table style="border-collapse: collapse; font-size: 15px;">
+            <!-- Right Side (Total Calculation) -->
+            <div style="width: 35%; text-align: right; margin-left: auto;">
+                <table style="border-collapse: collapse; font-size: 15px; width: 100%;">
                     <tr>
                         <td style="padding: 5px;">Sub Total</td>
                         <td style="padding: 5px;"><span t-field="doc.amount_without_shipping">0.00</span></td>
@@ -324,11 +325,9 @@
                     </tr>
                     <tr t-if="doc.brand_id.is_tax_show">
                         <td style="padding: 5px;">Total Tax (<span t-field="doc.amount_tax">0.00</span>)</td>
-                        <td style="padding: 5px;">
-                            <span t-field="doc.amount_tax">0.00</span>
-                        </td>
+                        <td style="padding: 5px;"><span t-field="doc.amount_tax">0.00</span></td>
                     </tr>
-                   <tr t-if="doc.discount_amount">
+                    <tr t-if="doc.discount_amount">
                         <td style="padding: 5px;">Discount</td>
                         <td style="padding: 5px;"><span t-field="doc.discount_amount">0.00</span></td>
                     </tr>
@@ -338,13 +337,16 @@
                     </tr>
                     <tr t-if="not doc.brand_id.is_tax_show" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                         <td style="padding: 1px;"><strong>Total</strong></td>
-                        <td style="padding: 1px;"><strong><span t-esc="doc.amount_without_shipping + doc.carrier_id.fixed_price if doc.carrier_id else doc.amount_without_shipping"/></strong></td>
+                        <td style="padding: 1px;">
+                            <strong>
+                                <span t-esc="doc.amount_without_shipping + doc.carrier_id.fixed_price if doc.carrier_id else doc.amount_without_shipping"/>
+                            </strong>
+                        </td>
                     </tr>
-
-                   
                 </table>
             </div>
         </div>
+
         <!-- Bank Details -->
         <div style="margin-top: 20px;">
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
@@ -389,7 +391,7 @@
               x        <span t-field="doc.signed_by">Oscar Morgan</span>
                 </div>
             </div>
-    <!-- </t> -->
+    </t>
     </t>
 </template>
 
@@ -397,8 +399,8 @@
 
     
 
-    <template id="purchase.report_purchaseorder_document">
-       <t t-call="web.html_container">
+<template id="purchase.report_purchaseorder_document">
+    <t t-call="web.external_layout">
 
         <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
      
@@ -705,7 +707,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
@@ -730,11 +732,11 @@
                                             </t>
                                 </div>
         </div>
-      </t>
-    </template>
+    </t>
+</template>
 
-    <template id="account.report_invoice_document">
-            <t t-call="web.html_container">
+<template id="account.report_invoice_document">
+            <t t-call="web.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <!-- Brand Logo and name -->
@@ -904,7 +906,7 @@
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
             <p style="font-size: 15px;">Bank Deposit</p>
 
-            <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
+            <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
               <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
             </div>
         </div>
@@ -938,9 +940,9 @@
         </div>
                 
             </t>
-    </template>
+        </template>
 
-    <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+            <template id="l10n_nz.report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
         <xpath expr="//div[hasclass('page')]/h2" position="replace">
             <h2>
                
@@ -949,8 +951,8 @@
     </template>
 
 
-    <template id="purchase.report_purchasequotation_document">
-            <t t-call="web.html_container">
+<template id="purchase.report_purchasequotation_document">
+            <t t-call="web.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <div class="page" style="font-size: 14pt;font-family:Lato,Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
@@ -1256,7 +1258,7 @@
                                     <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
                                     <p style="font-size: 15px;">Bank Deposit</p>
 
-                                    <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
+                                    <div style="font-size: 15px; width: 25%;border:1px solid black; padding:10px" border="1">
                                     <span class="m-0" t-field="o.brand_id.bank_account_details"></span>
                                     </div>
                                 </div>
@@ -1284,7 +1286,7 @@
             </t>
     </template>
 
-    <template id="mail.mail_notification_layout" name="Mail: mail notification layout template" >
+<template id="mail.mail_notification_layout" name="Mail: mail notification layout template" >
                     <html t-att-lang="lang">
                     <head>
                         <meta http-equiv="Content-Type" content="text/html charset=UTF-8"/>
@@ -1388,6 +1390,67 @@
                     </div>
                     </div>
                     </body></html>
+    </template>
+
+     <template id="web.external_layout_standard">
+            <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
+                    <!-- <div class="o_boxed_header">
+                    <div class="row mb8">
+                        <div class="col-6">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        </div>
+                        <div class="col-6 text-end mb4">
+                            <div class="mt0 h4" t-if="company.report_header" t-field="company.report_header">Company tagline</div>
+                            <div name="company_address" class="float-end mb4">
+                                <ul class="list-unstyled" name="company_address_list">
+                                    <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: true}">
+                                        <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
+                                            <strong>Company address block</strong>
+                                            <div>Contains the company address.</div>
+                                        </div>
+                                    </span></li>
+                                    <li t-else="">
+                                        <span t-field="company.company_details">
+                                            <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
+                                                <strong>Company details block</strong>
+                                                <div>Contains the company details.</div>
+                                            </div>
+                                        </span>
+                                    </li>
+                                    <li t-if="not forced_vat"/>
+                                    <li t-else="">
+                                        <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
+                                        <span t-esc="forced_vat">US12345671</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    </div> -->
+                </div>
+
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <div class="pt-5">
+                <!-- This div ensures that the address is not cropped by the header. -->
+                <t t-call="web.address_layout"/>
+            </div>
+            <t t-out="0"/>
+        </div>
+
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+            <div class="text-center" style="border-top: 1px solid black;">
+                <ul class="list-inline mb4">
+                    <div t-field="company.report_footer"/>
+                </ul>
+
+                <div t-if="report_type == 'pdf'" class="text-muted">
+                    Page: <span class="page"/> / <span class="topage"/>
+                </div>
+                <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+                    <span t-out="o.name">(document name)</span>
+                </div>
+            </div>
+        </div>
     </template>
 
 
