@@ -260,7 +260,7 @@
 
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
-        <table style="width: 100%;text-align: center;margin-bottom:60px">
+        <table style="width: 100%;text-align: center;">
         <thead>
             <tr>
                 <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
@@ -281,7 +281,7 @@
            <t t-set="index" t-value="0"/> 
            <t t-foreach="lines_to_report" t-as="line">
            <t t-set="index" t-value="index + 1"/>
-                <tr>
+                <tr style="page-break-inside: avoid; break-inside: avoid;">
                     <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
                     <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
@@ -305,7 +305,7 @@
         </tbody>
         </table>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 40px;">
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
         <!-- Left side -->
             <div>
                 <p style="font-size: 15px;">Thank you for your business!</p>
