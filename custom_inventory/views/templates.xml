@@ -260,6 +260,7 @@
 
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
+        <div style="page-break-inside: avoid;">
         <table style="width: 100%;text-align: center;">
         <thead>
             <tr>
@@ -304,6 +305,7 @@
             </t>
         </tbody>
         </table>
+        </div>
 
         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
         <!-- Left side -->
