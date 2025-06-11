@@ -33,10 +33,11 @@ class AccountMove(models.Model):
         }
    
 
+
     def action_open_payment_wizard(self):
         AkahuTransaction = self.env['akahu.transaction']
-        match = AkahuTransaction.search([('reference', '=', self.reference)], limit=1)
-        print(match,"pppppppppppppppppppllllllllssssssssssssssdddddddddddddddddd",self.reference)
+        match = AkahuTransaction.search(['|',('reference', '=', self.reference ),('amount_due', '=', self.amount_total)], limit=1)
+        print(match.amount_due,"pppppppppppppppppppllllllllssssssssssssssdddddddddddddddddd",self.reference)
         if match.match_status == 'matched':
                 raise UserError(f"Transaction {match.name} is already matched.")
         return {

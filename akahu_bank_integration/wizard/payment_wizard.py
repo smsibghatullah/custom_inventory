@@ -20,7 +20,7 @@ class MatchInvoicePaymentWizard(models.TransientModel):
                 raise UserError(f"Invoice {invoice.name} is already paid.")
 
             AkahuTransaction = self.env['akahu.transaction']
-            match = AkahuTransaction.search([('reference', '=', invoice.reference)], limit=1)
+            match = AkahuTransaction.search(['|',('reference', '=', invoice.reference),('amount_due', '=', invoice.amount_total)], limit=1)
 
             if match.match_status == 'matched':
                 raise UserError(f"Transaction {match.name} is already matched.")
