@@ -43,7 +43,7 @@
             <t t-if="doc.brand_id">
                 <div style="display: flex; align-items: center; margin-bottom: 20px;">
                     <div>
-                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 220px; max-width: 300px;" />
+                        <img t-att-src="image_data_uri(doc.brand_id.logo)" style="max-height: 180px; max-width: 300px;" />
                     </div>
                     <div style="margin-left: 10px;">
                         <!-- <span t-field="doc.brand_id.name" /> -->
@@ -55,6 +55,7 @@
         <div style="position: fixed; top: 38px; right: 0; padding: 10px; text-align: right;margin-bottom: 20px;">
             <span t-field="doc.brand_id.address" />
         </div>
+        <br/>
         <br/>
         <br/>
         <br/>
@@ -352,7 +353,7 @@
             <p style="font-size: 15px; font-weight: bold;">How to pay:</p>
             <p style="font-size: 15px;">Bank Deposit</p>
 
-            <div style="font-size: 15px; width: 100%;border:1px solid black; padding:10px" border="1">
+            <div style="font-size: 15px; width: 95%;border:1px solid black; padding:10px" border="1">
               <span class="m-0" t-field="doc.brand_id.bank_account_details"></span>
             </div>
         </div>
