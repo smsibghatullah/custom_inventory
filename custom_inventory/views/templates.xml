@@ -469,7 +469,7 @@
             </div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;margin-left: auto;">
+            <div style="width: 35%;margin-left: auto;border-collapse: collapse;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr t-if="o.user_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
@@ -508,7 +508,7 @@
             </div>
         </div>
         <br/>
-         <table style="margin-bottom: 10px;  width: 100%;">
+         <table style="margin-bottom: 10px;  width: 100%;border-collapse: collapse;">
             <t t-set="valid_fields" t-value="[field for field in o.text_fields if field.text_value]" />
             
             <t t-foreach="valid_fields" t-as="field">
@@ -525,7 +525,7 @@
         </table>
 
         <t t-if="o.checkbox_fields">
-                    <table style="margin-bottom:10px;  width: 100%;">
+                    <table style="margin-bottom:10px;  width: 100%;border-collapse: collapse;">
                         <t t-set="checkbox_count" t-value="len(o.checkbox_fields)" />
 
                         <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
@@ -583,7 +583,7 @@
                 </t>
 
                 <t t-if="o.selection_fields">
-                    <table style="margin-bottom:10px; width: 100%;">
+                    <table style="margin-bottom:10px; width: 100%;border-collapse: collapse;">
                         <t t-set="selection_count" t-value="len(o.selection_fields)" />
                                 <t t-foreach="range(0, selection_count, 4)" t-as="index">
                                     <tr>
@@ -1033,7 +1033,7 @@
             </div>
 
             <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;margin-left: auto;">
+            <div style="width: 35%;margin-left: auto;border-collapse: collapse;">
                 <table style="width: 100%; border-collapse: collapse; text-align: center;">
                     <tr t-if="o.user_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Purchase Representative #</td>
@@ -1072,7 +1072,7 @@
             </div>
         </div>
         <br/>
-         <table style="margin-bottom: 10px;  width: 100%;">
+         <table style="margin-bottom: 10px;  width: 100%;border-collapse: collapse;">
             <t t-set="valid_fields" t-value="[field for field in o.text_fields if field.text_value]" />
             
             <t t-foreach="valid_fields" t-as="field">
@@ -1089,7 +1089,7 @@
         </table>
 
         <t t-if="o.checkbox_fields">
-                    <table style="margin-bottom:10px;  width: 100%;">
+                    <table style="margin-bottom:10px;  width: 100%;border-collapse: collapse;">
                         <t t-set="checkbox_count" t-value="len(o.checkbox_fields)" />
 
                         <t t-foreach="range(0, checkbox_count, 4)" t-as="index">
@@ -1147,7 +1147,7 @@
                 </t>
 
                 <t t-if="o.selection_fields">
-                    <table style="margin-bottom:10px; width: 100%;">
+                    <table style="margin-bottom:10px; width: 100%;border-collapse: collapse;">
                         <t t-set="selection_count" t-value="len(o.selection_fields)" />
                                 <t t-foreach="range(0, selection_count, 4)" t-as="index">
                                     <tr>
