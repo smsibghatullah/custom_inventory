@@ -32,6 +32,7 @@
                                 <field name="name"/>
                                 <field name="amount"/>
                                 <field name="amount_due"/>
+                                <field name="akahu_account_id"/>
                                 <field name="reference"/>
                                 <field name="type"/>
                                 <field name="date"/>
