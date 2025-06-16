@@ -12,7 +12,7 @@
                   string="Approve"
                   type="object"
                   class="btn-primary"
-                  groups="custom_inventory.group_hr_attendance_approver"
+                  groups="custom_inventory.group_create_access"
                   invisible="status == 'approved'"/>
           <field name="status" widget="statusbar" statusbar_visible="submitted,approved"/>
         </header>
