@@ -23,7 +23,7 @@
       </xpath>
 
       <xpath expr="//field[@name='worked_hours']" position="after">
-        <field name="approved_hours"/>
+        <field name="approved_hours" widget="float_time"/>
       </xpath>
 
       <xpath expr="//field[@name='overtime_hours']" position="after">
@@ -45,7 +45,7 @@
       </xpath>
 
       <xpath expr="//field[@name='worked_hours']" position="after">
-        <field name="approved_hours"/>
+        <field name="approved_hours" widget="float_time"/>
       </xpath>
 
       <xpath expr="//field[@name='overtime_hours']" position="after">
