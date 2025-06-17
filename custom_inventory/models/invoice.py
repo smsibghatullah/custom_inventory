@@ -361,6 +361,7 @@ class AccountMoveSend(models.TransientModel):
         string="Custom Email To"
     )
     custom_email_from = fields.Char(string="Custom Email From")
+    custom_email_cc = fields.Char(string="CC") 
 
     def _get_wizard_values(self):
         self.ensure_one()
@@ -454,9 +455,10 @@ class AccountMoveSend(models.TransientModel):
             )
 
         new_message.attachment_ids.invalidate_recordset(['res_id', 'res_model'], flush=False)
-        # new_message.mail_ids.write({
-        #     'recipient_ids': self.custom_email_to.ids
-        # })
+        print(new_message.mail_ids,"======================================================================new_message.mail_ids")
+        new_message.mail_ids[0].write({
+           'email_cc': self.custom_email_cc,
+        })
         if new_message.attachment_ids.ids:
             self.env.cr.execute("UPDATE ir_attachment SET res_id = NULL WHERE id IN %s", [tuple(new_message.attachment_ids.ids)])
         new_message.attachment_ids.write({

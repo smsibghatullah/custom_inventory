@@ -227,6 +227,10 @@
                         <div >
                           <field name="custom_email_to" options="{'no_create': True, 'no_create_edit': True}" context="{'show_email_only': True}" widget="many2many_tags" domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email" required="1"/>
                         </div>
+                         <label for="custom_email_cc" string="CC Email"/>
+                        <div >
+                          <field name="custom_email_cc" />
+                        </div>
                             <field name="mail_subject"
                                 placeholder="Subject..."
                                 required="checkbox_send_mail and mode == 'invoice_single'"/>

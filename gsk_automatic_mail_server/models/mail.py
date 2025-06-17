@@ -9,9 +9,12 @@ class MailMail(models.Model):
     _inherit = 'mail.mail'
 
     def send(self, auto_commit=False, raise_exception=False):
+        # self.email_cc = 'm.mubeen1020@gmail.com'
         for mail in self:
             try:
                 emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', mail.email_from or '')
+                print(mail.email_to,"ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp")
+                
                 if not emails:
                     continue
 

@@ -110,9 +110,8 @@ class MailComposeMessage(models.TransientModel):
         'res_partner_email_rel_we',
         string="Custom Email To"
     )
-
-
     custom_email_from = fields.Char(string="Custom Email From")
+    custom_email_cc = fields.Char(string="CC") 
 
     def action_send_mail(self):
         """ Used for action button that do not accept arguments. """
@@ -206,10 +205,9 @@ class MailComposeMessage(models.TransientModel):
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
         print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
-        # messages.mail_ids.write({
-        #     'email_to': email_string,
-        #     'recipient_ids': [(5, 0, self.custom_email_to.ids)],
-        # })
+        messages.mail_ids.write({
+            'email_cc': self.custom_email_cc,
+        })
         return messages
 
 
