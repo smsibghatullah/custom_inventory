@@ -205,7 +205,7 @@ class MailComposeMessage(models.TransientModel):
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
         print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
-        messages.mail_ids.write({
+        messages.mail_ids[0].write({
             'email_cc': self.custom_email_cc,
         })
         return messages
