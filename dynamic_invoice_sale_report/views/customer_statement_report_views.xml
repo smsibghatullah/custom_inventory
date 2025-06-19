@@ -1,0 +1,45 @@
+<odoo>
+    <record id="view_customer_statement_report_form" model="ir.ui.view">
+        <field name="name">customer statement report</field>
+        <field name="model">customer.statement.report</field>
+        <field name="arch" type="xml">
+            <form string="Customer Statement" create="false">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_generate_statement" type="object" string="Generate Statement" class="btn btn-primary mx-2" icon="fa-filter"/>
+                    <button name="action_print_statement_pdf" type="object" string="Generate PDF Report" class="btn btn-secondary" />
+                </div>
+                <group col="4" string="Filter">
+                    <field name="customer_id"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="status"/>
+                </group>
+                <field name="statement_lines" invisible="1"/>
+                <separator string="Statement by Company"/>
+                <field name="company_lines_html" readonly="1" nolabel="1" widget="html"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_customer_statement_report" model="ir.actions.act_window">
+        <field name="name">Customer Statement</field>
+        <field name="res_model">customer.statement.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="view_id" ref="view_customer_statement_report_form"/>
+    </record>
+
+    <record id="customer_statement_pdf_report_action" model="ir.actions.report">
+        <field name="name">Customer Statement Report</field>
+        <field name="model">customer.statement.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dynamic_invoice_sale_report.customer_statement_report</field>
+    </record>
+    
+
+    <menuitem id="menu_customer_statement_root"
+              name="Customer Statement"
+              parent="account.menu_finance_reports"
+              action="action_customer_statement_report"
+              sequence="20"/>
+</odoo>

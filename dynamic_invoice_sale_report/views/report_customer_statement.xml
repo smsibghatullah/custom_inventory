@@ -1,0 +1,118 @@
+<odoo>
+  <template id="customer_statement_report">
+    <t t-call="web.html_container">
+      <t t-call="web.external_layout">
+        <div class="page" style="font-size: 18px;">
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+               <!-- Logo -->
+                <div style="float: left;">
+                  <img t-att-src="image_data_uri(active_company.logo)" style="max-height: 120px;" />
+                </div>
+                <!-- Company Info -->
+                <div style="text-align: right;">
+                  <strong><t t-esc="active_company.name"/></strong><br/>
+                  <t t-esc="active_company.street or ''"/>, <t t-esc="active_company.city or ''"/><br/>
+                  <t t-if="active_company.zip"><t t-esc="active_company.zip"/> </t>
+                  <t t-esc="active_company.state_id.name or ''"/> <br/>
+                  <t t-esc="active_company.country_id.name or ''"/> <br/>
+                  Phone - <t t-esc="active_company.phone or ''"/><br/>
+                  <t t-if="active_company.website"><t t-esc="active_company.website"/><br/></t>
+                  <t t-if="active_company.vat">GST Number <t t-esc="active_company.vat"/></t>
+                </div>
+          </div>  
+
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+      
+              <!-- Left Side: Empty Space or Content -->
+              <div style="width: 40%;">
+                <div style="font-size: 15px;">
+                  <div style="font-weight: bold;">To : </div>
+                  <span t-field="doc.customer_id.name"
+                      style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
+                </div>
+              </div>
+
+              <!-- Right Side: Sale Order Details -->
+             <div style="width: 60%; margin-left: auto;">
+                  <h3 style="margin-top: 10px;">Statement of Accounts</h3>
+                  <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                      <thead>
+                          <tr>
+                              <th colspan="2" style="background-color: gray; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">
+                                  Account Summary
+                              </th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <!-- <tr>
+                              <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Opening Balance</td>
+                              <td style="border: 1px solid black; padding: 5px;">
+                                  <t t-esc="formatLang(sum(l.total for l in doc.statement_lines) - sum(l.balance for l in doc.statement_lines), currency_obj=doc.statement_lines[0].currency_id if doc.statement_lines else None)"/>
+                              </td>
+                          </tr> -->
+                          <tr>
+                              <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice Amount</td>
+                              <td style="border: 1px solid black; padding: 5px;">
+                                  <t t-esc="formatLang(sum(l.total for l in doc.statement_lines), currency_obj=doc.statement_lines[0].currency_id if doc.statement_lines else None)"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Amount Paid</td>
+                              <td style="border: 1px solid black; padding: 5px;">
+                                  <t t-esc="formatLang(sum(l.total - l.balance for l in doc.statement_lines), currency_obj=doc.statement_lines[0].currency_id if doc.statement_lines else None)"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Balance Due</td>
+                              <td style="border: 1px solid black; padding: 5px;">
+                                  <t t-esc="formatLang(sum(l.balance for l in doc.statement_lines), currency_obj=doc.statement_lines[0].currency_id if doc.statement_lines else None)"/>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+
+          <div class="mt16">
+            <table class="table table-sm table-bordered" style="font-size: 12px; width: 100%;">
+              <thead style="background-color: #eaeaea;">
+                <tr>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">#</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Date of Invoice</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Due Date</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Invoice Number</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Order Number</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Customer Name</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Total</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Balance</th>
+                  <th style="width: 4%; padding: 5px; background-color: #666; color: white; border: 1px solid black;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="i" t-value="1"/>
+                <t t-foreach="doc.statement_lines" t-as="line">
+                  <tr>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="i"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.date"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.due_date"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.invoice_number"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.invoice_id.invoice_origin or ''"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.contact.name"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="formatLang(line.total, currency_obj=line.currency_id)"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="formatLang(line.balance, currency_obj=line.currency_id)"/></td>
+                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.status"/></td>
+                  </tr>
+                  <t t-set="i" t-value="i + 1"/>
+                </t>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </t>
+    </t>
+  </template>
+</odoo>
