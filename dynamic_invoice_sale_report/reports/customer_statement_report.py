@@ -154,6 +154,8 @@ class CustomerStatementReport(models.TransientModel):
                         status_label = 'Unpaid'
                     elif line.status == 'partial':
                         status_label = 'Partially Paid'
+                    elif line.status == 'reversed':
+                        status_label = 'Reversed'
                     else:
                         status_label = ''
                     html += f"""
