@@ -21,6 +21,7 @@ class CustomerStatementLine(models.TransientModel):
     status = fields.Selection(related='invoice_id.payment_state', store=True)
     company_id = fields.Many2one('res.company', compute='_compute_company', store=True, string="Company")
     is_selected = fields.Boolean(string="Select")
+    
 
     @api.depends('invoice_id')
     def _compute_company(self):
@@ -36,12 +37,10 @@ class CustomerStatementReport(models.TransientModel):
     start_date = fields.Date()
     end_date = fields.Date()
     company_ids = fields.Many2many('res.company', string="Companies")
-    status = fields.Selection([
-        ('paid', 'Paid'),
-        ('not_paid', 'Not Paid'),
-        ('partial', 'Partially Paid'),
-        ('all', 'All'),
-    ], default='all')
+    status_paid = fields.Boolean(string="Paid")
+    status_not_paid = fields.Boolean(string="Not Paid")
+    status_partial = fields.Boolean(string="Partially Paid")
+    status_all = fields.Boolean(string="All")
     statement_lines = fields.One2many('customer.statement.line', 'statement_id', string="Statement Lines")
     company_lines_html = fields.Html(string="Statement By Company", compute="_compute_company_lines_html", sanitize=False)
     has_statement_lines = fields.Boolean(compute="_compute_has_statement_lines",default=False)
@@ -87,10 +86,19 @@ class CustomerStatementReport(models.TransientModel):
             domain.append(('invoice_date', '>=', self.start_date))
         if self.end_date:
             domain.append(('invoice_date', '<=', self.end_date))
-        if self.status and self.status != 'all':
-            domain.append(('payment_state', '=', self.status))
         if self.company_ids:
             domain.append(('company_id', 'in', self.company_ids.ids))
+
+        status_filters = []
+        if self.status_paid:
+            status_filters.append('paid')
+        if self.status_not_paid:
+            status_filters.append('not_paid')
+        if self.status_partial:
+            status_filters.append('partial')
+
+        if not self.status_all and status_filters:
+            domain.append(('payment_state', 'in', status_filters))
 
         invoices = self.env['account.move'].search(domain)
 
@@ -140,6 +148,14 @@ class CustomerStatementReport(models.TransientModel):
                 """
                 for line in lines:
                     checked = 'checked' if line.is_selected else ''
+                    if line.status == 'paid':
+                        status_label = 'Paid'
+                    elif line.status == 'not_paid':
+                        status_label = 'Unpaid'
+                    elif line.status == 'partial':
+                        status_label = 'Partially Paid'
+                    else:
+                        status_label = ''
                     html += f"""
                         <tr>
                             <td>{line.date or ''}</td>
@@ -149,7 +165,7 @@ class CustomerStatementReport(models.TransientModel):
                             <td>{line.contact.name if line.contact else ''}</td>
                             <td>{formatLang(self.env, line.total, currency_obj=line.currency_id)}</td>
                             <td>{formatLang(self.env, line.balance, currency_obj=line.currency_id)}</td>
-                            <td>{line.status or ''}</td>
+                            <td>{status_label or ''}</td>
                         </tr>
                     """
                 html += "</tbody></table>"
