@@ -1,0 +1,41 @@
+<odoo>
+  <data noupdate="1">
+
+    <!-- <record id="email_template_customer_statement" model="mail.template">
+      <field name="name">Customer Statement Email</field>
+      <field name="model_id" ref="dynamic_invoice_sale_report.model_customer_statement_email_wizard"/>
+      <field name="subject">Customer Statement - ${object.statement_id.customer_id.name}</field>
+      <field name="email_from">${object.email_from}</field>
+      <field name="email_to">${object.email_to}</field>
+      <field name="email_cc">${object.email_cc}</field>
+      <field name="auto_delete" eval="True"/>
+      <field name="lang">${object.statement_id.customer_id.lang or 'en_US'}</field>
+      <field name="body_html" type="html">
+        <![CDATA[
+          <div style="font-family:Arial, sans-serif; font-size:14px;">
+            <p>السلام علیکم ${object.statement_id.customer_id.name},</p>
+
+            <p>Umeed hai sab theek ho ga. Yeh aap ka latest <strong>Customer Statement</strong> hai for the period:</p>
+
+            <ul>
+              % if object.statement_id.start_date:
+                <li><strong>From:</strong> ${object.statement_id.start_date}</li>
+              % endif
+              % if object.statement_id.end_date:
+                <li><strong>To:</strong> ${object.statement_id.end_date}</li>
+              % endif
+            </ul>
+
+            <p>Detailed invoices ka PDF attached hai. Koi sawal ho to zaroor rabta kijiyega.</p>
+
+            <p>
+              Shukriya,<br/>
+              <strong>${object.statement_id.env.company.name}</strong>
+            </p>
+          </div>
+        ]]>
+      </field>
+    </record> -->
+
+  </data>
+</odoo>

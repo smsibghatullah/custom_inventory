@@ -134,6 +134,9 @@
                                      <group string="Invoice Templates">
                                        <field name="mail_invoice_template_id" />
                                     </group>
+                                     <group string="Customer Statement Templates">
+                                       <field name="mail_customer_statement_template_id" />
+                                    </group>
                         </page>
                     </notebook>
 

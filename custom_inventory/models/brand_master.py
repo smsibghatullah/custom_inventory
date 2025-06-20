@@ -65,6 +65,10 @@ class BrandMaster(models.Model):
         string="Use Invoice template",
         domain="[('model', '=', 'account.move')]",
     )
+    mail_customer_statement_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        string="Use Customer Statement template",
+    )
 
 
 

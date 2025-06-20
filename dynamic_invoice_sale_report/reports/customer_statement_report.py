@@ -2,6 +2,7 @@ from odoo import models, fields, api,_
 from collections import defaultdict
 from odoo.tools import formatLang
 from odoo.exceptions import UserError
+import base64
 
 class CustomerStatementLine(models.TransientModel):
     _name = 'customer.statement.line'
@@ -44,6 +45,34 @@ class CustomerStatementReport(models.TransientModel):
     statement_lines = fields.One2many('customer.statement.line', 'statement_id', string="Statement Lines")
     company_lines_html = fields.Html(string="Statement By Company", compute="_compute_company_lines_html", sanitize=False)
     has_statement_lines = fields.Boolean(compute="_compute_has_statement_lines",default=False)
+    
+    def action_send_customer_statement_email(self):
+        self.ensure_one()
+        if not self.statement_lines:
+            raise UserError(_("No customer statement generated. Please generate the customer statement first."))
+        print(self.env.company.brand_ids[0].mail_customer_statement_template_id,"============================self.env.company.brand_ids[0].mail_customer_statement_template_id")
+        children = self.customer_id.child_ids
+        email_customer_ids = []
+
+        if self.customer_id.is_company:
+            email_customer_ids = [self.customer_id.id] + self.customer_id.child_ids.ids
+        elif self.customer_id.parent_id:
+            email_customer_ids = [self.customer_id.parent_id.id] + self.customer_id.parent_id.child_ids.ids
+        else:
+            email_customer_ids = [self.customer_id.id]
+        return {
+            'name': _('Send Customer Statement by Email'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'customer.statement.email.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_template_id': self.env.company.brand_ids[0].mail_customer_statement_template_id.id,
+                'default_statement_id': self.id,
+                'partner_child': email_customer_ids,
+                'default_email_from' : self.env.company.brand_ids[0].inv_email
+            }
+        }
 
     def _compute_has_statement_lines(self):
         for record in self:
@@ -141,7 +170,7 @@ class ReportCustomerStatement(models.AbstractModel):
     _description = 'Customer Statement Report'
 
     def _get_report_values(self, docids, data=None):
-        statement = self.env['customer.statement.report'].browse(docids)
+        statement = self.env['customer.statement.report'].sudo().browse(docids)
         return {
             'doc_ids': docids,
             'doc_model': 'customer.statement.report',
@@ -149,3 +178,73 @@ class ReportCustomerStatement(models.AbstractModel):
             'active_company': self.env.company, 
             'formatLang': lambda value, **kw: formatLang(self.env, value, **kw),
         }
+
+class CustomerStatementEmailWizard(models.TransientModel):
+    _name = 'customer.statement.email.wizard'
+    _description = 'Customer Statement Email Wizard'
+
+    partner_id = fields.Many2many(
+        'res.partner',
+        'res_customer_email_rel_we',
+        string="Customer"
+    )
+    email_from = fields.Char(string="From")
+    email_cc = fields.Char(string="CC")
+    template_id = fields.Many2one('mail.template', string="Email Template")
+    statement_id = fields.Many2one('customer.statement.report', string="Statement")
+    template_body = fields.Html(string='Body', compute='_compute_template_body')
+
+    @api.depends('template_id')
+    def _compute_template_body(self):
+        for wizard in self:
+            wizard.template_body = wizard.template_id.body_html if wizard.template_id else ''
+
+    def action_send_email(self):
+        self.ensure_one()
+
+        if not self.template_id:
+            raise UserError(_("Please select an email template."))
+        if not self.partner_id:
+            raise UserError(_("Please select at least one customer."))
+
+        invalid_lines = self.statement_id.statement_lines.filtered(
+            lambda l: not l.invoice_id or not l.invoice_id.exists()
+        )
+        if invalid_lines:
+            raise UserError(_("Some invoices in the statement no longer exist or are inaccessible. Please regenerate the statement."))
+        partner_email_list = self.partner_id.mapped('email')
+        if not partner_email_list:
+            raise UserError(_("Selected partners have no email addresses."))
+        partner_email_string = ','.join(partner_email_list)
+        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+            'dynamic_invoice_sale_report.customer_statement_pdf_report_action',
+            [self.statement_id.id]
+        )
+
+        customer_name = self.statement_id.customer_id.name or "Customer"
+        attachment = self.env['ir.attachment'].create({
+            'name': f'Customer Statement - {customer_name}.pdf',
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'customer.statement.report',
+            'res_id': self.statement_id.id,
+            'mimetype': 'application/pdf',
+        })
+     
+        email_values = {
+            'email_to': partner_email_string,
+            'email_from': self.email_from,
+            'email_cc': self.email_cc,
+            'attachment_ids': [attachment.id],
+        }
+
+        self.template_id.with_context(
+            active_model='customer.statement.report',
+            active_id=self.statement_id.id
+        ).send_mail(
+            self.id,  
+            email_values=email_values,
+            force_send=True
+        )
+
+        return {'type': 'ir.actions.act_window_close'}

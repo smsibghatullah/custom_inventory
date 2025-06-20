@@ -22,6 +22,7 @@ Website: https://dsmpk.com
     'depends': ['base', 'sale', 'account'],
     'data': [
         'security/ir.model.access.csv',
+        'data/email_templates.xml',
         'views/customer_statement_report_views.xml',
         'views/report_customer_statement.xml'
         

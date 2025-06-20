@@ -5,11 +5,28 @@
         <field name="arch" type="xml">
             <form string="Customer Statement" create="false">
                 <div class="oe_button_box" name="button_box">
-                    <button name="action_generate_statement" type="object" string="Generate Statement" class="btn btn-primary mx-2" icon="fa-filter"/>
-                    <button name="action_print_statement_pdf" type="object" string="Generate PDF Report" class="btn btn-secondary" />
+                   <button name="action_generate_statement"
+                            type="object"
+                            string="Generate Statement"
+                            class="btn btn-primary mx-2"
+                            icon="fa-filter"/>
+
+                    <button name="action_print_statement_pdf"
+                            type="object"
+                            string="Generate PDF Report"
+                            class="btn btn-secondary mx-2"
+                            icon="fa-file-pdf-o"/>
+
+                    <button name="action_send_customer_statement_email"
+                            type="object"
+                            string="Send by Email"
+                            class="btn btn-secondary mx-2"
+                            icon="fa-envelope"/>
+
+
                 </div>
                 <group col="4" string="Filter">
-                    <field name="customer_id"/>
+                    <field name="customer_id" options="{'no_create': True, 'no_create_edit': True}"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
                     <field name="status"/>
@@ -35,6 +52,31 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">dynamic_invoice_sale_report.customer_statement_report</field>
     </record>
+
+    <record id="view_customer_statement_email_wizard" model="ir.ui.view">
+        <field name="name">customer.statement.email.wizard.form</field>
+        <field name="model">customer.statement.email.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send Customer Statement by Email">
+                <group>
+                    <field name="partner_id" options="{'no_create': True, 'no_create_edit': True}" widget="many2many_tags" required="1"
+                          context="{'show_email_only': True}"
+                           domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email"/>
+                    <field name="email_cc"/>
+                    <field name="template_id" readonly='1' options="{'no_create': True, 'no_create_edit': True}" domain="[('model', '=', 'customer.statement.report')]"/>
+                </group>
+                <group string="Email Body Preview">
+                    <field name="template_body" readonly="1" nolabel="1" widget="html"/>
+                </group>
+                <footer>
+                    <button name="action_send_email" type="object" string="Send" class="btn btn-primary"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
     
 
     <menuitem id="menu_customer_statement_root"
