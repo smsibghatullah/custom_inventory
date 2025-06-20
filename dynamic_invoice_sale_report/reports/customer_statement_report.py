@@ -50,7 +50,6 @@ class CustomerStatementReport(models.TransientModel):
         self.ensure_one()
         if not self.statement_lines:
             raise UserError(_("No customer statement generated. Please generate the customer statement first."))
-        print(self.env.company.brand_ids[0].mail_customer_statement_template_id,"============================self.env.company.brand_ids[0].mail_customer_statement_template_id")
         children = self.customer_id.child_ids
         email_customer_ids = []
 
@@ -67,10 +66,10 @@ class CustomerStatementReport(models.TransientModel):
             'view_mode': 'form',
             'target': 'new',
             'context': {
-                'default_template_id': self.env.company.brand_ids[0].mail_customer_statement_template_id.id,
+                'default_template_id': self.env.company.brand_ids[0].mail_customer_statement_template_id.id if self.env.company.brand_ids else False,
                 'default_statement_id': self.id,
                 'partner_child': email_customer_ids,
-                'default_email_from' : self.env.company.brand_ids[0].inv_email
+                'default_email_from' : self.env.company.brand_ids[0].inv_email if self.env.company.brand_ids else False
             }
         }
 

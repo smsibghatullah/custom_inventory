@@ -63,7 +63,7 @@
                           context="{'show_email_only': True}"
                            domain="[('id', 'in', context.get('partner_child', []))]" placeholder="Enter recipient email"/>
                     <field name="email_cc"/>
-                    <field name="template_id" readonly='1' options="{'no_create': True, 'no_create_edit': True}" domain="[('model', '=', 'customer.statement.report')]"/>
+                    <field name="template_id" readonly='1' options="{'no_create': True, 'no_create_edit': True}"/>
                 </group>
                 <group string="Email Body Preview">
                     <field name="template_body" readonly="1" nolabel="1" widget="html"/>
