@@ -103,7 +103,14 @@
                     <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.contact.name"/></td>
                     <td style="border: 1px solid black; padding: 10px;"><t t-esc="formatLang(line.total, currency_obj=line.currency_id)"/></td>
                     <td style="border: 1px solid black; padding: 10px;"><t t-esc="formatLang(line.balance, currency_obj=line.currency_id)"/></td>
-                    <td style="border: 1px solid black; padding: 10px;"><t t-esc="line.status"/></td>
+                    <td>
+                      <t t-if="line.status == 'paid'">Paid</t>
+                      <t t-elif="line.status == 'not_paid'">Unpaid</t>
+                      <t t-elif="line.status == 'partial'">Partially Paid</t>
+                      <t t-elif="line.status == 'reversed'">Reversed</t>
+                      <t t-else="">-</t>
+                    </td>
+
                   </tr>
                   <t t-set="i" t-value="i + 1"/>
                 </t>
