@@ -203,18 +203,18 @@ class CustomerStatementEmailWizard(models.TransientModel):
         self.ensure_one()
 
         if not self.template_id:
-            raise UserError(_("Please select an email template."))
+            raise UserError(("Please select an email template."))
         if not self.partner_id:
-            raise UserError(_("Please select at least one customer."))
+            raise UserError(("Please select at least one customer."))
 
         invalid_lines = self.statement_id.statement_lines.filtered(
             lambda l: not l.invoice_id or not l.invoice_id.exists()
         )
         if invalid_lines:
-            raise UserError(_("Some invoices in the statement no longer exist or are inaccessible. Please regenerate the statement."))
+            raise UserError(("Some invoices in the statement no longer exist or are inaccessible. Please regenerate the statement."))
         partner_email_list = self.partner_id.mapped('email')
         if not partner_email_list:
-            raise UserError(_("Selected partners have no email addresses."))
+            raise UserError(("Selected partners have no email addresses."))
         partner_email_string = ','.join(partner_email_list)
         pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
             'dynamic_invoice_sale_report.customer_statement_pdf_report_action',
