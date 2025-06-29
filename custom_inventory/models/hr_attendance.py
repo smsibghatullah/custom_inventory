@@ -32,7 +32,7 @@ class HrAttendance(models.Model):
 
     approved_hours = fields.Float(string='Approved Hours')
 
-    @api.depends('check_in', 'check_out', 'break_time')
+    @api.onchange('check_in', 'check_out', 'break_time')
     def _compute_worked_hours(self):
         for attendance in self:
             if attendance.check_out and attendance.check_in and attendance.employee_id:

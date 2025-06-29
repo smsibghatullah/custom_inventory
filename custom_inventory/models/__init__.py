@@ -16,5 +16,6 @@ from . import res_users
 from . import product_category
 from . import hr_attendance
 from . import sequence_mixin
+from . import report
 
 

@@ -73,6 +73,10 @@ class SaleOrder(models.Model):
     bci_project = fields.Char(string='BCI Project')
     customer_description = fields.Char(string="Customer Description")
 
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        return f'234556666666'
+
     def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
                                                    force_email_company=False, force_email_lang=False):
         render_context = super()._notify_by_email_prepare_rendering_context(
