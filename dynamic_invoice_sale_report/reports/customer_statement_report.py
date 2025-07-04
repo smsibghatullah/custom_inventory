@@ -36,7 +36,11 @@ class CustomerStatementReport(models.TransientModel):
     customer_id = fields.Many2one('res.partner', string="Customer")
     start_date = fields.Date()
     end_date = fields.Date()
-    company_ids = fields.Many2many('res.company', string="Companies")
+    company_id = fields.Many2one(
+        'res.company',
+        string="Company",
+        domain=lambda self: [('id', 'in', self.env.companies.ids)],
+    )
     status_paid = fields.Boolean(string="Paid")
     status_not_paid = fields.Boolean(string="Not Paid")
     status_partial = fields.Boolean(string="Partially Paid")
@@ -86,8 +90,9 @@ class CustomerStatementReport(models.TransientModel):
             domain.append(('invoice_date', '>=', self.start_date))
         if self.end_date:
             domain.append(('invoice_date', '<=', self.end_date))
-        if self.company_ids:
-            domain.append(('company_id', 'in', self.company_ids.ids))
+
+        if self.company_id:
+            domain.append(('company_id', '=', self.company_id.id))
 
         status_filters = []
         if self.status_paid:
