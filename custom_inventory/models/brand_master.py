@@ -101,6 +101,25 @@ class ProductTemplate(models.Model):
         'sku.type.master',
         compute="_compute_available_categories",
     )
+
+    reserved_quantity = fields.Float(
+        string="Reserved Quantity",
+        compute='_compute_reserved_quantity',
+    )
+
+    available_quantity_new = fields.Float(
+        string="Available for Sale",
+        compute='_compute_available_quantity_new',
+    )
+
+    def _compute_available_quantity_new(self):
+        for template in self:
+            template.available_quantity_new = template.qty_available - template.reserved_quantity
+
+    def _compute_reserved_quantity(self):
+        for template in self:
+            reserved = sum(variant.outgoing_qty for variant in template.product_variant_ids)
+            template.reserved_quantity = reserved
   
     @api.depends("category_ids")
     def _compute_available_categories(self):
