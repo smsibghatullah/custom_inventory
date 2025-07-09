@@ -216,12 +216,7 @@
                     <field name="activity_ids" />
                     <field name="recurring_revenue_monthly"/>
                     <field name="team_id"/>
-                    <progressbar
-                        field="activity_state"
-                        colors='{"planned": "success", "today": "warning", "overdue": "danger"}'
-                        sum_field="record_count"
-                        help="This bar shows the number of records in each stage."
-                    />
+                    
                     <progressbar
                         field="activity_state"
                         colors='{"planned": "success", "today": "warning", "overdue": "danger"}'

@@ -1,34 +1,62 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "custom_kanban_views",
+    'name': "Custom Kanban Views",
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    'summary': "Enhanced kanban views with progress bars and stage-wise record insights.",
 
     'description': """
-Long description of module's purpose
+This module enhances the kanban view functionality by adding additional progress bars, 
+including record count and revenue summaries for CRM and related models.
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    'author': "Dynamic Solution Makers",
+    'website': "https://www.dsmpk.com",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Customization',
+    'version': '1.0',
 
-    # any module necessary for this one to work correctly
-    'depends': ['base','stock','sale','purchase','account','purchase_stock','crm', 'sale_crm','delivery','project','survey','product','maintenance','hr_maintenance','gsk_automatic_mail_server','hide_menu_user','hr_attendance'],
+    'depends': [
+        'base',
+        'stock',
+        'sale',
+        'purchase',
+        'account',
+        'purchase_stock',
+        'crm',
+        'sale_crm',
+        'delivery',
+        'project',
+        'survey',
+        'product',
+        'maintenance',
+        'hr_maintenance',
+        'gsk_automatic_mail_server',
+        'hide_menu_user',
+        'hr_attendance'
+    ],
 
-    # always loaded
     'data': [
+        # Uncomment the following line if you create access control rules
         # 'security/ir.model.access.csv',
-        'views/views.xml',
+        'views/sale_order_kanban_views.xml',
+        'views/purchase_order_kanban_views.xml',
+        'views/invoice_kanban_views.xml',
         'views/templates.xml',
     ],
-    # only loaded in demonstration mode
+
+    'assets': {
+        'web.assets_backend': [
+            'custom_kanban_views/static/src/xml/crm_template.xml', 
+            'custom_kanban_views/static/src/xml/sale_template.xml',  
+            'custom_kanban_views/static/src/js/sale_kanban_group_order.js',
+        ],
+    },
+
     'demo': [
         'demo/demo.xml',
     ],
-}
 
+    'license': 'LGPL-3',
+    'installable': True,
+    'application': False,
+}

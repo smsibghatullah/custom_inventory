@@ -1,0 +1,77 @@
+<odoo>
+<data>
+
+ <record id="account.view_account_move_kanban" model="ir.ui.view">
+            <field name="name">account.move.kanban</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" quick_create="false" default_group_by="state" sample="1" js_class="account_documents_kanban">
+                    <field name="move_type" invisible="1"/>
+                    <field name="journal_id"/>
+                    <field name="partner_id"/>
+                    <field name="ref"/>
+                    <field name="date"/>
+                    <field name="state"/>
+                    <progressbar 
+                        field="state" 
+                        colors='{"draft": "info", "sent": "primary", "sale": "success", "cancel": "default"}' 
+                        sum_field="amount_total"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="row mb4">
+                                    <div class="col-6 o_kanban_record_headings">
+                                        <strong>
+                                            <span>
+                                                <field name="partner_id" invisible="not partner_id" readonly="state != 'draft'" />
+                                                <field name="journal_id" invisible="partner_id" />
+                                            </span>
+                                        </strong>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <field name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'posted': 'success'}}"/>
+                                        <br/>
+                                        <strong><i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/> <t t-out="record.date.value"/></strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <span><field name="category_ids" widget="many2many_tags" /></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <span><field name="tag_ids" widget="many2many_tags" /></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <span><field name="reference"/></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <strong> <span><field name="amount_total" widget='monetary'/></span></strong> 
+                                        <span><field name="currency_id" invisible="1" readonly="state in ['cancel', 'posted']"/></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                       <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="float-end">
+                                            <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+</data>
+</odoo>

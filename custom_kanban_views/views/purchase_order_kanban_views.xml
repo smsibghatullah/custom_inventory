@@ -1,0 +1,72 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="purchase.view_purchase_order_kanban">
+                <field name="name">purchase.order.kanban</field>
+                <field name="model">purchase.order</field>
+                <field name="arch" type="xml">
+                    <kanban class="o_kanban_mobile" default_group_by="state" js_class="purchase_dashboard_kanban" sample="1" quick_create="false">
+                        <field name="name"/>
+                        <field name="partner_id" readonly="1"/>
+                        <field name="amount_total"/>
+                        <field name="state"/>
+                        <field name="date_order"/>
+                        <field name="currency_id" readonly="1"/>
+                        <field name="activity_state"/>
+                        <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                        <templates>
+                           <t t-name="kanban-box">
+                                    <div t-attf-class="oe_kanban_card oe_kanban_global_click p-2">
+                                        <!-- Top: Partner & Total -->
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong class="text-primary">
+                                            <span t-out="record.partner_id.value"/>
+                                        </strong>
+                                        <strong>
+                                            <field name="state"
+                                                widget="label_selection"
+                                                options="{'classes': {'draft': 'info', 'sent': 'primary', 'cancel': 'default', 'sale': 'success'}}"/>
+                                        </strong>
+                                        </div>
+
+                                        <!-- Info: Name + Date -->
+                                        <div class="mb-1 text-muted small">
+                                        <span t-out="record.name.value"/> |
+                                        <span t-out="record.date_order.value"/>
+                                        </div>
+
+                                        <!-- Tags -->
+                                        <div class="mb-1">
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        </div>
+
+                                        <div class="mb-1">
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        </div>
+
+                                        <!-- Reference -->
+                                        <!-- <div class="mb-1">
+                                        <field name="reference"/>
+                                        </div> -->
+
+                                        <div class="mb-1">
+                                        <strong><field name="amount_total" widget="monetary"/></strong>
+                                        </div>
+
+                                        <!-- Bottom: Activity left, State/User right -->
+                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <field name="activity_ids" widget="kanban_activity"/>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </record>
+
+  </data>
+</odoo>

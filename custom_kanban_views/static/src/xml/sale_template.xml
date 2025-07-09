@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.ColumnProgress" t-inherit-mode="extension">
+        <xpath expr="//AnimatedNumber" position="after">
+            <span class="ml-2 text-muted">
+                (<t t-esc="props.group.count || props.group.length || 0"/>)
+            </span>
+        </xpath>
+    </t>
+</templates>
