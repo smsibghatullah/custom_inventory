@@ -21,9 +21,9 @@ class PurchaseOrder(models.Model):
 
 
 
-    tag_ids = fields.One2many(
+    tag_ids = fields.Many2many(
         'crm.tag',  
-        'purchase_id', 
+        'purchase_id_seq', 
         string='Tags',
         help='Select the brands associated with this company'
     )

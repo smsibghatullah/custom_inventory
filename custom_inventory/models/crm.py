@@ -33,6 +33,8 @@ class CrmLead(models.Model):
         help='Select the Categories associated with the selected brand'
     )
 
+    record_count = fields.Integer(string="Record Count", default=1)
+
     sku_ids = fields.Many2many('product.template', string="SKU")
 
     available_tag_ids = fields.Many2many(

@@ -51,5 +51,4 @@ class Tag(models.Model):
         string="Companies using this tag"
     )
 
-    purchase_id = fields.Many2one('purchase.order', string="Purchase")
     invoice_id = fields.Many2one('account.move', string="Invoice")
