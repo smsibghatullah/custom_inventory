@@ -1,0 +1,31 @@
+<odoo>
+    <data>
+        <record id="view_order_form_inherit_manual_conversion" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.manual.conversion</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//sheet/notebook" position="before">
+
+                    <field name="is_manual_conversion" invisible="1"/>
+                    <field name="is_email_conversion" invisible="1"/>
+
+                    <div class="alert alert-danger" invisible="not is_manual_conversion" >
+                        <strong>✔ Sale converted manually</strong>
+                    </div>
+
+                    <div class="alert alert-info" invisible="not is_email_conversion" >
+                        <strong>✉ Sale converted by email</strong>
+                    </div>
+
+                </xpath>
+
+                <xpath expr="//field[@name='tag_ids']" position="after">
+                    <field name="total_product_qty" readonly="1"/>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>

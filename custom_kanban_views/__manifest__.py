@@ -32,16 +32,19 @@ including record count and revenue summaries for CRM and related models.
         'hr_maintenance',
         'gsk_automatic_mail_server',
         'hide_menu_user',
-        'hr_attendance'
+        'hr_attendance',
+        'custom_inventory'
     ],
 
     'data': [
-        # Uncomment the following line if you create access control rules
         # 'security/ir.model.access.csv',
         'views/sale_order_kanban_views.xml',
         'views/purchase_order_kanban_views.xml',
         'views/invoice_kanban_views.xml',
+        'views/delivery_kanban_view.xml',
         'views/templates.xml',
+        'views/delivery_view.xml',
+        'views/sale_order_view.xml'
     ],
 
     'assets': {

@@ -114,12 +114,16 @@ class MailComposeMessage(models.TransientModel):
     )
     custom_email_from = fields.Char(string="Custom Email From")
     custom_email_cc = fields.Char(string="CC") 
+    sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+
+
 
     def action_send_mail(self):
         """ Used for action button that do not accept arguments. """
         mail_server = self.env['ir.mail_server'].sudo().search([('smtp_user','=',self.custom_email_from)],limit=1)
         print(mail_server,"ppp===========================mubeen================================>>>>>>>>>>>>>>>>>>")
         self._action_send_mail(auto_commit=False)
+        self.sale_order_id.is_email_conversion = True
         return {'type': 'ir.actions.act_window_close'}
 
     

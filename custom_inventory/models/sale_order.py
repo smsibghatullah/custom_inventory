@@ -72,6 +72,7 @@ class SaleOrder(models.Model):
     )
     bci_project = fields.Char(string='BCI Project')
     customer_description = fields.Char(string="Customer Description")
+    is_email_conversion = fields.Boolean(string="Converted Email", default=False)
 
     def _get_report_base_filename(self):
         self.ensure_one()
@@ -527,6 +528,7 @@ class SaleOrder(models.Model):
             'force_email': True,
             'model_description': self.with_context(lang=lang).type_name,
             'partner_child': email_partner_ids,
+            'default_sale_order_id': self.id
         }
 
         return {
