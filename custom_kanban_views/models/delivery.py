@@ -94,3 +94,15 @@ class StockPicking(models.Model):
                     picking.payment_status = states[0]
                 else:
                     picking.payment_status = 'partial'
+
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        res = super(StockPicking, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        
+        if groupby and groupby[0] == 'state':
+            custom_order = ['draft', 'waiting', 'confirmed', 'assigned','pick_pack','ready_for_pickup','picked_up_by_logistic','pickup_by_buyer','in_transit','delivered','done','cancel']
+            res.sort(key=lambda x: custom_order.index(x['state']) if x['state'] in custom_order else len(custom_order))
+        
+        return res
+
+
