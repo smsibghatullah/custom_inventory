@@ -39,10 +39,10 @@
                 </div>
 
                   <div class="alert alert-danger p-1 mb-1" invisible="not is_manual_conversion" >
-                    ✔ Sale converted manually
+                    Mark as sent manually
                   </div>
                   <div class="alert alert-info p-1 mb-1" invisible="not is_email_conversion" >
-                    ✉ Sale converted by email
+                    Sent via Email
                   </div>
 
                 <!-- Info: Name + Date -->

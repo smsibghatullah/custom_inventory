@@ -12,11 +12,11 @@
                     <field name="is_email_conversion" invisible="1"/>
 
                     <div class="alert alert-danger" invisible="not is_manual_conversion" >
-                        <strong>✔ Sale converted manually</strong>
+                        <strong>Mark as sent manually</strong>
                     </div>
 
                     <div class="alert alert-info" invisible="not is_email_conversion" >
-                        <strong>✉ Sale converted by email</strong>
+                        <strong>Sent via Email</strong>
                     </div>
 
                 </xpath>

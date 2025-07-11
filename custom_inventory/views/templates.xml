@@ -74,61 +74,64 @@
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
         </div>
         </t>
-       <!-- Customer details -->
-        <div style="font-size: 15px; margin-bottom: 10px;">
-            <div style="font-weight: bold;">Bill To : </div>
-            <span t-field="doc.customer_description"
-                style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
-            </div>
+      
 
-        <p t-if="doc.partner_id.vat" style="margin-top: 5px;">
-            <t t-if="doc.company_id.account_fiscal_country_id.vat_label" 
-            t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
-            <t t-else="">Tax ID</t>: 
-            <span t-field="doc.partner_id.vat" style="font-weight: bold;"/>
-        </p>
+        <table style="width:100%; border-collapse: collapse;">
+                <tr style="border: 1px solid white; padding: 5px;">
+                    <td style="width: 60%; vertical-align: top;">
+                    <div style="font-size: 15px; margin-bottom: 10px;">
+                        <div style="font-weight: bold;">Bill To :</div>
+                        <span t-field="doc.customer_description"
+                            style="font-size: 16px; font-weight: bold; margin-top: 5px; display: block;" />
+                    </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-    
-            <!-- Left Side: Empty Space or Content -->
-            <div style="width: 60%;"></div>
+                    <p t-if="doc.partner_id.vat" style="margin-top: 5px;">
+                        <t t-if="doc.company_id.account_fiscal_country_id.vat_label"
+                        t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
+                        <t t-else="">Tax ID</t>:
+                        <span t-field="doc.partner_id.vat" style="font-weight: bold;" />
+                    </p>
+                    </td>
 
-            <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%; margin-left: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <tr t-if="doc.state in ['draft', 'sent']">
+                    <!-- Right Side: Sale Order Details -->
+                    <td style="width: 35%; vertical-align: top;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                        <tr t-if="doc.state in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Estimate / EST #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.state not in ['draft', 'sent']">
+                        </tr>
+                        <tr t-if="doc.state not in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.name">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.date_order">
+                        </tr>
+                        <tr t-if="doc.date_order">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
                             <span t-field="doc.formatted_date_order">20-Feb-2025</span>
                         </td>
-                    </tr>
-                    <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
+                        </tr>
+                        <tr t-if="doc.validity_date and doc.state in ['draft', 'sent']">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Expiry Date</td>
                         <td style="border: 1px solid black; padding: 5px;">
                             <div name="expiration_date">
-                                <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
+                            <span class="m-0" t-field="doc.formatted_validity_date">20-Feb-2025</span>
                             </div>
                         </td>
-                    </tr>
-                    <tr>
+                        </tr>
+                        <tr>
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Ref #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.reference">SO0000</span></td>
-                    </tr>
-                    <tr t-if="doc.payment_term_id">
+                        </tr>
+                        <tr t-if="doc.payment_term_id">
                         <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
                         <td style="border: 1px solid black; padding: 5px;"><span t-field="doc.payment_term_id"></span></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+        </table>
+        
+
 
         <br/>
         <table style="margin-bottom: 10px;  width: 100%;">

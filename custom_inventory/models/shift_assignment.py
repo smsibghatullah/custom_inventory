@@ -46,14 +46,14 @@ class ShiftAssignment(models.Model):
         domain="[('project_id', '=', project_id)]"
     )
     supervisor_ids = fields.Many2many(
-        'hr.employee', 
+        'res.users', 
         'shift_assignment_supervisor_rel',  
         'shift_id', 
         'employee_id', 
         string='Supervisors', 
     )
     employee_ids = fields.Many2many(
-        'hr.employee', 
+        'res.users', 
         'shift_assignment_employee_rel',  
         'shift_id', 
         'employee_id', 
@@ -193,7 +193,7 @@ class ShiftAttendance(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     shift_id = fields.Many2one('shift.assignment', string='Shift Assignment', required=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    employee_id = fields.Many2one('res.users', string='Employee', required=True)
     check_in = fields.Datetime(string='Check-in Time')
     check_out = fields.Datetime(string='Check-out Time')
     duration = fields.Float(string='Worked Hours', compute='_compute_duration', store=True)
@@ -223,7 +223,7 @@ class ShiftSurveyStatus(models.Model):
     _name = 'shift.assignment.survey.status'
     _description = 'Survey Status for Employee (Shift-Based)'
 
-    employee_id = fields.Many2one('hr.employee', string="Employee")
+    employee_id = fields.Many2one('res.users', string="Employee")
     survey_id = fields.Many2one('survey.survey', string="Survey")
     status = fields.Selection([
         ('not_filled', 'Not Filled'),
