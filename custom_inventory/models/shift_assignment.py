@@ -47,14 +47,14 @@ class ShiftAssignment(models.Model):
     )
     supervisor_ids = fields.Many2many(
         'res.users', 
-        'shift_assignment_supervisor_rel',  
+        'shift_assignment_supervisor_user_rel',  
         'shift_id', 
         'employee_id', 
         string='Supervisors', 
     )
     employee_ids = fields.Many2many(
         'res.users', 
-        'shift_assignment_employee_rel',  
+        'shift_assignment_employee_user_rel',  
         'shift_id', 
         'employee_id', 
         string='Employees', 
