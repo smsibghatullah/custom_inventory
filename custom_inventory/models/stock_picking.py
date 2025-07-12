@@ -16,7 +16,7 @@ class StockPicking(models.Model):
         ('delivered', 'Delivered'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-    ], string='Status', compute='_compute_state',
+    ], string='Status', compute='_compute_state',group_expand='_read_group_state_ids',
         copy=False, index=True, readonly=True, store=True, tracking=True,
         help=" * Draft: The transfer is not confirmed yet.\n"
              " * Pick & Pack: The transfer is in the picking process.\n"
@@ -31,6 +31,11 @@ class StockPicking(models.Model):
     readonly_fields = fields.Boolean(string="Readonly Fields", compute="_compute_field_readonly")
     courier_and_standard_fields = fields.Boolean(string="Both Fields", compute="_compute_carrier_fields")
     show_statusbar = fields.Boolean(compute="_compute_show_statusbar")
+
+    @api.model
+    def _read_group_state_ids(self, states, domain, orderby=''):
+        """Ensure all states are shown as Kanban columns, even if empty."""
+        return [key for key, _ in self.fields_get(allfields=['state'])['state']['selection']]
 
     def button_validate(self):
         for picking in self:

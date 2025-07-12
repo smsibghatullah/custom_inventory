@@ -52,6 +52,7 @@ including record count and revenue summaries for CRM and related models.
             'custom_kanban_views/static/src/xml/crm_template.xml', 
             'custom_kanban_views/static/src/xml/sale_template.xml',  
             'custom_kanban_views/static/src/js/sale_kanban_group_order.js',
+            'custom_kanban_views/static/src/js/stock_picking_kanban.js',
         ],
     },
 

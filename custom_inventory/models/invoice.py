@@ -63,9 +63,33 @@ class AccountMove(models.Model):
         domain="[('brand_id', '=', brand_id),('id', 'in', available_sku_category_ids)]",
         help='Select the Categories associated with the selected brand'
     )
-    customer_description = fields.Char(string="Customer Description")
+    customer_description = fields.Text(string="Customer Description") 
     formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates")
     formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates")
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.partner_id:
+            lines = []
+
+            if self.partner_id.name:
+                lines.append(f"{self.partner_id.name}")
+            if self.partner_id.street:
+                lines.append(f"{self.partner_id.street}")
+            if self.partner_id.street2:
+                lines.append(f"{self.partner_id.street2}")
+            if self.partner_id.city:
+                lines.append(f"{self.partner_id.city}")
+            if self.partner_id.state_id:
+                lines.append(f"{self.partner_id.state_id.name}")
+            if self.partner_id.zip:
+                lines.append(f"{self.partner_id.zip}")
+            if self.partner_id.country_id:
+                lines.append(f"{self.partner_id.country_id.name}")
+
+            self.customer_description = '\n'.join(lines)
+        else:
+            self.customer_description = False
 
     @api.depends('invoice_date', 'invoice_date_due')
     def _compute_formatted_dates(self):
@@ -95,12 +119,7 @@ class AccountMove(models.Model):
         return render_context
 
 
-    @api.onchange('partner_id')
-    def _onchange_partner_id(self):
-        if self.partner_id:
-            self.customer_description = self.partner_id.name
-        else:
-            self.customer_description = False
+   
             
     @api.depends("tag_ids")
     def _compute_available_tags(self):

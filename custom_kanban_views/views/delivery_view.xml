@@ -40,5 +40,19 @@
         </field>
     </record>
 
+     <record id="view_picking_internal_search_inherit_negative_margin" model="ir.ui.view">
+            <field name="name">stock.picking.internal.search.inherit.negative.margin</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <filter string="Negative Margin" name="negative_margin" domain="[('margin','&lt;',0)]"/>
+
+                </xpath>
+            </field>
+        </record>
+
+
+
 </data>
 </odoo>

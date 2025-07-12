@@ -785,60 +785,63 @@
                     </div>
                     <h2 style="display:none"></h2>
                 <!-- Customer details -->
-                    <div style="font-size: 15px; margin-bottom: 10px;">
-                        <div style="font-weight: bold;">Bill To : </div>
-                        <span t-field="o.customer_description"
-                            style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
-                        </div>
+                   
 
-                    <p t-if="o.partner_id.vat" style="margin-top: 5px;">
-                        <t t-if="o.company_id.account_fiscal_country_id.vat_label" 
-                        t-out="o.company_id.account_fiscal_country_id.vat_label"/>
-                        <t t-else="">Tax ID</t>: 
-                        <span t-field="o.partner_id.vat" style="font-weight: bold;"/>
-                    </p>
-
-                     <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="width: 60%;">
-            <!-- Dynamic fields -->
-            </div>
-
-            <!-- Right Side: Sale Order Details -->
-            <div style="width: 35%;margin-left: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_origin">SO0000</span></td>
-                    </tr>
-                     <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-if="o.name != '/'" t-field="o.name">INV/2023/0001</span></td>
-                    </tr>
-                    <tr t-if="o.invoice_date" name="invoice_date">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice Date</td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            <span t-field="o.formatted_invoice_date" ></span>
-                        </td>
-                    </tr>
-                     <tr t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'">
-                        <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Due Date</td>
-                        <td t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'"   style="border: 1px solid black; padding: 5px;">
-                            <div name="due_date">
-                            <span t-field="o.formatted_due_date"></span>
+       <table style="width:100%; border-collapse: collapse;">
+                <tr style="border: 1px solid white; padding: 5px;">
+                    <td style="width: 60%; vertical-align: top;">
+                        <div style="font-size: 15px; margin-bottom: 10px;">
+                            <div style="font-weight: bold;">Bill To : </div>
+                            <span t-field="o.customer_description"
+                                style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
-                    </tr>
-                     <tr t-if="o.invoice_payment_term_id">
-                        <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
-                        <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_payment_term_id"></span></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+
+                        <p t-if="o.partner_id.vat" style="margin-top: 5px;">
+                            <t t-if="o.company_id.account_fiscal_country_id.vat_label" 
+                            t-out="o.company_id.account_fiscal_country_id.vat_label"/>
+                            <t t-else="">Tax ID</t>: 
+                            <span t-field="o.partner_id.vat" style="font-weight: bold;"/>
+                        </p>
+                    </td>
+
+                    <!-- Right Side: Sale Order Details -->
+                    <td style="width: 35%; vertical-align: top;">
+                     <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                            <tr>
+                                <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">SO #</td>
+                                <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_origin">SO0000</span></td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice #</td>
+                                <td style="border: 1px solid black; padding: 5px;"><span t-if="o.name != '/'" t-field="o.name">INV/2023/0001</span></td>
+                            </tr>
+                            <tr t-if="o.invoice_date" name="invoice_date">
+                                <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Invoice Date</td>
+                                <td style="border: 1px solid black; padding: 5px;">
+                                    <span t-field="o.formatted_invoice_date" ></span>
+                                </td>
+                            </tr>
+                            <tr t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'">
+                                <td   style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Due Date</td>
+                                <td t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'"   style="border: 1px solid black; padding: 5px;">
+                                    <div name="due_date">
+                                    <span t-field="o.formatted_due_date"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Customers PO #</td>
+                                <td style="border: 1px solid black; padding: 5px;"><span t-field="o.reference">PO0000</span></td>
+                            </tr>
+                            <tr t-if="o.invoice_payment_term_id">
+                                <td style="background-color: #666; color: white; padding: 5px; border: 1px solid black; font-weight: bold;">Payment Terms #</td>
+                                <td style="border: 1px solid black; padding: 5px;"><span t-field="o.invoice_payment_term_id"></span></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+        </table>
+
         <br/>
 
         <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
