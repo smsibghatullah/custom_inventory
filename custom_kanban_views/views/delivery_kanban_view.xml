@@ -4,7 +4,7 @@
         <field name="name">stock.picking.kanban</field>
         <field name="model">stock.picking</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" default_group_by="state" >
+            <kanban default_group_by="stage_id">
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="location_dest_id"/>
@@ -19,6 +19,7 @@
                 <field name="payment_status"/>
                 <field name="tag_ids"/>
                 <field name="margin"/>
+                <field name="stage_id"/>
 
                 <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
 

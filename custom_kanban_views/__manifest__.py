@@ -37,7 +37,8 @@ including record count and revenue summaries for CRM and related models.
     ],
 
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
+        'data/cron.xml',
         'views/sale_order_kanban_views.xml',
         'views/purchase_order_kanban_views.xml',
         'views/invoice_kanban_views.xml',

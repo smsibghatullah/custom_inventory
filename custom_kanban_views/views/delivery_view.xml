@@ -17,6 +17,7 @@
                         <field name="invoice_status" readonly="1"/>
                         <field name="payment_status" readonly="1"/>
                         <field name="margin"/>
+                        
                     </group>
                 </page>
             </xpath>
@@ -24,6 +25,7 @@
             <!-- Add brand tags after origin field -->
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="available_tag_ids" invisible="1" />
+                <field name="stage_id"/>
                 <field name="tag_ids" widget="many2many_tags"
                        domain="[('id', 'in', available_tag_ids)]"
                        options="{'color_field': 'color', 'no_create_edit': True, 'no_create': True}" />

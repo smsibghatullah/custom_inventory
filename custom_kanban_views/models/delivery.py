@@ -52,6 +52,25 @@ class StockPicking(models.Model):
     margin = fields.Float(string="Sales Margin", compute='_compute_margin', store=True)
 
     has_negative_margin = fields.Boolean(string="Negative Margin", compute="_compute_negative_margin")
+    stage_id = fields.Many2one(
+        'stock.picking.stage',
+        string='Stage',
+        group_expand='_read_group_stage_ids',
+    )
+
+    @api.model
+    def write(self, vals):
+        if 'stage_id' in vals:
+            stage = self.env['stock.picking.stage'].browse(vals['stage_id'])
+            if stage and stage.code:
+                vals['state'] = stage.code 
+        return super().write(vals)
+
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, orderby='sequence'):
+        return self.env['stock.picking.stage'].search([], order=orderby)
+
 
     @api.depends('margin')
     def _compute_negative_margin(self):
@@ -96,13 +115,67 @@ class StockPicking(models.Model):
                     picking.payment_status = 'partial'
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        res = super(StockPicking, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        
-        if groupby and groupby[0] == 'state':
-            custom_order = ['draft', 'waiting', 'confirmed', 'assigned','pick_pack','ready_for_pickup','picked_up_by_logistic','pickup_by_buyer','in_transit','delivered','done','cancel']
-            res.sort(key=lambda x: custom_order.index(x['state']) if x['state'] in custom_order else len(custom_order))
-        
-        return res
+    def cron_update_stage_id_from_state(self):
+        """ Cron: Sync stage_id with state based on stage.code """
+        stage_map = {s.code: s.id for s in self.env['stock.picking.stage'].search([])}
+        pickings = self.search([('state', '!=', False)])
+
+        for picking in pickings:
+            if picking.state in stage_map:
+                picking.write({'stage_id': stage_map[picking.state]})
 
 
+
+class StockPickingStage(models.Model):
+    _name = 'stock.picking.stage'
+    _description = 'Delivery Stages'
+    _order = 'sequence'
+
+    name = fields.Char(required=True)
+    code = fields.Selection([
+        ('draft', 'Draft'),
+        ('waiting', 'Waiting'),
+        ('confirmed', 'Confirmed'),
+        ('assigned', 'Assigned'),
+        ('pick_pack', 'Pick Pack'),
+        ('ready_for_pickup', 'Ready For Pickup'),
+        ('picked_up_by_logistic', 'Picked Up By Logistic'),
+        ('pickup_by_buyer', 'Pickup By Buyer'),
+        ('in_transit', 'In Transit'),
+        ('delivered', 'Delivered'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled'),
+    ], required=True)
+    sequence = fields.Integer(default=10)
+
+    @api.model
+    def cron_create_default_stages(self):
+        """Create all default delivery stages if not exist"""
+        default_stages = [
+            ('draft', 'Draft'),
+            ('waiting', 'Waiting'),
+            ('confirmed', 'Confirmed'),
+            ('assigned', 'Assigned'),
+            ('pick_pack', 'Pick Pack'),
+            ('ready_for_pickup', 'Ready For Pickup'),
+            ('picked_up_by_logistic', 'Picked Up By Logistic'),
+            ('pickup_by_buyer', 'Pickup By Buyer'),
+            ('in_transit', 'In Transit'),
+            ('delivered', 'Delivered'),
+            ('done', 'Done'),
+            ('cancel', 'Cancelled'),
+        ]
+
+        for sequence, (code, name) in enumerate(default_stages, start=1):
+            stage = self.search([('code', '=', code)], limit=1)
+            if not stage:
+                self.create({
+                    'name': name,
+                    'code': code,
+                    'sequence': sequence,
+                })
+            else:
+                stage.write({
+                    'name': name,
+                    'sequence': sequence
+                })

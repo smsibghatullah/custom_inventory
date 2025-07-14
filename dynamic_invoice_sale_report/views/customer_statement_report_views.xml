@@ -52,11 +52,13 @@
     </record>
 
     <record id="customer_statement_pdf_report_action" model="ir.actions.report">
-        <field name="name">Customer Statement Report</field>
+        <field name="name">'%s - Customer Statement' % (object.customer_id.name or 'Customer')</field>
         <field name="model">customer.statement.report</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">dynamic_invoice_sale_report.customer_statement_report</field>
+        <field name="print_report_name">'%s - Customer Statement' % (object.customer_id.name or 'Customer')</field>
     </record>
+
 
     <record id="view_customer_statement_email_wizard" model="ir.ui.view">
         <field name="name">customer.statement.email.wizard.form</field>
