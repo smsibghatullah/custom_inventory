@@ -229,21 +229,32 @@ class CustomerStatementEmailWizard(models.TransientModel):
         if not self.partner_id:
             raise UserError(("Please select at least one customer."))
 
+        # Validate invoices
         invalid_lines = self.statement_id.statement_lines.filtered(
             lambda l: not l.invoice_id or not l.invoice_id.exists()
         )
         if invalid_lines:
-            raise UserError(("Some invoices in the statement no longer exist or are inaccessible. Please regenerate the statement."))
+            raise UserError((
+                "Some invoices in the statement no longer exist or are inaccessible. "
+                "Please regenerate the statement."
+            ))
+
+        # Get partner email(s)
         partner_email_list = self.partner_id.mapped('email')
         if not partner_email_list:
             raise UserError(("Selected partners have no email addresses."))
+
         partner_email_string = ','.join(partner_email_list)
+
+        # Generate PDF report
         pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
             'dynamic_invoice_sale_report.customer_statement_pdf_report_action',
             [self.statement_id.id]
         )
 
         customer_name = self.statement_id.customer_id.name or "Customer"
+
+        # Create attachment
         attachment = self.env['ir.attachment'].create({
             'name': f'Customer Statement - {customer_name}.pdf',
             'type': 'binary',
@@ -252,19 +263,21 @@ class CustomerStatementEmailWizard(models.TransientModel):
             'res_id': self.statement_id.id,
             'mimetype': 'application/pdf',
         })
-     
+
+        # Prepare email values with correct attachment format
         email_values = {
             'email_to': partner_email_string,
             'email_from': self.email_from,
             'email_cc': self.email_cc,
-            'attachment_ids': [attachment.id],
+            'attachment_ids': [(4, attachment.id)],  # ✅ Correct format
         }
 
+        # Send mail using template
         self.template_id.with_context(
             active_model='customer.statement.report',
             active_id=self.statement_id.id
         ).send_mail(
-            self.id,  
+            self.id,
             email_values=email_values,
             force_send=True
         )
