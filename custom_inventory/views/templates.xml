@@ -1333,9 +1333,11 @@
                         <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width: 100%; margin-top: 5px;">
                             <tbody>
                                 <tr>
-                                    <td valign="center" t-if="company and not company.uses_default_logo">
-                                        <img t-att-src="'/logo.png?company=%s' % company.id" style="padding: 0px; margin: 0px;max-height: 220px; max-width: 300px;" t-att-alt="'%s' % company.name"/>
-                                    </td>
+                                 <td valign="center" t-if="company">
+                                    <strong><t t-esc="company.name"/></strong>
+                                </td>
+
+
                                 </tr>
                                 <tr>
                                     <td valign="center">
@@ -1397,7 +1399,7 @@
                         <div t-if="email_add_signature and not is_html_empty(signature)" t-out="signature" style="font-size: 13px;"/>
                     </t>
                     <!-- FOOTER -->
-                    <div style="margin-top:32px;">
+                    <!-- <div style="margin-top:32px;">
                         <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 4px 0px;"/>
                         <b t-out="company.name" style="font-size:11px;"/><br/>
                         <p style="color: #999999; margin-top:2px; font-size:11px;">
@@ -1407,7 +1409,7 @@
                             <t t-if="company.website and (company.phone or company.email)"> |</t>
                             <a t-if="company.website" t-att-href="'%s' % company.website" style="text-decoration:none; color: #999999;" t-out="company.website"/>
                         </p>
-                    </div>
+                    </div> -->
                     <div style="color: #555555; font-size:11px;">
                         <!--Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email" t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">Odoo</a>-->
                         <span id="mail_unfollow">
