@@ -73,6 +73,28 @@ class SaleOrder(models.Model):
     bci_project = fields.Char(string='BCI Project')
     customer_description = fields.Text(string="Customer Description") 
     is_email_conversion = fields.Boolean(string="Converted Email", default=False)
+    project_id = fields.Many2one(
+        'project.project',
+        string='Project',
+        domain="[('company_id', 'in', company_ids_from_brand)]",
+        help='Select a project linked to the selected brand\'s company'
+    )
+
+    company_ids_from_brand = fields.Many2many(
+        'res.company',
+        compute='_compute_company_ids_from_brand',
+        store=True
+    )
+
+
+
+    @api.depends('brand_id')
+    def _compute_company_ids_from_brand(self):
+        for rec in self:
+            if rec.brand_id:
+                rec.company_ids_from_brand = rec.brand_id.company_ids
+            else:
+                rec.company_ids_from_brand = False
 
     def _get_report_base_filename(self):
         self.ensure_one()
@@ -611,6 +633,21 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         """Override sale order confirmation to mark the linked CRM Lead as 'Won'."""
         res = super(SaleOrder, self).action_confirm()
+        for order in self:
+            service_lines = order.order_line.filtered(lambda l: l.product_id.type == 'service')
+            if service_lines and order.project_id:
+                task_name = "Task for %s - %s" % (order.name, order.partner_id.name)
+                task_vals = {
+                    'name': task_name,
+                    'project_id': order.project_id.id,
+                    'project_sale_order_id':order.id, 
+                    'partner_id': order.partner_id.id,
+                    'description': "\n".join(["%s x %s" % (l.product_id.display_name, l.product_uom_qty) for l in service_lines]),
+                }
+
+                task = self.env['project.task'].create(task_vals)
+
+                order.project_id.task_ids = [(4, task.id)]
         for order in self:
             if order.opportunity_id:
                 won_stage = self.env['crm.stage'].search([('is_won', '=', True)], limit=1)

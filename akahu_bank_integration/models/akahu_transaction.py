@@ -3,6 +3,7 @@ import requests
 import logging
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError
+from itertools import combinations
 
 _logger = logging.getLogger(__name__)
 
@@ -102,30 +103,119 @@ class AkahuTransaction(models.Model):
 
 
     def action_match_transaction(self):
-            for transaction in self:
-                transaction_reference = transaction.reference
-                transaction_amount = round(transaction.amount_due, 2)
-                if self.amount > 0:
-                    move_types = ['out_invoice', 'in_refund']
-                else:
-                    move_types = ['in_invoice', 'out_refund']
-                matching_invoices = self.env['account.move'].search([
-                    '&',
-                        '&',
-                            ('state', '=', 'posted'),
-                            ('payment_state', 'in', ['not_paid', 'partial']),
-                        ('move_type', 'in', move_types),
-                    '|',
-                        ('reference', '=', transaction_reference),
-                        ('amount_total', '=', transaction_amount),
-                ])
-                print(matching_invoices,"ppppppppppppppppppppppppsssssssssssssmatching_invoicess")
+        all_ids_criteria_1 = []
+        all_ids_criteria_2 = []
+        all_ids_criteria_3 = []
+        all_ids_criteria_4 = []
+        all_ids_criteria_5 = []
 
-                if matching_invoices:
-                    transaction.transaction_link_id.invoice_ids = [(6, 0, matching_invoices.ids)]
-                else:
-                    transaction.transaction_link_id.invoice_ids = [(6, 0, [])]
-            return True
+        for transaction in self:
+            transaction_amount = round(transaction.amount_due, 2)
+
+            if transaction.amount > 0:
+                move_types = ['out_invoice', 'in_refund']
+            else:
+                move_types = ['in_invoice', 'out_refund']
+
+            # ------------------- CRITERIA 1 -------------------
+            matching_invoices = self.env['account.move'].search([
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ['not_paid', 'partial']),
+                ('move_type', 'in', move_types),
+                '|',
+                    ('partner_id.name', '=', transaction.name),
+                    ('amount_total', '=', transaction_amount),
+            ])
+            all_ids_criteria_1.extend(matching_invoices.ids)
+
+            # ------------------- CRITERIA 2 -------------------
+            matching_invoices_criteria_2 = self.env['account.move'].search([
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ['not_paid', 'partial']),
+                ('move_type', 'in', move_types),
+                '|','|','|',
+                    ('name', '=', transaction.reference),
+                    ('invoice_origin', '=', transaction.reference),
+                    ('reference', '=', transaction.code),
+                    ('reference', '=', transaction.reference),
+            ])
+            all_ids_criteria_2.extend(matching_invoices_criteria_2.ids)
+
+            # ------------------- CRITERIA 3 -------------------
+            matching_invoices_criteria_3 = self.env['account.move'].search([
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ['not_paid', 'partial']),
+                ('move_type', 'in', move_types),
+                '|', '|',
+                    ('amount_total', '=', transaction_amount),
+                    ('reference', '=', transaction.code),
+                    ('reference', '=', transaction.reference),
+            ])
+            all_ids_criteria_3.extend(matching_invoices_criteria_3.ids)
+
+            # ------------------- CRITERIA 4 -------------------
+            matching_partners = self.env['res.partner'].search([
+                ('name', 'ilike', transaction.name)
+            ]).ids
+
+            matching_invoices_criteria_4 = self.env['account.move'].search([
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ['not_paid', 'partial']),
+                ('move_type', 'in', move_types),
+                '|',
+                    ('partner_id', 'in', matching_partners),
+                    '&',
+                        ('amount_total', '>=', transaction.amount - 10),
+                        ('amount_total', '<=', transaction.amount + 10),
+            ])
+            all_ids_criteria_4.extend(matching_invoices_criteria_4.ids)
+
+            # ------------------- CRITERIA 5 (Multiple Invoices Sum) -------------------
+            # Find partners matching name or reference
+            partners_criteria_5 = self.env['res.partner'].search([
+                    ('name', '=', transaction.name),
+            ]).ids
+
+            # Get all open invoices for these partners
+            candidate_invoices = self.env['account.move'].search([
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ['not_paid', 'partial']),
+                ('move_type', 'in', move_types),
+                '|',
+                ('partner_id', 'in', partners_criteria_5),
+                ('reference', '=', transaction.reference)
+
+            ])
+
+            # Check all combinations for sum match (allow ±0.05 tolerance for rounding)
+            print(candidate_invoices,partners_criteria_5,"=======================================candidate_invoices")
+            tolerance = 0.05
+            for partner_id in partners_criteria_5:
+                partner_invoices = candidate_invoices.filtered(lambda m: m.partner_id.id == partner_id)
+                invoice_list = list(partner_invoices)
+                print(invoice_list,"=============================================invoice_list")
+
+                for r in range(1, len(invoice_list) + 1):
+                    for combo in combinations(invoice_list, r):
+                        total = round(sum(inv.amount_total for inv in combo), 2)
+                        if abs(total - transaction_amount) <= tolerance:
+                            all_ids_criteria_5.extend(inv.id for inv in combo)
+
+        # Remove duplicates
+        all_ids_criteria_1 = list(set(all_ids_criteria_1))
+        all_ids_criteria_2 = list(set(all_ids_criteria_2))
+        all_ids_criteria_3 = list(set(all_ids_criteria_3))
+        all_ids_criteria_4 = list(set(all_ids_criteria_4))
+        all_ids_criteria_5 = list(set(all_ids_criteria_5))
+
+        # Save results to transaction link
+        self.transaction_link_id.invoice_ids = [(6, 0, all_ids_criteria_1)]
+        self.transaction_link_id.invoice_ids_criteria_2 = [(6, 0, all_ids_criteria_2)]
+        self.transaction_link_id.invoice_ids_criteria_3 = [(6, 0, all_ids_criteria_3)]
+        self.transaction_link_id.invoice_ids_criteria_4 = [(6, 0, all_ids_criteria_4)]
+        self.transaction_link_id.invoice_ids_criteria_5 = [(6, 0, all_ids_criteria_5)]
+
+        return True
 
     def action_match_invoice(self):
         self.ensure_one()

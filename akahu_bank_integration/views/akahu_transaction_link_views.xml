@@ -27,7 +27,7 @@
 
                     <separator string="Linked Akahu Transactions"/>
                     <div style="max-height:300px; overflow-y:auto;">
-                        <field nolabel="1" name="transaction_ids" widget="many2many_tree">
+                        <field nolabel="1" name="transaction_ids" >
                             <tree>
                                 <field name="name"/>
                                 <field name="amount"/>
@@ -42,27 +42,144 @@
                             </tree>
                         </field>
                     </div>
+                    <notebook>
+                        <page string="Amount and Customer or Supplier Name Match">
+                            <field nolabel="1" 
+                                name="invoice_ids"
+                                
+                                >
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="transaction_ref"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due" widget="remaining_days"/>
+                                    <field name="payment_state"/>
+                                    <button name="action_open_attachment_wizard"
+                                            type="object"
+                                            string="View Attachments"
+                                            class="btn btn-secondary p-1"
+                                            icon="fa-paperclip"/>
+                                    <button name="action_open_payment_wizard"
+                                            class="btn btn-primary p-1"
+                                            type="object"
+                                            string="Create Payment"
+                                            icon="fa-credit-card"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Invoice, Bill, or Sales Order Number Match">
+                            <field nolabel="1" 
+                                name="invoice_ids_criteria_2"
+                                
+                                >
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="transaction_ref"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due" widget="remaining_days"/>
+                                    <field name="payment_state"/>
+                                    <button name="action_open_attachment_wizard"
+                                            type="object"
+                                            string="View Attachments"
+                                            class="btn btn-secondary p-1"
+                                            icon="fa-paperclip"/>
+                                    <button name="action_open_payment_wizard"
+                                            class="btn btn-primary p-1"
+                                            type="object"
+                                            string="Create Payment"
+                                            icon="fa-credit-card"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Amount Match + Internal Code Match">
+                            <field nolabel="1" 
+                                name="invoice_ids_criteria_3"
+                                
+                                >
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="transaction_ref"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due" widget="remaining_days"/>
+                                    <field name="payment_state"/>
+                                    <button name="action_open_attachment_wizard"
+                                            type="object"
+                                            string="View Attachments"
+                                            class="btn btn-secondary p-1"
+                                            icon="fa-paperclip"/>
+                                    <button name="action_open_payment_wizard"
+                                            class="btn btn-primary p-1"
+                                            type="object"
+                                            string="Create Payment"
+                                            icon="fa-credit-card"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Partial Fuzzy Match of Name + Approximate/Exact Amount">
+                            <field nolabel="1" 
+                                name="invoice_ids_criteria_4"
+                                
+                                >
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="transaction_ref"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due" widget="remaining_days"/>
+                                    <field name="payment_state"/>
+                                    <button name="action_open_attachment_wizard"
+                                            type="object"
+                                            string="View Attachments"
+                                            class="btn btn-secondary p-1"
+                                            icon="fa-paperclip"/>
+                                    <button name="action_open_payment_wizard"
+                                            class="btn btn-primary p-1"
+                                            type="object"
+                                            string="Create Payment"
+                                            icon="fa-credit-card"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Multi-Invoice or Bill Consolidated Payment">
+                            <field nolabel="1" 
+                                name="invoice_ids_criteria_5"
+                                
+                                >
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="transaction_ref"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due" widget="remaining_days"/>
+                                    <field name="payment_state"/>
+                                    <button name="action_open_attachment_wizard"
+                                            type="object"
+                                            string="View Attachments"
+                                            class="btn btn-secondary p-1"
+                                            icon="fa-paperclip"/>
+                                    <button name="action_open_payment_wizard"
+                                            class="btn btn-primary p-1"
+                                            type="object"
+                                            string="Create Payment"
+                                            icon="fa-credit-card"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
 
-                    <separator string="Linked Customer Invoices"/>
-                    <div style="max-height:300px; overflow-y:auto;">
-                        <field nolabel="1" name="invoice_ids" widget="many2many_tree">
-                            <tree>
-                                <field name="name"/>
-                                <field name="partner_id"/>
-                                <field name="transaction_ref"/>
-                                <field name="amount_total"/>
-                                <field name="amount_residual"/>
-                                <field name="invoice_date"/>
-                                <field name="payment_state"/>
-                                <button name="action_open_attachment_wizard"
-                                    type="object"
-                                    string="View Attachments"
-                                    class="btn btn-secondary p-1"
-                                    icon="fa-paperclip"/>
-                                <button name="action_open_payment_wizard" class="btn btn-primary p-1" type="object" string="Create Payment" icon="fa-credit-card"/>
-                            </tree>
-                        </field>
-                    </div>
                 </sheet>
             </form>
         </field>

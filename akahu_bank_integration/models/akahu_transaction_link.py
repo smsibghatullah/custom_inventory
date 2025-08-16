@@ -15,6 +15,38 @@ class AkahuTransactionLink(models.Model):
         string="Linked Invoices",
     )
 
+    invoice_ids_criteria_2 = fields.Many2many(
+        'account.move',
+        'akahu_link_account_move_rel2',
+        'link_id',
+        'invoice_id',
+        string="Linked Invoices",
+    )
+
+    invoice_ids_criteria_3 = fields.Many2many(
+        'account.move',
+        'akahu_link_account_move_rel3',
+        'link_id',
+        'invoice_id',
+        string="Linked Invoices",
+    )
+
+    invoice_ids_criteria_4 = fields.Many2many(
+        'account.move',
+        'akahu_link_account_move_rel4',
+        'link_id',
+        'invoice_id',
+        string="Linked Invoices",
+    )
+
+    invoice_ids_criteria_5 = fields.Many2many(
+        'account.move',
+        'akahu_link_account_move_rel5',
+        'link_id',
+        'invoice_id',
+        string="Linked Invoices",
+    )
+
     all_transaction_ids = fields.Many2many(
         'akahu.transaction',
         'akahu_link_transaction_rel',

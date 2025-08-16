@@ -12,6 +12,14 @@ class AccountMove(models.Model):
 
     transaction_ref = fields.Char(string="Transaction Refrence")  
 
+    @api.model
+    def search(self, args, offset=0, limit=None, order=None):
+        context = self._context or {}
+        if context.get('order_by_over_due'):
+            order = 'invoice_date_due desc'
+        return super(AccountMove, self).search(args, offset=offset, limit=limit, order=order)
+
+
     def action_open_attachment_wizard(self):
         self.ensure_one()
         attachments = self.env['ir.attachment'].search([
