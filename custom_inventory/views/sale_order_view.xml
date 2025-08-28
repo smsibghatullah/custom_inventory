@@ -213,6 +213,7 @@
                 <field name="bci_project" readonly="state in ['cancel', 'sale']" required="1" string="BCI Project ID / Address / Company" />
                 <field name="company_ids_from_brand" invisible="1" />
                 <field name="project_id" domain="[('company_id', 'in', company_ids_from_brand)]" />
+                <field name="printing_statement" />
             </xpath>
              <xpath expr="//field[@name='payment_term_id']" position="replace">
                      <field name="payment_term_id" readonly="state in ['cancel', 'sale']" string="Payment Terms *" required="1"/>

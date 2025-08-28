@@ -85,6 +85,10 @@ class SaleOrder(models.Model):
         compute='_compute_company_ids_from_brand',
         store=True
     )
+    printing_statement = fields.Selection([
+        ('estimation', 'Estimation'),
+        ('quotation', 'Quotation')
+    ], string="Printing Statement")
 
 
 
@@ -640,20 +644,25 @@ class SaleOrder(models.Model):
                 task_vals = {
                     'name': task_name,
                     'project_id': order.project_id.id,
-                    'project_sale_order_id':order.id, 
+                    'sale_order_id': order.id,
+                    'project_sale_order_id': order.id,
                     'partner_id': order.partner_id.id,
-                    'description': "\n".join(["%s x %s" % (l.product_id.display_name, l.product_uom_qty) for l in service_lines]),
+                    'sale_line_id': service_lines[0].id,  
+                    'description': "\n".join([
+                        "%s x %s" % (l.product_id.display_name, l.product_uom_qty)
+                        for l in service_lines
+                    ]),
                 }
-
                 task = self.env['project.task'].create(task_vals)
-
                 order.project_id.task_ids = [(4, task.id)]
+
         for order in self:
             if order.opportunity_id:
                 won_stage = self.env['crm.stage'].search([('is_won', '=', True)], limit=1)
                 if won_stage:
                     order.opportunity_id.write({'stage_id': won_stage.id})
         return res
+
 
     def create_journal_entry(self):
         for order in self:

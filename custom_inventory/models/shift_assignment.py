@@ -17,6 +17,10 @@ class ShiftRole(models.Model):
         'shift_main_id',
         string="Survey Statuses",
     )
+    survey_assigned_form_ids = fields.One2many(
+        'shift.assignment.assigned.forms',
+        'shift_main_id',
+    )
    
 
     def action_waiting_for_checkin(self):
@@ -60,24 +64,6 @@ class ShiftAssignment(models.Model):
         string='Employees', 
     )
     survey_id = fields.Many2many('survey.survey', string='Survey Forms')
-    project_survey_ids = fields.Many2many(
-        'survey.survey',
-        'shift_assignment_project_survey_rel',
-        'shift_id',
-        'survey_id',
-        string='Project Survey Form(s)'
-    )
-    task_survey_ids = fields.Many2many(
-        'survey.survey',
-        'shift_assignment_task_survey_rel',
-        'shift_id',
-        'survey_id',
-        string='Task Survey Form(s)'
-    )
-    project_survey_required = fields.Boolean(string="Project Survey Mandatory")
-    task_survey_required = fields.Boolean(string="Task Survey Mandatory")
-
-
     team_checkin_required = fields.Boolean(string="Team Check-in Required")
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -100,8 +86,8 @@ class ShiftAssignment(models.Model):
 
         status_data = []
         all_surveys = [
-            ('project', record.project_survey_ids),
-            ('task', record.task_survey_ids)
+            # ('project', record.project_survey_ids),
+            # ('task', record.task_survey_ids)
         ]
         all_employees = record.employee_ids | record.supervisor_ids
         for survey_type, surveys in all_surveys:
@@ -136,8 +122,8 @@ class ShiftAssignment(models.Model):
 
         for record in self:
             all_surveys = [
-                ('project', record.project_survey_ids),
-                ('task', record.task_survey_ids)
+                # ('project', record.project_survey_ids),
+                # ('task', record.task_survey_ids)
             ]
             all_employees = record.employee_ids | record.supervisor_ids
             for survey_type, surveys in all_surveys:
@@ -184,6 +170,63 @@ class ShiftAssignment(models.Model):
 
         self.mapped('main_shift_assignment_id').check_and_update_state()
         return result
+
+
+class ShiftSurveyAssignedForms(models.Model):
+    _name = 'shift.assignment.assigned.forms'
+    _description = 'Survey Assigned Form'
+
+    survey_id = fields.Many2one('survey.survey', string="Survey")
+    shift_main_id = fields.Many2one('shift.assignment.main', string="Shift main Assignment")
+    survey_type = fields.Selection([
+        ('project', 'Project Survey'),
+        ('task', 'Task Survey')
+    ], string="Survey Type")
+
+    project_id = fields.Many2one(
+        'project.project', 
+        string='Project',
+        domain="[('id','in',available_project_ids)]"
+    )
+    task_id = fields.Many2one(
+        'project.task', 
+        string='Task',
+        domain="[('id','in',available_task_ids)]"
+    )
+
+    frequency = fields.Selection([
+        ('one_time_recurring', 'One Time Recurring'),
+        ('multiple_time_recurring', 'Multiple Time Recurring')
+    ], string="Frequency")
+
+    available_project_ids = fields.Many2many(
+        'project.project',
+        compute='_compute_available_projects',
+        store=False
+    )
+    available_task_ids = fields.Many2many(
+        'project.task',
+        compute='_compute_available_tasks',
+        store=False
+    )
+
+
+    @api.depends('shift_main_id')
+    def _compute_available_projects(self):
+        for rec in self:
+            if rec.shift_main_id:
+                rec.available_project_ids = rec.shift_main_id.main_shift_assignment_id.mapped('project_id')
+            else:
+                rec.available_project_ids = self.env['project.project']
+
+    @api.depends('project_id', 'shift_main_id')
+    def _compute_available_tasks(self):
+        for rec in self:
+            if rec.shift_main_id:
+                rec.available_task_ids = rec.shift_main_id.main_shift_assignment_id.mapped('task_id')
+            else:
+                rec.available_task_ids = self.env['project.task']
+
 
   
 
@@ -241,6 +284,8 @@ class ShiftSurveyStatus(models.Model):
         'project.task', 
         string='Task', 
     )
+
+
 
 
 

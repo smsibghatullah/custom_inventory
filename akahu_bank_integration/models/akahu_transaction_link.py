@@ -73,9 +73,25 @@ class AkahuTransactionLink(models.Model):
     matched_transactions = fields.Integer(string="Matched", compute="_compute_transaction_counts")
     unmatched_transactions = fields.Integer(string="Unmatched", compute="_compute_transaction_counts")
     partial_matched_transactions = fields.Integer(string="Partial Matched", compute="_compute_transaction_counts")
+
+    def action_create_multi_payments(self):
+        for rec in self:
+            selected_invoices = rec.invoice_ids_criteria_5.filtered(lambda inv: inv.selected)
+            if not selected_invoices:
+                raise exceptions.UserError(_("Please select at least one invoice."))
+
+            return {
+                'name': _('Create Payments'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.payment.register',
+                'view_mode': 'form',
+                'target': 'new',
+                'context': {
+                    'active_model': 'account.move',
+                    'active_ids': selected_invoices.ids,
+                }
+            }
         
-
-
     @api.depends('all_transaction_ids.match_status')
     def _compute_transaction_counts(self):
         for rec in self:

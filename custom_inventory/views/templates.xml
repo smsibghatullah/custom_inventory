@@ -63,7 +63,7 @@
         <t t-if="doc.state in ['draft', 'sent']">
         <div style="display: flex; align-items: center; text-align: center; margin-bottom: 10px;margin-top:130px">
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
-            <span style="font-weight: bold; font-size: 30px;">&#160;&#160; QUOTATION &#160;&#160;</span>
+            <span style="font-weight: bold; font-size: 30px;">&#160;&#160;  <t t-esc="doc.printing_statement == 'estimation' and 'ESTIMATION' or 'QUOTATION'"/> &#160;&#160;</span>
             <span style="flex: 1; border-bottom: 2px solid black; margin: 0 0;"></span>
         </div>
         </t>
@@ -84,13 +84,6 @@
                         <span t-field="doc.customer_description"
                             style="font-size: 16px; font-weight: bold; margin-top: 5px; display: block;" />
                     </div>
-
-                    <p t-if="doc.partner_id.vat" style="margin-top: 5px;">
-                        <t t-if="doc.company_id.account_fiscal_country_id.vat_label"
-                        t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
-                        <t t-else="">Tax ID</t>:
-                        <span t-field="doc.partner_id.vat" style="font-weight: bold;" />
-                    </p>
                     </td>
 
                     <!-- Right Side: Sale Order Details -->
@@ -796,12 +789,7 @@
                                 style="font-size: 16px; font-weight: bold; margin-top: 5px;width:100%" />
                             </div>
 
-                        <p t-if="o.partner_id.vat" style="margin-top: 5px;">
-                            <t t-if="o.company_id.account_fiscal_country_id.vat_label" 
-                            t-out="o.company_id.account_fiscal_country_id.vat_label"/>
-                            <t t-else="">Tax ID</t>: 
-                            <span t-field="o.partner_id.vat" style="font-weight: bold;"/>
-                        </p>
+                        
                     </td>
 
                     <!-- Right Side: Sale Order Details -->

@@ -3,7 +3,7 @@
 
     <record id="ir_cron_sync_akahu_bank_accounts" model="ir.cron">
         <field name="name">Sync Akahu Bank Accounts</field>
-        <field name="model_id" ref="model_akahu_all_bank_account"/>
+        <field name="model_id" ref="model_akahu_bank_account"/>
         <field name="state">code</field>
         <field name="code">model.cron_sync_all_accounts()</field>
         <field name="interval_number">5</field>

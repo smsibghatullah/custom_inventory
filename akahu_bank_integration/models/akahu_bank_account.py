@@ -5,7 +5,8 @@ from datetime import datetime
 
 _logger = logging.getLogger(__name__)
 
-class AkahuBankAccount(models.Model):
+
+class AkahuAllBankAccount(models.Model):
     _name = 'akahu.bank.account'
     _description = 'Akahu Bank Account'
 
@@ -30,19 +31,6 @@ class AkahuBankAccount(models.Model):
     connection_logo = fields.Char(string="Connection Logo")
     attributes = fields.Char(string="Attributes (CSV)")
     last_refresh = fields.Datetime(string="Last Refreshed At")
-
-    @staticmethod
-    def parse_datetime_safe(value):
-        """Parse ISO datetime string safely, return None if value is None or malformed."""
-        if value:
-            try:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
-            except ValueError:
-                try:
-                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-                except ValueError:
-                    _logger.warning("Invalid datetime format: %s", value)
-        return None
 
     def sync_bank_accounts(self):
             """Sync only the current record with the matching API account, then refresh view."""
@@ -94,32 +82,6 @@ class AkahuBankAccount(models.Model):
                 'target': 'current',
             }
 
-class AkahuAllBankAccount(models.Model):
-    _name = 'akahu.all.bank.account'
-    _description = 'Akahu Bank Account'
-
-    name = fields.Char(string="Account Name")
-    akahu_account_id = fields.Char(string="Akahu Account ID")
-    formatted_account = fields.Char(string="Formatted Account")
-    balance_currency = fields.Char(string="Currency")
-    balance_current = fields.Float(string="Current Balance")
-    balance_available = fields.Float(string="Available Balance")
-    balance_overdrawn = fields.Boolean(string="Overdrawn")
-    status = fields.Char(string="Status")
-    type = fields.Char(string="Account Type")
-    holder_name = fields.Char(string="Holder")
-    refreshed_balance = fields.Datetime(string="Balance Refreshed At")
-    refreshed_meta = fields.Datetime(string="Meta Refreshed At")
-    refreshed_transactions = fields.Datetime(string="Transactions Refreshed At")
-    refreshed_party = fields.Datetime(string="Party Refreshed At")
-    authorisation_id = fields.Char(string="Authorisation ID")
-    credentials_id = fields.Char(string="Credentials ID")
-    connection_id = fields.Char(string="Connection ID")
-    connection_name = fields.Char(string="Connection Name")
-    connection_logo = fields.Char(string="Connection Logo")
-    attributes = fields.Char(string="Attributes (CSV)")
-    last_refresh = fields.Datetime(string="Last Refreshed At")
-
     @staticmethod
     def parse_datetime_safe(value):
         """Parse ISO datetime string safely, return None if value is None or malformed."""
@@ -142,12 +104,14 @@ class AkahuAllBankAccount(models.Model):
         response = requests.get('https://api.akahu.io/v1/accounts', headers=headers)
         if response.status_code == 200:
             accounts = response.json().get('items', [])
+            print(accounts,"===================================================12344444")
             for account_data in accounts:
                 akahu_account_id = account_data.get('_id')
                 
-                existing = self.env['akahu.all.bank.account'].search([
+                existing = self.env['akahu.bank.account'].search([
                     ('akahu_account_id', '=', akahu_account_id)
                 ], limit=1)
+                print(existing,"=================================================existing")
 
                 vals = {
                     'name': account_data.get('formatted_account'),

@@ -4,7 +4,6 @@ access_akahu_transaction,akahu.transaction,model_akahu_transaction,base.group_us
 access_akahu_transaction_link,akahu.transaction.link,model_akahu_transaction_link,base.group_user,1,1,1,1
 access_match_invoice_wizard,match.invoice.wizard,model_match_invoice_wizard,,1,1,1,0
 access_match_invoice_wizard_line,match.invoice.wizard.line,model_match_invoice_wizard_line,,1,1,1,0
-access_akahu_all_bank_account,akahu.all.bank.account,model_akahu_all_bank_account,base.group_user,1,1,1,1
 access_match_invoice_wizard_payment,match.invoice.wizard.payment,model_match_invoice_wizard_payment,,1,1,1,0
 access_invoice_attachment_wizard,invoice.attachment.wizard,model_invoice_attachment_wizard,,1,1,1,0
 

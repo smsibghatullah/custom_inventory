@@ -171,12 +171,10 @@ class AkahuTransaction(models.Model):
             all_ids_criteria_4.extend(matching_invoices_criteria_4.ids)
 
             # ------------------- CRITERIA 5 (Multiple Invoices Sum) -------------------
-            # Find partners matching name or reference
             partners_criteria_5 = self.env['res.partner'].search([
                     ('name', '=', transaction.name),
             ]).ids
 
-            # Get all open invoices for these partners
             candidate_invoices = self.env['account.move'].search([
                 ('state', '=', 'posted'),
                 ('payment_state', 'in', ['not_paid', 'partial']),
@@ -187,28 +185,21 @@ class AkahuTransaction(models.Model):
 
             ])
 
-            # Check all combinations for sum match (allow ±0.05 tolerance for rounding)
-            print(candidate_invoices,partners_criteria_5,"=======================================candidate_invoices")
             tolerance = 0.05
-            for partner_id in partners_criteria_5:
-                partner_invoices = candidate_invoices.filtered(lambda m: m.partner_id.id == partner_id)
-                invoice_list = list(partner_invoices)
-                print(invoice_list,"=============================================invoice_list")
+            invoice_list = list(candidate_invoices)
 
-                for r in range(1, len(invoice_list) + 1):
-                    for combo in combinations(invoice_list, r):
-                        total = round(sum(inv.amount_total for inv in combo), 2)
-                        if abs(total - transaction_amount) <= tolerance:
-                            all_ids_criteria_5.extend(inv.id for inv in combo)
+            for r in range(1, len(invoice_list) + 1):
+                for combo in combinations(invoice_list, r):
+                    total = round(sum(inv.amount_total for inv in combo), 2)
+                    if abs(total - transaction_amount) <= tolerance:
+                        all_ids_criteria_5.extend(inv.id for inv in combo)
 
-        # Remove duplicates
         all_ids_criteria_1 = list(set(all_ids_criteria_1))
         all_ids_criteria_2 = list(set(all_ids_criteria_2))
         all_ids_criteria_3 = list(set(all_ids_criteria_3))
         all_ids_criteria_4 = list(set(all_ids_criteria_4))
         all_ids_criteria_5 = list(set(all_ids_criteria_5))
 
-        # Save results to transaction link
         self.transaction_link_id.invoice_ids = [(6, 0, all_ids_criteria_1)]
         self.transaction_link_id.invoice_ids_criteria_2 = [(6, 0, all_ids_criteria_2)]
         self.transaction_link_id.invoice_ids_criteria_3 = [(6, 0, all_ids_criteria_3)]

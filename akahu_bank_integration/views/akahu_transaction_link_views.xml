@@ -44,9 +44,8 @@
                     </div>
                     <notebook>
                         <page string="Amount and Customer or Supplier Name Match">
-                            <field nolabel="1" 
+                            <field nolabel="1" options="{'no_open': True}"
                                 name="invoice_ids"
-                                
                                 >
                                 <tree>
                                     <field name="name"/>
@@ -71,7 +70,7 @@
                             </field>
                         </page>
                         <page string="Invoice, Bill, or Sales Order Number Match">
-                            <field nolabel="1" 
+                            <field nolabel="1"  options="{'no_open': True}"
                                 name="invoice_ids_criteria_2"
                                 
                                 >
@@ -98,7 +97,7 @@
                             </field>
                         </page>
                         <page string="Amount Match + Internal Code Match">
-                            <field nolabel="1" 
+                            <field nolabel="1" options="{'no_open': True}"
                                 name="invoice_ids_criteria_3"
                                 
                                 >
@@ -125,7 +124,7 @@
                             </field>
                         </page>
                         <page string="Partial Fuzzy Match of Name + Approximate/Exact Amount">
-                            <field nolabel="1" 
+                            <field nolabel="1" options="{'no_open': True}"
                                 name="invoice_ids_criteria_4"
                                 
                                 >
@@ -152,7 +151,14 @@
                             </field>
                         </page>
                         <page string="Multi-Invoice or Bill Consolidated Payment">
-                            <field nolabel="1" 
+                            <div class="oe_button_box"  style="margin: 10px;">
+                                <button name="action_create_multi_payments"
+                                        class="btn btn-primary"
+                                        type="object"
+                                        string="Create Payment"
+                                        icon="fa-credit-card"/>
+                            </div>
+                            <field nolabel="1" options="{'no_open': True}"
                                 name="invoice_ids_criteria_5"
                                 
                                 >
