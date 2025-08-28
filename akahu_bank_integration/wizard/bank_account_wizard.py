@@ -5,7 +5,7 @@ class AccountSetupBankManualConfig(models.TransientModel):
     _inherit = 'account.setup.bank.manual.config'
 
     akahu_account_ref_id = fields.Many2one(
-        'akahu.all.bank.account',
+        'akahu.bank.account',
         string="Account"
     )
 
