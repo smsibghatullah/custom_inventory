@@ -11,17 +11,15 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     @staticmethod
-    def parse_datetime_safe(value):
-        """Parse ISO datetime string safely, return None if value is None or malformed."""
-        if value:
-            try:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
-            except ValueError:
-                try:
-                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-                except ValueError:
-                    _logger.warning("Invalid datetime format: %s", value)
-        return None
+    def convert_iso_to_odoo(iso_date):
+        if iso_date.endswith("Z"):
+            iso_date = iso_date.replace("Z", "")
+        try:
+            dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S")
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 
     def action_configure_bank_accounts(self):
         headers = {
@@ -85,8 +83,6 @@ class AccountJournal(models.Model):
         }
 
 
-
-
     def action_configure_bank_accounts_transactions(self):
             print("========================================12345677888996")
             AkahuAccount = self.env['akahu.bank.account']
@@ -109,12 +105,12 @@ class AccountJournal(models.Model):
                     matched_account = AkahuAccount.search([('formatted_account', '=', self.bank_account_id.acc_number)], limit=1)
                     if not matched_account or acc_data.get('_id') != matched_account.akahu_account_id:
                         continue 
-                    print(acc_data.get('_id'),"==========================================")
                     
-                    transection_response = requests.get(f"https://api.akahu.io/v1/transactions?_account={acc_data.get('_id')}", headers=headers)
+                    transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions", headers=headers)
 
                     if transection_response.status_code == 200:
                         transection_data = transection_response.json()
+                    print(len(transection_data.get('items', [])),"=================================================123456")
                     for trans_data in transection_data.get('items', []):
 
                         transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
@@ -136,9 +132,9 @@ class AccountJournal(models.Model):
                                 'amount': trans_data.get('amount'),
                                 'amount_due': trans_data.get('amount'),  
                                 'amount_paid': 0.0,
-                                'date': self.parse_datetime_safe(trans_data.get('date')),
-                                'created_at': self.parse_datetime_safe(trans_data.get('created_at')),
-                                'updated_at': self.parse_datetime_safe(trans_data.get('updated_at')),
+                                'date': self.convert_iso_to_odoo(trans_data.get('date')),
+                                'created_at': self.convert_iso_to_odoo(trans_data.get('created_at')),
+                                'updated_at': self.convert_iso_to_odoo(trans_data.get('updated_at')),
                                 'balance': trans_data.get('balance'),
                                 'type': transaction_type,
                                 'reference': reference,
@@ -156,7 +152,6 @@ class AccountJournal(models.Model):
                         transaction_link.write({
                                 'invoice_ids': [(5, 0, 0)]
                             })  
-                        print(transaction.id,"vvvvvvvvvvvvvvvvvvvvvvvvvvxxxxcccccccccccccccccccc")  
                         created_transaction.append(transaction_link.id)
 
                         if transaction.id not in transaction_link.transaction_ids.ids:
