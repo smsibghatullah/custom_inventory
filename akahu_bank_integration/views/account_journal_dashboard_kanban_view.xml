@@ -14,7 +14,7 @@
                     </button>
                     <br/>
                     <div t-if="journal_type == 'bank'" name="bank_new_actions">
-                                        <a role="menuitem" type="object" name="action_configure_bank_accounts_transactions" groups="account.group_account_invoice">Show Transaction</a>
+                                    <a role="menuitem" type="object" name="action_configure_bank_accounts_transactions" groups="account.group_account_invoice">Show Transaction</a>
                     </div>
                 </t>
             </xpath>

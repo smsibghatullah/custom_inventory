@@ -19,8 +19,7 @@ class AkahuTransaction(models.Model):
 
     created_at = fields.Datetime(string="Created At")  
     updated_at = fields.Datetime(string="Updated At") 
-    date = fields.Datetime(string="Transaction Date")  
-
+    date = fields.Char(string="Transaction Date")
     description = fields.Char(string="Description")  
     amount = fields.Float(string="Amount")  
     balance = fields.Float(string="Balance After Transaction")  

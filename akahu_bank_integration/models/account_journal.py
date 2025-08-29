@@ -3,6 +3,7 @@ import requests
 import logging
 from datetime import datetime
 from odoo.exceptions import UserError
+import pytz
 
 _logger = logging.getLogger(__name__)
 
@@ -12,13 +13,14 @@ class AccountJournal(models.Model):
 
     @staticmethod
     def convert_iso_to_odoo(iso_date):
+        if not iso_date:
+            return False
         if iso_date.endswith("Z"):
-            iso_date = iso_date.replace("Z", "")
-        try:
-            dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%f")
-        except ValueError:
-            dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S")
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
+            iso_date = iso_date[:-1]
+        dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%f")
+        print(iso_date,dt,fields.Datetime.to_string(dt),"============================================================")
+
+        return fields.Datetime.to_string(dt)
 
 
     def action_configure_bank_accounts(self):
@@ -110,7 +112,6 @@ class AccountJournal(models.Model):
 
                     if transection_response.status_code == 200:
                         transection_data = transection_response.json()
-                    print(len(transection_data.get('items', [])),"=================================================123456")
                     for trans_data in transection_data.get('items', []):
 
                         transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
@@ -122,7 +123,7 @@ class AccountJournal(models.Model):
                         
                         reference = trans_data.get('_id')
                         transaction = AkahuTransaction.search([('reference', '=', reference),('akahu_account_id', '=', matched_account.akahu_account_id)], limit=1)
-                        print(matched_account.akahu_account_id,"ppppppppssssssssssssddddddddddfffffffffffggggggg",matched_account.name,transaction)
+                        print(trans_data.get('description'),"trans_data.get('description')=============================================")
 
                         if not transaction:
                             transaction_type = 'INCOME' if trans_data.get('type') == 'credit' else 'PAYMENT'
