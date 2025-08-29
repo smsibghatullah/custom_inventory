@@ -1,11 +1,15 @@
 from odoo import models, fields, api
+from datetime import timedelta
+from odoo.exceptions import UserError,ValidationError
+
 
 class ShiftRole(models.Model):
     _name = 'shift.assignment.main'
     _description = 'Shift Assignment'
 
     name = fields.Char(string="Name", required=True)
-    date = fields.Date(string="Date", default=fields.Date.context_today)
+    date_from = fields.Date(string="Date From")
+    date_to = fields.Date(string="Date To")
     state = fields.Selection([
         ('draft', 'Draft'),
         ('in_progress', 'In Progress'),
@@ -21,7 +25,25 @@ class ShiftRole(models.Model):
         'shift.assignment.assigned.forms',
         'shift_main_id',
     )
-   
+
+    @api.constrains('date_from', 'date_to')
+    def _check_date_order(self):
+        for rec in self:
+            if rec.date_from and rec.date_to and rec.date_from < rec.date_to:
+                raise ValidationError("⚠️ Date From must be greather than Date To.")
+
+
+    def action_generate_shifts(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'shift.generate.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_main_shift_id': self.id,
+            }
+        }
+
 
     def action_waiting_for_checkin(self):
         """Mark shift assignment as verified"""
@@ -42,7 +64,7 @@ class ShiftAssignment(models.Model):
     _description = 'Shift Assignment for Project Management'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string="Name", required=True, copy=False, readonly=True, default='New')
+    date = fields.Date(string="Date")
     project_id = fields.Many2one('project.project', string='Project')
     task_id = fields.Many2one(
         'project.task', 
@@ -80,8 +102,6 @@ class ShiftAssignment(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'New') == 'New':
-            vals['name'] = self.env['ir.sequence'].next_by_code('shift.assignment') or 'New'
         record = super(ShiftAssignment, self).create(vals)
 
         status_data = []
@@ -286,7 +306,114 @@ class ShiftSurveyStatus(models.Model):
     )
 
 
+class ShiftGenerateWizard(models.TransientModel):
+    _name = 'shift.generate.wizard'
+    _description = 'Wizard to Generate Shifts'
 
+    project_id = fields.Many2one('project.project', string="Project", required=True)
+    task_id = fields.Many2one(
+        'project.task', 
+        string='Task', 
+        domain="[('project_id', '=', project_id)]",
+        required=True
+    )
+    supervisor_ids = fields.Many2many(
+        'res.users', 
+        'shift_generate_supervisor_rel',
+        'wizard_id',
+        'user_id',
+        string="Supervisors",
+        required=True
+    )
+    employee_ids = fields.Many2many(
+        'res.users', 
+        'shift_generate_employee_rel',
+        'wizard_id',
+        'user_id',
+        string="Employees",
+        required=True
+    )
+    main_shift_id = fields.Many2one('shift.assignment.main', string="Main Shift Assignment")
+
+    def action_generate(self):
+        """Generate Shift Assignments for all dates in main_shift_id"""
+        self.ensure_one()
+        main = self.main_shift_id
+        if not main:
+            return
+
+        start_date = min(main.date_from, main.date_to)
+        end_date = max(main.date_from, main.date_to)
+
+        current_date = start_date
+        while current_date <= end_date:
+            vals = {
+                'date': current_date,
+                'project_id': self.project_id.id,
+                'task_id': self.task_id.id,
+                'supervisor_ids': [(6, 0, self.supervisor_ids.ids)],
+                'employee_ids': [(6, 0, self.employee_ids.ids)],
+                'main_shift_assignment_id': main.id,
+            }
+            rec = self.env['shift.assignment'].create(vals)
+            print(f"Created Shift on {current_date} -> {rec.id}")
+            current_date += timedelta(days=1)
+
+        return {'type': 'ir.actions.act_window_close'}
+
+
+
+
+class SurveyUserInput(models.Model):
+    _inherit = "survey.user_input"
+
+    project_id = fields.Many2one('project.project', string="Project")
+    task_id = fields.Many2one(
+        'project.task', 
+        string="Task", 
+    )
+
+class Project(models.Model):
+    _inherit = "project.project"
+
+    survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
+
+    def _compute_survey_count(self):
+        for project in self:
+            project.survey_count = self.env['survey.user_input'].search_count([
+                ('project_id', '=', project.id)
+            ]) or 0
+
+    def action_view_project_surveys(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Surveys',
+            'res_model': 'survey.user_input',
+            'view_mode': 'tree,form',
+            'domain': [('project_id', '=', self.id)],
+            'context': {'default_project_id': self.id},
+        }
+
+class Task(models.Model):
+    _inherit = "project.task"
+
+    survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
+
+    def _compute_survey_count(self):
+        for task in self:
+            task.survey_count = self.env['survey.user_input'].search_count([
+                ('task_id', '=', task.id)
+            ])
+
+    def action_view_task_surveys(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Surveys',
+            'res_model': 'survey.user_input',
+            'view_mode': 'tree,form',
+            'domain': [('task_id', '=', self.id)],
+            'context': {'default_task_id': self.id},
+        }
 
 
   

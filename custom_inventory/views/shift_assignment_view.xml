@@ -39,8 +39,7 @@
                             </group>
                             <group>
                                 <field name="survey_id" string="Survey Form" required="1" readonly="state != 'draft'" />
-                                <!-- <field name="team_checkin_required" string="Check-in Required?" readonly="state != 'draft'"/> -->
-                                 <field name="employee_ids" required="1" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
+                                <field name="employee_ids" required="1" widget="many2many_tags" string="Employees" readonly="state != 'draft'" domain="[('id', 'not in', supervisor_ids)]"/>
                             </group>
                         </group>
                          <notebook>
@@ -71,7 +70,6 @@
             <field name="arch" type="xml">
                 <tree string="Shift Assignments">
                     <field name="name"/>
-                    <field name="date"/>
                 </tree>
             </field>
         </record>
@@ -81,20 +79,29 @@
             <field name="model">shift.assignment.main</field>
             <field name="arch" type="xml">
                 <form string="Shift Assignment">
-                    <header>
+                     <header>
                         <button name="action_waiting_for_checkin" type="object" invisible="state != 'draft'" string="Confirm" class="oe_highlight"/>
+                        <button name="action_generate_shifts" type="object" invisible="date_to == False or date_from == False or state != 'draft'" string="Generate Shifts" class="oe_highlight"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
                         <group>
                             <field name="name" readonly="state != 'draft'" />
-                            <field name="date" readonly="state != 'draft'"/>
                         </group>
+                         <group>
+                            <div class="o_form_label">Date</div>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <field name="date_to" />
+                                <span>to</span>
+                                <field name="date_from" />
+                            </div>
+                        </group>
+
                         <notebook>
                             <page string="Shift Assignments">
                                 <field name="main_shift_assignment_id" readonly="state != 'draft'">
                                     <tree editable="bottom">
-                                        <field name="name" readonly="1" />
+                                        <field name="date" />
                                         <field name="project_id" required="1" readonly="state != 'draft'"  options="{'no_create': True}"/>
                                         <field name="task_id" required="1" readonly="state != 'draft'"  options="{'no_create': True}"/>
                                         <field name="supervisor_ids" required="1"  options="{'no_create': True}" readonly="state != 'draft'" widget="many2many_tags" string="Supervisors" domain="[('id', 'not in', employee_ids)]"/>
@@ -104,11 +111,11 @@
                                 </field>
                             </page>
                              <page string="Assigned Forms">
-                                <field name="survey_assigned_form_ids" readonly="0"  >
+                                <field name="survey_assigned_form_ids" readonly="state != 'draft'" >
                                    <tree editable="bottom">
                                         <field name="survey_type"/>
-                                        <field name="project_id" column_invisible="'survey_type' == False"   options="{'no_create': True, 'no_create_edit': True}" />
-                                        <field name="task_id" invisible="'survey_type' ==  'project'" options="{'no_create': True, 'no_create_edit': True}" />
+                                        <field name="project_id" invisible="survey_type == 'task'"   options="{'no_create': True, 'no_create_edit': True}" />
+                                        <field name="task_id" invisible="survey_type ==  'project'" options="{'no_create': True, 'no_create_edit': True}" />
                                         <field name="survey_id"/>
                                         <field name="frequency" />
                                         <field name="available_project_ids" column_invisible="True"  invisible="1" />
@@ -135,6 +142,68 @@
                 </form>
             </field>
         </record>
+
+        <record id="view_shift_generate_wizard" model="ir.ui.view">
+            <field name="name">shift.generate.wizard.form</field>
+            <field name="model">shift.generate.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generate Shifts">
+                    <group>
+                        <field name="project_id" required="1"/>
+                        <field name="task_id" required="1"/>
+                        <field name="supervisor_ids" domain="[('id', 'not in', employee_ids)]" widget="many2many_tags" required="1"/>
+                        <field name="employee_ids" domain="[('id', 'not in', supervisor_ids)]" widget="many2many_tags" required="1"/>
+                    </group>
+                    <footer>
+                        <button string="Generate" type="object" name="action_generate" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_project_form_inherit_survey" model="ir.ui.view">
+            <field name="name">project.project.form.inherit.survey</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_view_project_surveys"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list">
+                        <field name="survey_count" string="Surveys" widget="statinfo"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="view_task_form_inherit_survey" model="ir.ui.view">
+            <field name="name">project.task.form.inherit.survey</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                        <button name="action_view_task_surveys"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-list">
+                            <field name="survey_count" string="Surveys" widget="statinfo"/>
+                        </button>
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="action_shift_generate_wizard" model="ir.actions.act_window">
+            <field name="name">Generate Shifts</field>
+            <field name="res_model">shift.generate.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+
 
         <record id="action_shift_assignment_main" model="ir.actions.act_window">
             <field name="name">Main Shift Assignments</field>

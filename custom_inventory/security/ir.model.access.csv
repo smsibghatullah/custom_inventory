@@ -25,4 +25,6 @@ access_purchase_dynamic_field_selection_values,purchase.dynamic.field.selection.
 access_shift_assignment_main,shift.assignment_main_access,model_shift_assignment_main,group_shift_assignment_access,1,1,1,1
 access_shift_assignment_survey_status,name_shift_assignment_survey_status,model_shift_assignment_survey_status,base.group_user,1,1,1,1
 access_shift_assignment_assigned_forms,name_shift_assignment_assigned_forms,model_shift_assignment_assigned_forms,base.group_user,1,1,1,1
+access_shift_generate_wizard,name_shift_generate_wizard,model_shift_generate_wizard,base.group_user,1,1,1,1
+
 
