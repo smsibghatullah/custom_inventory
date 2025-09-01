@@ -44,6 +44,85 @@ class ShiftRole(models.Model):
             }
         }
 
+    @api.model
+    def create(self, vals):
+        record = super(ShiftRole, self).create(vals)
+        record.action_generate_survey_plan()
+        record.action_generate_task_survey_plan()
+        return record
+
+    def write(self, vals):
+        res = super(ShiftRole, self).write(vals)
+        self.action_generate_survey_plan()
+        self.action_generate_task_survey_plan()
+        return res
+
+    def action_generate_survey_plan(self):
+        """
+        Generate survey plan records based on date range and assigned forms
+        """
+        for rec in self:
+            if rec.date_from and rec.date_to:
+                start_date = min(rec.date_from, rec.date_to)
+                end_date = max(rec.date_from, rec.date_to)
+
+                current_date = start_date
+                while current_date <= end_date:
+                    for assigned_form in rec.survey_assigned_form_ids:
+                        if assigned_form == 'project':
+                            existing = self.env["shift.project.survey.plan"].search([
+                                ("date", "=", current_date),
+                                ("project_id", "=", assigned_form.project_id.id),
+                                ("survey_id", "=", assigned_form.survey_id.id),
+                            ], limit=1)
+
+                            if not existing:
+                                self.env["shift.project.survey.plan"].create({
+                                    "date": current_date,
+                                    "project_id": assigned_form.project_id.id,
+                                    "survey_id": assigned_form.survey_id.id,
+                                    "frequency": assigned_form.frequency,
+                                    "shift_main_id": rec.id,
+                                })
+
+                    current_date += timedelta(days=1)
+
+        return True
+
+    def action_generate_task_survey_plan(self):
+        """
+        Generate survey plan records based on date range and assigned forms
+        """
+        for rec in self:
+            if rec.date_from and rec.date_to:
+                start_date = min(rec.date_from, rec.date_to)
+                end_date = max(rec.date_from, rec.date_to)
+
+                current_date = start_date
+                while current_date <= end_date:
+                    for assigned_form in rec.survey_assigned_form_ids:
+                        if assigned_form == 'task':
+                            print(assigned_form.task_id.id,"88888888888888888888",assigned_form.task_id.name)
+                            existing = self.env["shift.task.survey.plan"].search([
+                                ("date", "=", current_date),
+                                ("task_id", "=", assigned_form.task_id.id),
+                                ("survey_id", "=", assigned_form.survey_id.id),
+                            ], limit=1)
+
+                            if not existing:
+                                self.env["shift.task.survey.plan"].create({
+                                    "date": current_date,
+                                    "task_id": assigned_form.task_id.id,
+                                    "survey_id": assigned_form.survey_id.id,
+                                    "frequency": assigned_form.frequency,
+                                    "shift_main_id": rec.id,
+                                })
+
+                    current_date += timedelta(days=1)
+
+        return True
+
+
 
     def action_waiting_for_checkin(self):
         """Mark shift assignment as verified"""
@@ -377,6 +456,23 @@ class Project(models.Model):
     _inherit = "project.project"
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
+    survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
+
+    def _compute_survey_form_count(self):
+        for project in self:
+            project.survey_form_count = self.env['shift.project.survey.plan'].search_count([
+                ('project_id', '=', project.id)
+            ]) or 0
+
+    def action_view_project_surveys_forms(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Surveys',
+            'res_model': 'shift.project.survey.plan',
+            'view_mode': 'tree,form',
+            'domain': [('project_id', '=', self.id)],
+            'context': {'default_project_id': self.id},
+        }
 
     def _compute_survey_count(self):
         for project in self:
@@ -398,6 +494,23 @@ class Task(models.Model):
     _inherit = "project.task"
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
+    survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
+
+    def _compute_survey_form_count(self):
+        for project in self:
+            project.survey_form_count = self.env['shift.task.survey.plan'].search_count([
+                ('task_id', '=', project.id)
+            ]) or 0
+
+    def action_view_task_surveys_forms(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Surveys',
+            'res_model': 'shift.task.survey.plan',
+            'view_mode': 'tree,form',
+            'domain': [('task_id', '=', self.id)],
+            'context': {'default_task_id': self.id},
+        }
 
     def _compute_survey_count(self):
         for task in self:
@@ -416,4 +529,38 @@ class Task(models.Model):
         }
 
 
-  
+class ShiftProjectSurveyPlan(models.Model):
+    _name = "shift.project.survey.plan"
+    _description = "Shift Survey Plan"
+
+    date = fields.Date(string="Date", required=True)
+    project_id = fields.Many2one("project.project", string="Project", required=True)
+    survey_id = fields.Many2one("survey.survey", string="Survey Form", required=True)
+    frequency = fields.Selection([
+        ('one_time_recurring', 'One Time Recurring'),
+        ('multiple_time_recurring', 'Multiple Time Recurring')
+    ], string="Frequency")
+    state = fields.Selection([
+        ('pending', 'Pending'),
+        ('done', 'Done'),
+    ], string="Status", default="pending")
+    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment")
+
+
+class ShiftTaskSurveyPlan(models.Model):
+    _name = "shift.task.survey.plan"
+    _description = "Shift Survey Plan"
+
+    date = fields.Date(string="Date", required=True)
+    task_id = fields.Many2one("project.task", string="Task", required=True)
+    survey_id = fields.Many2one("survey.survey", string="Survey Form", required=True)
+    frequency = fields.Selection([
+        ('one_time_recurring', 'One Time Recurring'),
+        ('multiple_time_recurring', 'Multiple Time Recurring')
+    ], string="Frequency")
+    state = fields.Selection([
+        ('pending', 'Pending'),
+        ('done', 'Done'),
+    ], string="Status", default="pending")
+    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment")
+

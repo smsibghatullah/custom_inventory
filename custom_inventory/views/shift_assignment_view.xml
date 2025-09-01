@@ -122,7 +122,6 @@
                                         <field name="available_task_ids" column_invisible="True" invisible="1" />
                                    </tree>
                                 </field>
-
                             </page>
                             <page string="Survey Status">
                                 <field name="survey_status_ids" readonly="1">
@@ -174,6 +173,12 @@
                             icon="fa-list">
                         <field name="survey_count" string="Surveys" widget="statinfo"/>
                     </button>
+                    <button name="action_view_project_surveys_forms"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list">
+                        <field name="survey_form_count" string="Surveys Forms" widget="statinfo"/>
+                    </button>
                 </xpath>
             </field>
         </record>
@@ -191,7 +196,83 @@
                                 icon="fa-list">
                             <field name="survey_count" string="Surveys" widget="statinfo"/>
                         </button>
+                        <button name="action_view_task_surveys_forms"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list">
+                        <field name="survey_form_count" string="Surveys Forms" widget="statinfo"/>
+                    </button>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="view_shift_project_survey_plan_tree" model="ir.ui.view">
+            <field name="name">shift.project.survey.plan.tree</field>
+            <field name="model">shift.project.survey.plan</field>
+            <field name="arch" type="xml">
+                <tree string="Shift Survey Plans">
+                    <field name="date"/>
+                    <field name="project_id"/>
+                    <field name="survey_id"/>
+                    <field name="frequency"/>
+                    <field name="state"/>
+                    <field name="shift_main_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_shift_project_survey_plan_form" model="ir.ui.view">
+            <field name="name">shift.project.survey.plan.form</field>
+            <field name="model">shift.project.survey.plan</field>
+            <field name="arch" type="xml">
+                <form string="Shift Survey Plan">
+                    <sheet>
+                        <group>
+                            <field name="date"/>
+                            <field name="project_id"/>
+                            <field name="survey_id"/>
+                            <field name="frequency"/>
+                            <field name="state"/>
+                            <field name="shift_main_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_shift_task_survey_plan_tree" model="ir.ui.view">
+            <field name="name">shift.task.survey.plan.tree</field>
+            <field name="model">shift.task.survey.plan</field>
+            <field name="arch" type="xml">
+                <tree string="Shift Survey Plans">
+                    <field name="date"/>
+                    <field name="task_id"/>
+                    <field name="survey_id"/>
+                    <field name="frequency"/>
+                    <field name="state"/>
+                    <field name="shift_main_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_shift_task_survey_plan_form" model="ir.ui.view">
+            <field name="name">shift.task.survey.plan.form</field>
+            <field name="model">shift.task.survey.plan</field>
+            <field name="arch" type="xml">
+                <form string="Shift Survey Plan">
+                    <sheet>
+                        <group>
+                            <field name="date"/>
+                            <field name="task_id"/>
+                            <field name="survey_id"/>
+                            <field name="frequency"/>
+                            <field name="state"/>
+                            <field name="shift_main_id"/>
+                        </group>
+                    </sheet>
+                </form>
             </field>
         </record>
 
