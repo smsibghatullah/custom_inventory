@@ -7,7 +7,7 @@
                     <group>
                         <field name="transaction_ref" readonly="1"/>
                     </group>
-                    <field name="invoice_line_ids" mode="tree" readonly="1" nolabel="1">
+                    <field name="invoice_line_ids" mode="tree"  nolabel="1">
                         <tree editable="bottom">
                             <field name="selected"/>
                             <field name="invoice_id" />

@@ -69,7 +69,7 @@ class ShiftRole(models.Model):
                 current_date = start_date
                 while current_date <= end_date:
                     for assigned_form in rec.survey_assigned_form_ids:
-                        if assigned_form == 'project':
+                        if assigned_form.survey_type == 'project':
                             existing = self.env["shift.project.survey.plan"].search([
                                 ("date", "=", current_date),
                                 ("project_id", "=", assigned_form.project_id.id),
@@ -101,7 +101,7 @@ class ShiftRole(models.Model):
                 current_date = start_date
                 while current_date <= end_date:
                     for assigned_form in rec.survey_assigned_form_ids:
-                        if assigned_form == 'task':
+                        if assigned_form.survey_type == 'task':
                             print(assigned_form.task_id.id,"88888888888888888888",assigned_form.task_id.name)
                             existing = self.env["shift.task.survey.plan"].search([
                                 ("date", "=", current_date),
