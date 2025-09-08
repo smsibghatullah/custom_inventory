@@ -15,7 +15,7 @@ class AccountSetupBankManualConfig(models.TransientModel):
             vals['partner_id'] = self.env.company.partner_id.id
 
             if vals.get('akahu_account_ref_id'):
-                akahu_account = self.env['akahu.all.bank.account'].browse(vals['akahu_account_ref_id'])
+                akahu_account = self.env['akahu.bank.account'].browse(vals['akahu_account_ref_id'])
                 existing = self.env['account.journal'].search([
                     ('bank_acc_number', '=', akahu_account.name)
                 ], limit=1)
