@@ -1322,7 +1322,7 @@
                             <tbody>
                                 <tr>
                                  <td valign="center" t-if="company">
-                                    <strong><t t-esc="company.name"/></strong>
+                                    <!-- <strong><t t-esc="company.name"/></strong> -->
                                 </td>
 
 

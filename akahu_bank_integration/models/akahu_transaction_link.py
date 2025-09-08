@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from datetime import datetime
 
 class AkahuTransactionLink(models.Model):
     _name = 'akahu.transaction.link'
@@ -92,25 +93,37 @@ class AkahuTransactionLink(models.Model):
                 }
             }
         
-    @api.depends('all_transaction_ids.match_status')
+    @api.depends('all_transaction_ids.match_status', 'all_transaction_ids.date')
     def _compute_transaction_counts(self):
-        for rec in self:
-            rec.total_transactions = len(rec.all_transaction_ids)
-            rec.matched_transactions = len(rec.all_transaction_ids.filtered(lambda t: t.match_status == 'matched'))
-            rec.partial_matched_transactions = len(rec.all_transaction_ids.filtered(lambda t: t.match_status == 'partial'))
-            rec.unmatched_transactions = len(rec.all_transaction_ids.filtered(lambda t: t.match_status == 'unmatched'))
+        cutoff_date = datetime(2025, 9, 1).date()
 
-    @api.depends('filter_match_status', 'all_transaction_ids.match_status')
+        for rec in self:
+            filtered_tx = rec.all_transaction_ids.filtered(
+                lambda t: t.date and fields.Date.from_string(t.date) >= cutoff_date
+            )
+
+            rec.total_transactions = len(filtered_tx)
+            rec.matched_transactions = len(filtered_tx.filtered(lambda t: t.match_status == 'matched'))
+            rec.partial_matched_transactions = len(filtered_tx.filtered(lambda t: t.match_status == 'partial'))
+            rec.unmatched_transactions = len(filtered_tx.filtered(lambda t: t.match_status == 'unmatched'))
+
+    @api.depends('filter_match_status', 'all_transaction_ids.match_status', 'all_transaction_ids.date')
     def _compute_filtered_transactions(self):
+        cutoff_date = datetime(2025, 9, 1)
+
         for rec in self:
             if rec.filter_match_status == 'matched':
-                rec.transaction_ids = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'matched')
+                filtered = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'matched')
             elif rec.filter_match_status == 'partial':
-                rec.transaction_ids = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'partial')
+                filtered = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'partial')
             elif rec.filter_match_status == 'unmatched':
-                rec.transaction_ids = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'unmatched')
+                filtered = rec.all_transaction_ids.filtered(lambda t: t.match_status == 'unmatched')
             else:
-                rec.transaction_ids = rec.all_transaction_ids
+                filtered = rec.all_transaction_ids
+
+            rec.transaction_ids = filtered.filtered(
+                    lambda t: t.date and fields.Date.from_string(t.date) >= cutoff_date.date()
+            )
 
     def action_filter_all(self):
         self.write({'filter_match_status': 'all'})

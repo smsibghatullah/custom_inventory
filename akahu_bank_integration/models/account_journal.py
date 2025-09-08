@@ -108,7 +108,7 @@ class AccountJournal(models.Model):
                     if not matched_account or acc_data.get('_id') != matched_account.akahu_account_id:
                         continue 
                     
-                    transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions", headers=headers)
+                    transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions?start=2025-09-01:00:00Z", headers=headers)
 
                     if transection_response.status_code == 200:
                         transection_data = transection_response.json()
