@@ -370,6 +370,7 @@ class PurchaseOrder(models.Model):
             'default_email_layout_xmlid': "mail.mail_notification_layout_with_responsible_signature",
             'force_email': True,
             'mark_rfq_as_sent': True,
+            'default_purchase_order_id':self.id
         })
 
         # In the case of a RFQ or a PO, we want the "View..." button in line with the state of the

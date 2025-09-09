@@ -401,6 +401,8 @@
         <field name="arch" type="xml">
             <field name="partner_id" position="after">
                 <field name="brand_id"/>
+                <field name="bci_project" optional="hide"/>
+                <field name="reference" optional="hide"/>
             </field>
         </field>
     </record>

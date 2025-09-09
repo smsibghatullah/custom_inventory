@@ -115,6 +115,7 @@ class MailComposeMessage(models.TransientModel):
     custom_email_from = fields.Char(string="Custom Email From")
     custom_email_cc = fields.Char(string="CC") 
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    purchase_order_id = fields.Many2one('purchase.order', string="Purchase Order")
 
 
 
@@ -211,6 +212,20 @@ class MailComposeMessage(models.TransientModel):
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
         print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
+        if self.custom_email_cc and self.sale_order_id:
+            self.sale_order_id.message_post(
+                body=f"CC Email: {self.custom_email_cc}",
+                message_type="comment",
+                subtype_xmlid="mail.mt_note"
+            )
+        
+        if self.custom_email_cc and self.purchase_order_id:
+            self.purchase_order_id.message_post(
+                body=f"CC Email: {self.custom_email_cc}",
+                message_type="comment",
+                subtype_xmlid="mail.mt_note"
+            )
+
         messages.mail_ids[0].write({
             'email_cc': self.custom_email_cc,
         })
