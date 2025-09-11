@@ -123,7 +123,7 @@ class AccountJournal(models.Model):
                         
                         reference = trans_data.get('_id')
                         transaction = AkahuTransaction.search([('reference', '=', reference),('akahu_account_id', '=', matched_account.akahu_account_id)], limit=1)
-                        print(trans_data.get('description'),"trans_data.get('description')=============================================")
+                        print(trans_data.get('_id'),"trans_data.get('description')=============================================")
 
                         if not transaction:
                             transaction_type = 'INCOME' if trans_data.get('type') == 'credit' else 'PAYMENT'

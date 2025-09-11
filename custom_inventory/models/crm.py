@@ -212,19 +212,48 @@ class MailComposeMessage(models.TransientModel):
             else:
                 messages += ActiveModel.browse(res_id).message_post(**post_values)
         print(messages,"oosmmmmmmmmmmjjjjjjjjjjjjjjjjj========================++><><><>>>>>>>>>>>>>>>>>>>")
-        if self.custom_email_cc and self.sale_order_id:
-            self.sale_order_id.message_post(
-                body=f"CC Email: {self.custom_email_cc}",
-                message_type="comment",
-                subtype_xmlid="mail.mt_note"
-            )
-        
-        if self.custom_email_cc and self.purchase_order_id:
-            self.purchase_order_id.message_post(
-                body=f"CC Email: {self.custom_email_cc}",
-                message_type="comment",
-                subtype_xmlid="mail.mt_note"
-            )
+        email_list = self.custom_email_to.mapped('email')
+        email_string = ', '.join(filter(None, email_list))
+
+        if self.purchase_order_id:
+            if email_string:
+                self.purchase_order_id.message_post(
+                    body=f"To Emails: {email_string}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
+            if self.custom_email_cc:
+                self.purchase_order_id.message_post(
+                    body=f"CC Email: {self.custom_email_cc}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
+            if self.custom_email_from:
+                self.purchase_order_id.message_post(
+                    body=f"From Email: {self.custom_email_from}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
+
+        if self.sale_order_id:
+            if email_string:
+                self.sale_order_id.message_post(
+                    body=f"To Emails: {email_string}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
+            if self.custom_email_cc:
+                self.sale_order_id.message_post(
+                    body=f"CC Email: {self.custom_email_cc}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
+            if self.custom_email_from:
+                self.sale_order_id.message_post(
+                    body=f"From Email: {self.custom_email_from}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note"
+                )
 
         messages.mail_ids[0].write({
             'email_cc': self.custom_email_cc,
