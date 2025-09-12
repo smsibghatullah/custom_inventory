@@ -43,8 +43,11 @@ class AkahuAllBankAccount(models.Model):
             if response.status_code == 200:
                 accounts = response.json().get('items', [])
                 for account_data in accounts:
-                    if account_data.get('name') != self.name:
+                    print(account_data.get('_id'),self.akahu_account_id,"===========================================")
+                    if account_data.get('_id') != self.akahu_account_id:
                         continue  
+
+                    print(datetime.now(),"==================================================")    
 
                     vals = {
                         'akahu_account_id': account_data.get('_id'),
