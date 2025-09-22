@@ -9,6 +9,7 @@ from odoo.exceptions import AccessDenied, AccessError
 from odoo.http import request
 import base64
 from odoo.service import db
+from datetime import date
 
 _logger = logging.getLogger(__name__)
 
@@ -19,6 +20,78 @@ class AccessToken(http.Controller):
     def __init__(self):
 
         self._token = request.env["api.access_token"]
+
+
+    @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
+    def update_survey_input(self, record_id, **kwargs):
+        try:
+            today = date.today()
+            payload = request.httprequest.data.decode()
+            payload = json.loads(payload or "{}")
+            if not payload:
+                return {"error": "No data provided"}
+
+            project_id = payload.get("project_id")
+            task_id = payload.get("task_id")
+
+            survey_input = False
+
+            if project_id:
+                survey_input = request.env['survey.user_input'].sudo().search([
+                    ("deadline", "=", today),
+                    ("state", "in", ["in_progress", "done"]),
+                    ("survey_id", "=", record_id),
+                    ("project_id", "=", project_id),
+                ], limit=1, order="id desc")
+
+            elif task_id:
+                survey_input = request.env['survey.user_input'].sudo().search([
+                    ("deadline", "=", today),
+                    ("state", "in", ["in_progress", "done"]),
+                    ("survey_id", "=", record_id),
+                    ("task_id", "=", task_id),
+                ], limit=1, order="id desc")
+
+            print(survey_input, "======================================survey input")
+            if not survey_input.exists():
+                return {"error": "Survey input not found"}
+
+            line_ids = payload.pop("user_input_line_ids", [])
+            print(line_ids, "================ line_ids raw")
+
+            survey_input.sudo().user_input_line_ids.unlink()
+
+            new_line_ids = []
+            for line in line_ids:
+                if isinstance(line, (list, tuple)) and len(line) >= 3 and isinstance(line[2], dict):
+                    vals = line[2]
+                elif isinstance(line, dict):
+                    vals = line
+                else:
+                    continue
+
+                vals.pop("id", None)
+                vals["user_input_id"] = survey_input.id
+
+                print(vals, "================ cleaned vals")
+                new_line = request.env["survey.user_input.line"].sudo().create(vals)
+                print(new_line, "================ created line")
+                new_line_ids.append(new_line.id)
+
+            if payload:
+                survey_input.sudo().write(payload)
+
+            return {
+                "success": True,
+                "message": "Survey input updated successfully",
+                "id": survey_input.id,
+                "new_line_ids": new_line_ids,
+            }
+
+        except Exception as e:
+            return {"error": str(e)}
+
+
 
 
     @http.route('/equipment/public/<int:record_id>/private', type="http", auth="public", methods=["GET"], csrf=False)

@@ -60,65 +60,103 @@ class ShiftRole(models.Model):
     def action_generate_survey_plan(self):
         """
         Generate survey plan records based on date range and assigned forms
+        and also create blank user_input with questions (no answers).
         """
+        SurveyUserInput = self.env["survey.user_input"]
+        SurveyUserInputLine = self.env["survey.user_input.line"]
+
         for rec in self:
-            if rec.date_from and rec.date_to:
-                start_date = min(rec.date_from, rec.date_to)
-                end_date = max(rec.date_from, rec.date_to)
+            for assignments in rec.main_shift_assignment_id:
+                for assigned_form in rec.survey_assigned_form_ids:
+                    if assigned_form.survey_type == 'project':
+                        existing = self.env["shift.project.survey.plan"].search([
+                            ("date", "=", assignments.date),
+                            ("project_id", "=", assigned_form.project_id.id),
+                            ("survey_id", "=", assigned_form.survey_id.id),
+                            ("shift_main_id", "=", rec.id),
+                            ("shift_assignment_id", "=", assignments.id),
+                        ], limit=1)
 
-                current_date = start_date
-                while current_date <= end_date:
-                    for assigned_form in rec.survey_assigned_form_ids:
-                        if assigned_form.survey_type == 'project':
-                            existing = self.env["shift.project.survey.plan"].search([
-                                ("date", "=", current_date),
-                                ("project_id", "=", assigned_form.project_id.id),
-                                ("survey_id", "=", assigned_form.survey_id.id),
-                            ], limit=1)
+                        if not existing:
+                            plan = self.env["shift.project.survey.plan"].create({
+                                "date": assignments.date,
+                                "project_id": assigned_form.project_id.id,
+                                "survey_id": assigned_form.survey_id.id,
+                                "frequency": assigned_form.frequency,
+                                "shift_main_id": rec.id,
+                                "shift_assignment_id": assignments.id,
+                                "supervisor_ids": assignments.supervisor_ids.ids,
+                                "employee_ids": assignments.employee_ids.ids,
+                            })
 
-                            if not existing:
-                                self.env["shift.project.survey.plan"].create({
-                                    "date": current_date,
-                                    "project_id": assigned_form.project_id.id,
+                            user_input = SurveyUserInput.create({
+                                "survey_id": assigned_form.survey_id.id,
+                                "state": "in_progress",
+                                "partner_id":self.env.user.partner_id.id,
+                                "project_id": assigned_form.project_id.id,
+                                "deadline": assignments.date
+                            })
+
+                            for question in assigned_form.survey_id.question_ids:
+                                SurveyUserInputLine.create({
+                                    "user_input_id": user_input.id,
+                                    "question_id": question.id,
                                     "survey_id": assigned_form.survey_id.id,
-                                    "frequency": assigned_form.frequency,
-                                    "shift_main_id": rec.id,
+                                    "skipped": True,   
                                 })
 
-                    current_date += timedelta(days=1)
-
         return True
+
+
 
     def action_generate_task_survey_plan(self):
         """
         Generate survey plan records based on date range and assigned forms
         """
-        for rec in self:
-            if rec.date_from and rec.date_to:
-                start_date = min(rec.date_from, rec.date_to)
-                end_date = max(rec.date_from, rec.date_to)
+        SurveyUserInput = self.env["survey.user_input"]
+        SurveyUserInputLine = self.env["survey.user_input.line"]
 
-                current_date = start_date
-                while current_date <= end_date:
+        for rec in self:
+            for assignments in rec.main_shift_assignment_id:
                     for assigned_form in rec.survey_assigned_form_ids:
                         if assigned_form.survey_type == 'task':
                             print(assigned_form.task_id.id,"88888888888888888888",assigned_form.task_id.name)
                             existing = self.env["shift.task.survey.plan"].search([
-                                ("date", "=", current_date),
+                                ("date", "=", assignments.date),
                                 ("task_id", "=", assigned_form.task_id.id),
                                 ("survey_id", "=", assigned_form.survey_id.id),
+                                ("shift_main_id", "=", rec.id),
+                                ("shift_assignment_id", "=", assignments.id),
                             ], limit=1)
 
                             if not existing:
                                 self.env["shift.task.survey.plan"].create({
-                                    "date": current_date,
+                                    "date": assignments.date,
                                     "task_id": assigned_form.task_id.id,
                                     "survey_id": assigned_form.survey_id.id,
                                     "frequency": assigned_form.frequency,
                                     "shift_main_id": rec.id,
+                                    "shift_assignment_id": assignments.id,
+                                    "supervisor_ids": assignments.supervisor_ids.ids,
+                                    "employee_ids": assignments.employee_ids.ids,
                                 })
 
-                    current_date += timedelta(days=1)
+                                user_input = SurveyUserInput.create({
+                                    "survey_id": assigned_form.survey_id.id,
+                                    "state": "in_progress",
+                                    "partner_id":self.env.user.partner_id.id,
+                                    "task_id": assigned_form.task_id.id,
+                                    "deadline": assignments.date
+                                })
+
+                                for question in assigned_form.survey_id.question_ids:
+                                    SurveyUserInputLine.create({
+                                        "user_input_id": user_input.id,
+                                        "question_id": question.id,
+                                        "survey_id": assigned_form.survey_id.id,
+                                        "skipped": True,   
+                                    })
+
 
         return True
 
@@ -346,20 +384,21 @@ class ShiftAttendance(models.Model):
             if record.check_in and record.check_out:
                 duration = (record.check_out - record.check_in).total_seconds() / 3600.0
                 record.duration = round(duration, 2)
-                task = record.shift_id.task_id if record.shift_id.task_id else False
-                print(task.id, "pppppppp=================================================pppppppppppp")
-                if task and hasattr(task, 'timesheet_ids'):
-                    print(task.id, "pppppppp=================================================pppppppppppp")
 
-                    self.env['account.analytic.line'].create({
-                        'date': record.check_in.date(),
-                        'employee_id': record.employee_id.id,
-                        'name': task.name,
-                        'unit_amount': record.duration,
-                        'task_id': task.id,
-                    })
+                task = record.shift_id.task_id if record.shift_id.task_id else False
+                if task and hasattr(task, 'timesheet_ids') and record.employee_id:
+                    hr_employee = self.env['hr.employee'].search([('user_id', '=', record.employee_id.id)], limit=1)
+                    if hr_employee:
+                        self.env['account.analytic.line'].create({
+                            'date': record.check_in.date(),
+                            'employee_id': hr_employee.id,  
+                            'name': task.name,
+                            'unit_amount': record.duration,
+                            'task_id': task.id,
+                        })
             else:
                 record.duration = 0.0
+
 
 class ShiftSurveyStatus(models.Model):
     _name = 'shift.assignment.survey.status'
@@ -544,7 +583,22 @@ class ShiftProjectSurveyPlan(models.Model):
         ('pending', 'Pending'),
         ('done', 'Done'),
     ], string="Status", default="pending")
-    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment")
+    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment Main")
+    shift_assignment_id = fields.Many2one("shift.assignment", string="Shift Assignment")
+    supervisor_ids = fields.Many2many(
+        'res.users', 
+        'shift_assignment_project_form_plan_supervisor_user_rel',  
+        'shift_id', 
+        'employee_id', 
+        string='Supervisors', 
+    )
+    employee_ids = fields.Many2many(
+        'res.users', 
+        'shift_assignment_project_form_plan_employee_user_rel',  
+        'shift_id', 
+        'employee_id', 
+        string='Employees', 
+    )
 
 
 class ShiftTaskSurveyPlan(models.Model):
@@ -562,5 +616,47 @@ class ShiftTaskSurveyPlan(models.Model):
         ('pending', 'Pending'),
         ('done', 'Done'),
     ], string="Status", default="pending")
-    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment")
+    shift_main_id = fields.Many2one("shift.assignment.main", string="Shift Assignment Main")
+    shift_assignment_id = fields.Many2one("shift.assignment", string="Shift Assignment")
+    supervisor_ids = fields.Many2many(
+        'res.users', 
+        'shift_assignment_task_form_plan_supervisor_user_rel',  
+        'shift_id', 
+        'employee_id', 
+        string='Supervisors', 
+    )
+    employee_ids = fields.Many2many(
+        'res.users', 
+        'shift_assignment_task_form_plan_employee_user_rel',  
+        'shift_id', 
+        'employee_id', 
+        string='Employees', 
+    )
 
+
+class SurveyUserInputLineInherit(models.Model):
+    _inherit = 'survey.user_input.line'
+
+    is_multiple_choice = fields.Boolean(
+        string="Multiple Choice",
+        compute="_compute_question_types",
+        store=True
+    )
+    is_simple_choice = fields.Boolean(
+        string="Simple Choice",
+        compute="_compute_question_types",
+        store=True
+    )
+    is_matrix = fields.Boolean(
+        string="Matrix",
+        compute="_compute_question_types",
+        store=True
+    )
+
+    @api.depends('question_id.question_type')
+    def _compute_question_types(self):
+        for rec in self:
+            q_type = rec.question_id.question_type
+            rec.is_multiple_choice = q_type == 'multiple_choice'
+            rec.is_simple_choice = q_type == 'simple_choice'
+            rec.is_matrix = q_type == 'matrix'

@@ -215,6 +215,8 @@
                     <field name="project_id"/>
                     <field name="survey_id"/>
                     <field name="frequency"/>
+                    <field name="supervisor_ids" widget="many2many_tags"/>
+                    <field name="employee_ids" widget="many2many_tags"/>
                     <field name="state"/>
                     <field name="shift_main_id"/>
                 </tree>
@@ -233,6 +235,8 @@
                             <field name="project_id"/>
                             <field name="survey_id"/>
                             <field name="frequency"/>
+                            <field name="supervisor_ids" widget="many2many_tags"/>
+                            <field name="employee_ids" widget="many2many_tags"/>
                             <field name="state"/>
                             <field name="shift_main_id"/>
                         </group>
@@ -250,6 +254,8 @@
                     <field name="task_id"/>
                     <field name="survey_id"/>
                     <field name="frequency"/>
+                     <field name="supervisor_ids" widget="many2many_tags"/>
+                    <field name="employee_ids" widget="many2many_tags"/>
                     <field name="state"/>
                     <field name="shift_main_id"/>
                 </tree>
@@ -268,6 +274,8 @@
                             <field name="task_id"/>
                             <field name="survey_id"/>
                             <field name="frequency"/>
+                            <field name="supervisor_ids" widget="many2many_tags"/>
+                            <field name="employee_ids" widget="many2many_tags"/>
                             <field name="state"/>
                             <field name="shift_main_id"/>
                         </group>
