@@ -11,6 +11,7 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     transaction_ref = fields.Char(string="Transaction Refrence")  
+    transection_date = fields.Char(string="Transaction Date")
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None):

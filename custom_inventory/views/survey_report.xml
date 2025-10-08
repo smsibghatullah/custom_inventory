@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+         <record id="action_report_survey_answer_print_pdf" model="ir.actions.report">
+            <field name="name">Survey Answers</field>
+            <field name="model">survey.user_input</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">survey.survey_page_print</field>
+            <field name="binding_model_id" ref="survey.model_survey_user_input"/>
+        </record>
+
+    </data>
+</odoo>

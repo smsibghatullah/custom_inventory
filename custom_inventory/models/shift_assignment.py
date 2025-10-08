@@ -98,12 +98,36 @@ class ShiftRole(models.Model):
                             })
 
                             for question in assigned_form.survey_id.question_ids:
-                                SurveyUserInputLine.create({
+                                if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
+                                    answer_type = 'suggestion'
+                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime']:
+                                    answer_type = question.question_type
+                                else:
+                                    answer_type = 'text_box'
+
+                                vals = {
                                     "user_input_id": user_input.id,
                                     "question_id": question.id,
                                     "survey_id": assigned_form.survey_id.id,
-                                    "skipped": True,   
-                                })
+                                    "answer_type": answer_type,
+                                }
+
+                                if answer_type == 'text_box':
+                                    vals["value_text_box"] = ""
+                                elif answer_type == 'char_box':
+                                    vals["value_char_box"] = ""
+                                elif answer_type == 'numerical_box':
+                                    vals["value_numerical_box"] = 0.0  
+                                elif answer_type == 'date':
+                                    vals["value_date"] = False
+                                elif answer_type == 'datetime':
+                                    vals["value_datetime"] = False
+                                elif answer_type == 'suggestion':
+                                    vals["suggested_answer_id"] = False
+
+
+                                print(answer_type, "answer_type=============================>>>>><<<<<<")
+                                SurveyUserInputLine.create(vals)
 
         return True
 
@@ -150,13 +174,36 @@ class ShiftRole(models.Model):
                                 })
 
                                 for question in assigned_form.survey_id.question_ids:
-                                    SurveyUserInputLine.create({
+                                    if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
+                                        answer_type = 'suggestion'
+                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime']:
+                                        answer_type = question.question_type
+                                    else:
+                                        answer_type = 'text_box'
+
+                                    vals = {
                                         "user_input_id": user_input.id,
                                         "question_id": question.id,
                                         "survey_id": assigned_form.survey_id.id,
-                                        "skipped": True,   
-                                    })
+                                        "answer_type": answer_type,
+                                    }
 
+                                    if answer_type == 'text_box':
+                                        vals["value_text_box"] = ""
+                                    elif answer_type == 'char_box':
+                                        vals["value_char_box"] = ""
+                                    elif answer_type == 'numerical_box':
+                                        vals["value_numerical_box"] = 0.0  
+                                    elif answer_type == 'date':
+                                        vals["value_date"] = False
+                                    elif answer_type == 'datetime':
+                                        vals["value_datetime"] = False
+                                    elif answer_type == 'suggestion':
+                                        vals["suggested_answer_id"] = False
+
+
+                                    print(answer_type, "answer_type=============================>>>>><<<<<<")
+                                    SurveyUserInputLine.create(vals)
 
         return True
 
@@ -491,6 +538,50 @@ class SurveyUserInput(models.Model):
         string="Task", 
     )
 
+    def action_send_survey_pdf(self):
+        """Redirect to PDF email route."""
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        url = f"{base_url}/survey/send_pdf/{self.id}"
+        return {
+            'type': 'ir.actions.act_url',
+            'url': url,
+            'target': 'self',
+        }
+
+class SurveyReport(models.AbstractModel):
+    _name = "report.survey.survey_page_print"
+    _description = "Survey Print Report"
+
+    def _get_report_values(self, docids, data=None):
+        docs = self.env['survey.user_input'].browse(docids)
+        result = []
+        for answer in docs:
+            survey = answer.survey_id.sudo()
+            values = {
+                'is_html_empty': is_html_empty,
+                'review': False,
+                'survey': survey,
+                'answer': answer if survey.scoring_type != 'scoring_without_answers' else answer.browse(),
+                'questions_to_display': answer._get_print_questions(),
+                'scoring_display_correction': survey.scoring_type in [
+                    'scoring_with_answers',
+                    'scoring_with_answers_after_page'
+                ] and answer,
+                'format_datetime': lambda dt: format_datetime(self.env, dt, dt_format=False),
+                'format_date': lambda date: format_date(self.env, date),
+                'graph_data': json.dumps(answer._prepare_statistics()[answer])
+                    if answer and survey.scoring_type in ['scoring_with_answers', 'scoring_with_answers_after_page']
+                    else False,
+            }
+            result.append(values)
+
+        return {
+            'doc_ids': docids,
+            'doc_model': 'survey.user_input',
+            'docs': docs,
+            'data': result[0] if result else {},
+        }    
+
 class Project(models.Model):
     _inherit = "project.project"
 
@@ -660,3 +751,64 @@ class SurveyUserInputLineInherit(models.Model):
             rec.is_multiple_choice = q_type == 'multiple_choice'
             rec.is_simple_choice = q_type == 'simple_choice'
             rec.is_matrix = q_type == 'matrix'
+
+class SurveyUserInputLineInherit(models.Model):
+    _inherit = 'survey.user_input.line'
+
+    def name_get(self):
+        result = []
+        for record in self:
+            answer = ''
+            if record.answer_type == 'char_box' and record.value_char_box:
+                answer = record.value_char_box
+            elif record.answer_type == 'numerical_box' and record.value_numerical_box is not False:
+                answer = str(record.value_numerical_box)
+            elif record.answer_type == 'date' and record.value_date:
+                answer = str(record.value_date)
+            elif record.answer_type == 'datetime' and record.value_datetime:
+                answer = str(record.value_datetime)
+            elif record.answer_type == 'text_box' and record.value_text_box:
+                answer = record.value_text_box
+            elif record.answer_type == 'suggestion' and record.suggested_answer_id:
+                answer = record.suggested_answer_id.display_name
+            elif record.skipped:
+                answer = "Skipped"
+            else:
+                answer = "(no answer)"
+
+            name = f"{answer}"
+            result.append((record.id, name))
+        return result
+
+    @api.model
+    def write(self, vals):
+        print("================================12345================================")
+        res = super(SurveyUserInputLineInherit, self).write(vals)
+        for record in self:
+            if any(field in vals for field in [
+                'value_char_box', 'value_text_box', 'value_numerical_box',
+                'value_date', 'value_datetime', 'suggested_answer_id', 'skipped'
+            ]):
+                answer = ''
+                if record.answer_type == 'char_box' and record.value_char_box:
+                    answer = record.value_char_box
+                elif record.answer_type == 'numerical_box' and record.value_numerical_box is not False:
+                    answer = str(record.value_numerical_box)
+                elif record.answer_type == 'date' and record.value_date:
+                    answer = str(record.value_date)
+                elif record.answer_type == 'datetime' and record.value_datetime:
+                    answer = str(record.value_datetime)
+                elif record.answer_type == 'text_box' and record.value_text_box:
+                    answer = record.value_text_box
+                elif record.answer_type == 'suggestion' and record.suggested_answer_id:
+                    answer = record.suggested_answer_id.display_name
+                elif record.skipped:
+                    answer = "Skipped"
+                else:
+                    answer = "(no answer)"
+
+                record.display_name = f"{answer}"
+
+        return res   
+
+                    

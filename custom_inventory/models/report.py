@@ -1,13 +1,12 @@
 from odoo import http
 from odoo.http import request
-from odoo.addons.web.controllers.main import ReportController
+from odoo.addons.web.controllers.report import ReportController  # ✅ Correct import
 
 class CustomReportController(ReportController):
 
     @http.route(['/report/download'], type='http', auth="user")
     def report_download(self, data, token):
         import json
-        import werkzeug
 
         request_content = json.loads(data)
         url, report_type = request_content[0], request_content[1]
@@ -23,8 +22,8 @@ class CustomReportController(ReportController):
             # Customize file name based on model
             if model == 'sale.order':
                 filename = record.name
-            elif model == 'account.invoice':
-                filename = record.number or 'invoice'
+            elif model in ['account.move', 'account.invoice']:  # account.invoice old hai, 17 me account.move hai
+                filename = record.name or 'invoice'
             elif model == 'purchase.order':
                 filename = record.name
             else:
@@ -32,6 +31,6 @@ class CustomReportController(ReportController):
 
             filename = filename.replace('/', '_') + '.pdf'
 
-            response = super(CustomReportController, self).report_download(data, token)
+            response = super().report_download(data, token)
             response.headers['Content-Disposition'] = 'attachment; filename=%s' % filename
             return response

@@ -51,6 +51,7 @@
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="transaction_ref"/>
+                                    <field name="transection_date"/>
                                     <field name="amount_total"/>
                                     <field name="amount_residual"/>
                                     <field name="invoice_date"/>

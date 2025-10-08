@@ -133,6 +133,7 @@ class MatchInvoiceWizard(models.TransientModel):
         invoices_to_pay.write({
             'transaction_ref': match.name,
             'reference': match.reference,
+            'transection_date': match.date,
         })
 
         

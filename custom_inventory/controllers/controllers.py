@@ -1,56 +1,88 @@
-# from odoo import http, fields
-# from odoo.http import request
-# from odoo.exceptions import AccessError, MissingError
+from odoo import http
+from odoo.http import request
+import base64
+import json
+from datetime import datetime
+
+from odoo.addons.survey.controllers.main import is_html_empty
 
 
-# class CustomPortalController(http.Controller):
+class SurveyControllerExtended(http.Controller):
 
-#     @http.route(['/my/orders/<int:order_id>'], type='http', auth="public", website=True)
-#     def portal_order_page(
-#         self,
-#         order_id,
-#         report_type=None,
-#         access_token=None,
-#         message=False,
-#         download=False,
-#         **kw
-#     ):
-#         try:
-#             order_sudo = request.env['sale.order'].sudo()._document_check_access(order_id, access_token=access_token)
-#         except (AccessError, MissingError):
-#             return request.redirect('/my')
+    @http.route('/survey/send_pdf/<int:answer_id>', type='http', auth='user', website=True)
+    def send_survey_pdf_email(self, answer_id, **post):
+        """
+        Generate the survey result PDF with company logo and print date,
+        send by email, and allow browser download.
+        """
+        answer_sudo = request.env['survey.user_input'].sudo().browse(answer_id)
+        if not answer_sudo.exists():
+            return "Survey answer not found."
 
-#         # Generate and return PDF
-#         if report_type == 'pdf':
-#             report = request.env.ref('sale.action_report_saleorder')  # ✅ Correct XML ID
+        survey_sudo = answer_sudo.survey_id
+        company = request.env.company
+        print(company.logo,"=======================")
 
-#             pdf_content, _ = report._render_qweb_pdf([order_sudo.id])  # Must be list
+        # Get company logo
+        company_logo = False
+        if company.logo:
+            company_logo = company.logo
 
-#             # Set filename as Sale Order name (e.g., SO023.pdf)
-#             filename = "%s.pdf" % order_sudo.name.replace('/', '_')
+        # Render HTML with additional context
+        html = request.env['ir.qweb']._render('survey.survey_page_print', {
+            'is_html_empty': is_html_empty,
+            'review': False,
+            'survey': survey_sudo,
+            'answer': answer_sudo,
+            'questions_to_display': answer_sudo._get_print_questions(),
+            'scoring_display_correction': survey_sudo.scoring_type in [
+                'scoring_with_answers', 'scoring_with_answers_after_page'
+            ] and answer_sudo,
+            'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
+            'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
+            'graph_data': json.dumps(
+                answer_sudo._prepare_statistics()[answer_sudo]
+            ) if answer_sudo and survey_sudo.scoring_type in [
+                'scoring_with_answers', 'scoring_with_answers_after_page'
+            ] else False,
+            'company_logo': company_logo,
+            'company_name': company.name,
+            'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
+        })
 
-#             return request.make_response(
-#                 pdf_content,
-#                 headers=[
-#                     ('Content-Type', 'application/pdf'),
-#                     ('Content-Length', len(pdf_content)),
-#                     (
-#                         'Content-Disposition',
-#                         'attachment; filename="%s"' % filename
-#                         if download else
-#                         'inline; filename="%s"' % filename
-#                     ),
-#                 ]
-#             )
+        # Convert HTML to PDF
+        pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
 
-#         # Regular view logic (not PDF)
-#         backend_url = f'/web#model=sale.order&id={order_sudo.id}&view_type=form'
-#         values = {
-#             'sale_order': order_sudo,
-#             'report_type': 'html',
-#             'message': message,
-#             'backend_url': backend_url,
-#             'res_company': order_sudo.company_id,
-#         }
+        # Create attachment
+        attachment = request.env['ir.attachment'].sudo().create({
+            'name': f"{survey_sudo.title or 'Survey'}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'survey.user_input',
+            'res_id': answer_sudo.id,
+            'mimetype': 'application/pdf',
+        })
 
-#         return request.render('sale.sale_order_portal_template', values)
+        # Send email
+        recipient_email = answer_sudo.partner_id.email or 'm.mubeen1020@gmail.com'
+        mail_values = {
+            'subject': f"Survey Results: {survey_sudo.title}",
+            'body_html': f"""
+                <p>Dear {answer_sudo.partner_id.name or 'User'},</p>
+                <p>Please find attached your survey result report.</p>
+            """,
+            'email_to': recipient_email,
+            'email_from': request.env.company.email or 'accounts@ezylock.co.nz',
+            'attachment_ids': [(6, 0, [attachment.id])],
+        }
+
+        mail = request.env['mail.mail'].sudo().create(mail_values)
+        mail.sudo().send()
+
+        # Return PDF for download
+        filename = f"{survey_sudo.title or 'Survey'}.pdf"
+        headers = [
+            ('Content-Type', 'application/pdf'),
+            ('Content-Disposition', f'attachment; filename="{filename}"'),
+        ]
+        return request.make_response(pdf_content, headers=headers)

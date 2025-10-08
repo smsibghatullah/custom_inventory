@@ -21,7 +21,9 @@
       <xpath expr="//field[@name='worked_hours']" position="attributes">
         <attribute name="string">Submit Hours</attribute>
       </xpath>
-
+      <xpath expr="//field[@name='check_out']" position="after">
+        <field name="comment" />
+      </xpath>
       <xpath expr="//field[@name='worked_hours']" position="after">
         <field name="approved_hours" widget="float_time"/>
       </xpath>
@@ -42,6 +44,10 @@
 
       <xpath expr="//field[@name='worked_hours']" position="attributes">
         <attribute name="string">Submit Hours</attribute>
+      </xpath>
+
+      <xpath expr="//field[@name='worked_hours']" position="before">
+        <field name="comment"/>
       </xpath>
 
       <xpath expr="//field[@name='worked_hours']" position="after">

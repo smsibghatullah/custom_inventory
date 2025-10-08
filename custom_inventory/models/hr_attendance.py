@@ -31,6 +31,7 @@ class HrAttendance(models.Model):
     )
 
     approved_hours = fields.Float(string='Approved Hours')
+    comment = fields.Text(string="Comments")
 
     @api.onchange('check_in', 'check_out', 'break_time')
     def _compute_worked_hours(self):

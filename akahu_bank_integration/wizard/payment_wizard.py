@@ -59,6 +59,7 @@ class MatchInvoicePaymentWizard(models.TransientModel):
             payments = wizard._create_payments()
             payments.attachment = self.attachment
             invoice.transaction_ref = match.name
+            invoice.transection_date = match.date
             match.action_match_transaction()
             return {
                 'type': 'ir.actions.client',

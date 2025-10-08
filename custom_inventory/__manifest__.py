@@ -32,6 +32,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         
         'data/data.xml',
         'security/ir.model.access.csv',
+        'views/survey_report.xml',
         'views/brand_view.xml',
         'views/bom_products_view.xml',
         'views/invoice_view.xml',
