@@ -11,6 +11,7 @@ class AkahuTransaction(models.Model):
     _name = 'akahu.transaction'
     _description = 'Akahu Bank Transaction'
     _order = 'date desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string="Transaction ID")  
     akahu_account_id = fields.Char(string="Akahu Account")  
@@ -44,8 +45,27 @@ class AkahuTransaction(models.Model):
     ], string="Status", default='unmatched')
     amount_due = fields.Float(string="Amount Due")
     amount_paid = fields.Float(string="Amount Paid")
+    comment_line_ids = fields.One2many(
+        'transaction.comment.line',
+        'transaction_id',
+        string='Comments History',
+        readonly=True,
+    )
 
-   
+    def action_open_comment_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Comment',
+            'res_model': 'transaction.comment.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+             'default_transaction_id': self.id,
+             'default_amount':self.amount,
+             'default_show_history':False
+            },
+        }
  
     @staticmethod
     def parse_datetime_safe(value):
@@ -238,4 +258,17 @@ class AkahuTransaction(models.Model):
             },
         }
 
+class TransactionCommentLine(models.Model):
+    _name = 'transaction.comment.line'
+    _description = 'Transaction Comment Line'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'create_date desc'
+
+    transaction_id = fields.Many2one('akahu.transaction', string='Transaction', required=True, ondelete='cascade')
+    comment = fields.Text(string='Comment', required=True, tracking=True)
+    amount = fields.Monetary(string='Amount', currency_field='currency_id')
+    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    create_uid = fields.Many2one('res.users', string='Added By', readonly=True)
+    create_date = fields.Datetime(string='Date', readonly=True)
+    currency_id = fields.Many2one('res.currency', readonly=True)
 

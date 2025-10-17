@@ -39,7 +39,46 @@
                                 <field name="match_status" widget="badge"/>
                                 <button name="action_match_transaction" class="btn btn-primary" type="object" string="Match" icon="fa-check"/>
                                 <button name="action_match_invoice" class="btn btn-primary" type="object" string="Manual" icon="fa-hand-paper-o"/>
+                                <button name="action_open_comment_wizard" class="btn btn-primary" type="object" string="Comment" icon="fa-comment"/>
                             </tree>
+                            <form create='false' edit='false' string="Transaction">
+                                <sheet>
+                                <div class="oe_button_box" name="button_box">
+                                        <button name="sync_transactions" type="object" string="Refresh" class="oe_stat_button" icon="fa-refresh">
+                                        </button>
+                                    </div>
+                                    <group>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="date"/>
+                                            <field name="created_at"/>
+                                            <field name="updated_at"/>
+                                        </group>
+                                        <group>
+                                            <field name="amount"/>
+                                            <field name="balance"/>
+                                            <field name="type"/>
+                                            <field name="hash"/>
+                                        </group>
+                                        <group>
+                                            <field name="akahu_account_id"/>
+                                            <field name="akahu_user_id"/>
+                                            <field name="akahu_connection_id"/>
+                                        </group>
+                                        <group>
+                                            <field name="description"/>
+                                            <field name="particulars"/>
+                                            <field name="code"/>
+                                            <field name="reference"/>
+                                            <field name="other_account"/>
+                                        </group>
+                                    </group>
+                                </sheet>
+                                <div class="oe_chatter">
+                                        <field name="message_follower_ids" widget="mail_followers"/>
+                                        <field name="message_ids" widget="mail_thread"/>
+                                </div>
+                            </form>
                         </field>
                     </div>
                     <notebook>

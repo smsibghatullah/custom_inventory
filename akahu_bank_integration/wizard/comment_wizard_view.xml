@@ -1,0 +1,69 @@
+<odoo>
+    <data>
+
+        <!-- FORM VIEW: Comment Wizard -->
+        <record id="view_transaction_comment_wizard_form" model="ir.ui.view">
+            <field name="name">transaction.comment.wizard.form</field>
+            <field name="model">transaction.comment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Add Comment" class="oe_form_boxed">
+                    <sheet>
+
+                        <group  style="margin-bottom:10px;">
+                            <field name="transaction_id" invisible="1"/>
+                            <field name="amount" readonly="1" class="oe_inline" string="Transaction Amount"/>
+                             <field name="comment" placeholder="Write your comment here..." />
+                            <field name="attachment_ids" widget="many2many_binary" string="Attachments"/>
+                        </group>
+
+                        <separator string="Comment History" colspan="4" style="margin-top:5px;"/>
+
+                        <div style="width:100%; margin-top:10px;">
+                            <field name="comment_line_ids" readonly="1" nolabel="1" colspan="4"
+                                   style="width:100%; min-height:180px;">
+                                <tree string="Previous Comments" decoration-muted="True">
+                                    <field name="create_date"/>
+                                    <field name="create_uid" string="Added By"/>
+                                    <field name="comment"/>
+                                    <field name="amount"/>
+                                    <field name="attachment_ids" widget="many2many_binary"/>
+                                </tree>
+                                <form string="Comment Details" editable="false">
+                                    <sheet>
+                                        <group col="2" style="margin-bottom:10px;">
+                                            <field name="create_uid" readonly="1" string="Created By"/>
+                                            <field name="create_date" readonly="1" string="Created On"/>
+                                        </group>
+                                        <group>
+                                            <field name="comment" readonly="1" string="Comment Text"
+                                                    widget="text"/>
+                                            <field name="amount" readonly="1" string="Related Amount"/>
+                                            <field name="attachment_ids" widget="many2many_binary"
+                                                   readonly="1" string="Attachments"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </div>
+
+                    </sheet>
+
+                    <footer>
+                        <button name="action_save_comment" type="object" string="Save Comment"
+                                class="btn-primary" icon="fa-save"/>
+                        <button string="Cancel" special="cancel" class="btn-secondary" icon="fa-times"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- ACTION -->
+        <record id="action_transaction_comment_wizard" model="ir.actions.act_window">
+            <field name="name">Add Comment</field>
+            <field name="res_model">transaction.comment.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
