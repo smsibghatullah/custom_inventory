@@ -35,7 +35,7 @@
                                 <field name="akahu_account_id"/>
                                 <field name="reference"/>
                                 <field name="type"/>
-                                <field name="has_comment" invisible="0"/>
+                                <field name="has_comment" invisible="1"/>
                                 <field name="date"/>
                                 <field name="match_status" widget="badge"/>
                                 <button name="action_match_transaction" class="btn btn-primary" type="object" string="Match" icon="fa-check"/>
