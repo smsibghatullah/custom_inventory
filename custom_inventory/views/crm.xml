@@ -363,6 +363,17 @@
         </field>
     </record>
 
+     <record id="crm_case_tree_view_oppor_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.tree.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <field name="email_from" position="after">
+                <field name="bci_project" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
     </data>
 </odoo>
 

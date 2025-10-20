@@ -51,6 +51,16 @@ class AkahuTransaction(models.Model):
         string='Comments History',
         readonly=True,
     )
+    has_comment = fields.Boolean(
+        string="Has Comment",
+        compute="_compute_has_comment",
+        store=False
+    )
+
+    def _compute_has_comment(self):
+        for rec in self:
+            rec.has_comment = bool(rec.comment_line_ids)
+
 
     def action_open_comment_wizard(self):
         self.ensure_one()
