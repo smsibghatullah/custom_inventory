@@ -654,6 +654,7 @@ class SaleOrder(models.Model):
                         for l in service_lines
                     ]),
                 }
+                print(task_vals,"===========================================,,,,,,,,,,,,,,,,,,,,,,,,,,,")
                 task = self.env['project.task'].create(task_vals)
                 order.project_id.task_ids = [(4, task.id)]
 
