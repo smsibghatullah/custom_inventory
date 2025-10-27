@@ -641,7 +641,7 @@ class SaleOrder(models.Model):
             service_lines = order.order_line.filtered(lambda l: l.product_id.type == 'service')
             print(service_lines[0],"=============================sale_order_line")
             if service_lines and order.project_id:
-                task_name = "%s -345 %s" % (order.name, service_lines[0].name)
+                task_name = "%s - %s" % (order.name, service_lines[0].name)
                 task_vals = {
                     'name': task_name,
                     'project_id': order.project_id.id,
