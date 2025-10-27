@@ -641,7 +641,7 @@ class SaleOrder(models.Model):
             service_lines = order.order_line.filtered(lambda l: l.product_id.type == 'service')
             print(service_lines[0],"=============================sale_order_line")
             if service_lines and order.project_id:
-                task_name = "%s - %s" % (order.name, service_lines[0].name)
+                task_name = "%s -345 %s" % (order.name, service_lines[0].name)
                 task_vals = {
                     'name': task_name,
                     'project_id': order.project_id.id,
@@ -649,12 +649,13 @@ class SaleOrder(models.Model):
                     'project_sale_order_id': order.id,
                     'partner_id': order.partner_id.id,
                     'sale_line_id': service_lines[0].id,  
+                    'user_ids':[self.env.user.id],
                     'description': "\n".join([
                         "%s x %s" % (l.product_id.display_name, l.product_uom_qty)
                         for l in service_lines
                     ]),
                 }
-                print(task_vals,"===========================================,,,,,,,,,,,,,,,,,,,,,,,,,,,")
+                print(task_vals,"task===========================================,,,,,,,,,,,,,,,,,,,,,,,,,,,")
                 task = self.env['project.task'].create(task_vals)
                 order.project_id.task_ids = [(4, task.id)]
 
@@ -741,6 +742,7 @@ class SaleOrder(models.Model):
             move.action_post()
             line.product_id.standard_price = product_cost
     
+
 
 class SaleOrderEmailWizard(models.TransientModel):
     _name = 'sale.order.email.wizard'
