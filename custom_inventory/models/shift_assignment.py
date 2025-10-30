@@ -538,15 +538,19 @@ class SurveyUserInput(models.Model):
         string="Task", 
     )
 
-    def action_send_survey_pdf(self):
-        """Redirect to PDF email route."""
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        url = f"{base_url}/survey/send_pdf/{self.id}"
+    def action_open_send_pdf_wizard(self):
+        self.ensure_one()
         return {
-            'type': 'ir.actions.act_url',
-            'url': url,
-            'target': 'self',
+            'name': 'Send Survey PDF',
+            'type': 'ir.actions.act_window',
+            'res_model': 'survey.send.pdf.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_survey_input_id': self.id,
+            },
         }
+
 
 class SurveyReport(models.AbstractModel):
     _name = "report.survey.survey_page_print"

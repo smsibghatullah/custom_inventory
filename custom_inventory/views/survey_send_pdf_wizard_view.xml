@@ -1,0 +1,28 @@
+<odoo>
+<data>
+
+    <record id="view_survey_send_pdf_wizard" model="ir.ui.view">
+        <field name="name">survey.send.pdf.wizard.form</field>
+        <field name="model">survey.send.pdf.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send Survey PDF">
+                <group>
+                    <field name="company_id" required="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="brand_id" required="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="recipient_ids" options="{'no_create': True, 'no_create_edit': True}" context="{'show_email_only': True}" widget="many2many_tags" required="1"/>
+                    <field name="custom_email_cc" />
+                    <field name="attachment_id" readonly="1" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_generate_and_send_pdf"
+                            string="Generate and Send"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</data>
+</odoo>

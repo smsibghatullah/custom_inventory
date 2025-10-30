@@ -28,4 +28,7 @@ access_shift_assignment_assigned_forms,name_shift_assignment_assigned_forms,mode
 access_shift_generate_wizard,name_shift_generate_wizard,model_shift_generate_wizard,base.group_user,1,1,1,1
 access_shift_project_survey_plan,name_shift_project_survey_plan,model_shift_project_survey_plan,base.group_user,1,1,1,1
 access_shift_task_survey_plan,name_shift_task_survey_plan,model_shift_task_survey_plan,base.group_user,1,1,1,1
+access_survey_send_pdf_wizard,name_survey_send_pdf_wizard,model_survey_send_pdf_wizard,base.group_user,1,1,1,1
+
+
 

@@ -293,11 +293,11 @@
             <field name="arch" type="xml">
 
                  <header position="inside">
-                    <button name="action_send_survey_pdf"
+                    <button name="action_open_send_pdf_wizard"
                             type="object"
-                            string="Print PDF"
+                            string="Send PDF"
                             class="btn-primary"
-                            icon="fa-print"/>
+                            icon="fa-envelope"/>
                 </header>
                 
                 <xpath expr="//page[@name='page_answers']/field[@name='user_input_line_ids']" position="attributes">

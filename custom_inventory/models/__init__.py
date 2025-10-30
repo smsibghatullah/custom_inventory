@@ -17,5 +17,6 @@ from . import product_category
 from . import hr_attendance
 from . import sequence_mixin
 from . import report
+from . import survey_send_pdf_wizard
 
 
