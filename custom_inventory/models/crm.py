@@ -131,6 +131,8 @@ class MailComposeMessage(models.TransientModel):
             if not wizard.custom_email_from:
                 raise UserError(_("Please enter Custom Email From address."))
 
+            print(wizard.custom_email_from,"======================================wizard.custom_email_from")   
+
             mail_values = {
                 'email_from': wizard.custom_email_from,
                 'email_to': email_to,
@@ -144,61 +146,8 @@ class MailComposeMessage(models.TransientModel):
             mail = self.env['mail.mail'].sudo().create(mail_values)
             attachment_ids = []
 
-            if wizard.sale_order_id:
-                template = self.env.ref('sale.report_saleorder_document')
 
-                html_content = self.env['ir.qweb']._render(
-                    template.id,
-                    {
-                        'doc_ids': [wizard.sale_order_id.id],
-                        'doc_model': 'sale.order',
-                        'docs': wizard.sale_order_id,
-                        'doc': wizard.sale_order_id, 
-                    }
-                )
-
-
-                pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_content])
-
-                attachment = self.env['ir.attachment'].sudo().create({
-                    'name': f"{wizard.sale_order_id.name}.pdf",
-                    'type': 'binary',
-                    'datas': base64.b64encode(pdf_content),
-                    'res_model': 'mail.mail',
-                    'res_id': mail.id,
-                    'mimetype': 'application/pdf',
-                })
-                attachment_ids.append(attachment.id)
-
-
-            if wizard.purchase_order_id:
-                template = self.env.ref('purchase.report_purchaseorder_document')
-
-                html_content = self.env['ir.qweb']._render(
-                    template.id,
-                    {
-                        'doc_ids': [wizard.sale_order_id.id],
-                        'doc_model': 'purchase.order',
-                        'docs': wizard.purchase_order_id,
-                        'o': wizard.purchase_order_id,  
-                    }
-                )
-
-
-                pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_content])
-
-                attachment = self.env['ir.attachment'].sudo().create({
-                    'name': f"{wizard.purchase_order_id.name}.pdf",
-                    'type': 'binary',
-                    'datas': base64.b64encode(pdf_content),
-                    'res_model': 'mail.mail',
-                    'res_id': mail.id,
-                    'mimetype': 'application/pdf',
-                })
-                attachment_ids.append(attachment.id)
-
-            if attachment_ids:
-                mail.write({'attachment_ids': [(6, 0, attachment_ids)]})
+            mail.write({'attachment_ids': [(6, 0, self.attachment_ids.ids)]})
 
             mail.sudo().send()
             mail.sudo().write({'state': 'sent'})
