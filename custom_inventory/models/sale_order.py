@@ -633,14 +633,20 @@ class SaleOrder(models.Model):
         for order in self:
             for line in order.order_line:
                 line._update_price_from_pricelist()
+
             
     def action_confirm(self):
         """Override sale order confirmation to mark the linked CRM Lead as 'Won'."""
         res = super(SaleOrder, self).action_confirm()
         for order in self:
             service_lines = order.order_line.filtered(lambda l: l.product_id.type == 'service')
-            print(service_lines[0],"=============================sale_order_line")
-            if service_lines and order.project_id:
+
+            if not service_lines:
+                continue  
+
+            print(service_lines[0], "=============================sale_order_line")
+
+            if order.project_id:
                 task_name = "%s - %s" % (order.name, service_lines[0].name)
                 task_vals = {
                     'name': task_name,
@@ -648,14 +654,14 @@ class SaleOrder(models.Model):
                     'sale_order_id': order.id,
                     'project_sale_order_id': order.id,
                     'partner_id': order.partner_id.id,
-                    'sale_line_id': service_lines[0].id,  
-                    'user_ids':[self.env.user.id],
+                    'sale_line_id': service_lines[0].id,
+                    'user_ids': [self.env.user.id],
                     'description': "\n".join([
                         "%s x %s" % (l.product_id.display_name, l.product_uom_qty)
                         for l in service_lines
                     ]),
                 }
-                print(task_vals,"task===========================================,,,,,,,,,,,,,,,,,,,,,,,,,,,")
+                print(task_vals, "task===========================================")
                 task = self.env['project.task'].create(task_vals)
                 order.project_id.task_ids = [(4, task.id)]
 
@@ -664,6 +670,7 @@ class SaleOrder(models.Model):
                 won_stage = self.env['crm.stage'].search([('is_won', '=', True)], limit=1)
                 if won_stage:
                     order.opportunity_id.write({'stage_id': won_stage.id})
+
         return res
 
 
