@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_cost_allocation_parameter_form" model="ir.ui.view">
+        <field name="name">cost.allocation.parameter.form</field>
+        <field name="model">cost.allocation.parameter</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group string="Source Company">
+                        <field name="source_company_id"/>
+                        <field name="source_debit_account_id"/>
+                        <field name="source_credit_account_id"/>
+                        <field name="source_journal_id"/>
+                    </group>
+                    
+                    <group string="Destination Companies">
+                        <field name="destination_company_ids" mode="tree" string="">
+                            <tree editable="bottom">
+                                <field name="destination_company_id"/>
+                                <field name="destination_debit_account_id"/>
+                                <field name="destination_credit_account_id"/>
+                                <field name="destination_journal_id"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_cost_allocation_parameter_tree" model="ir.ui.view">
+        <field name="name">cost.allocation.parameter.tree</field>
+        <field name="model">cost.allocation.parameter</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="source_company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_company_cost_allocation_parameters">
+        <field name="name">Company Cost Allocation Parameters</field>
+        <field name="res_model">cost.allocation.parameter</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="view_cost_allocation_parameter_tree"/>
+    </record>
+
+</odoo>

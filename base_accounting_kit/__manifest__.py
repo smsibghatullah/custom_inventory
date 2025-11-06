@@ -53,6 +53,7 @@
         'views/account_followup.xml',
         'views/followup_report.xml',
         'wizard/asset_depreciation_confirmation_wizard_views.xml',
+        'views/cost_allocation_view.xml',
         'wizard/asset_modify_views.xml',
         'views/account_asset_views.xml',
         'views/account_move_views.xml',
