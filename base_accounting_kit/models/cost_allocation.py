@@ -50,6 +50,14 @@ class CostAllocationDestination(models.Model):
     _description = 'Cost Allocation Destination Companies'
 
     parameter_id = fields.Many2one('cost.allocation.parameter', string='Parameter')
+
+    parent_source_company_id = fields.Many2one(
+        'res.company',
+        string='Source Company Reference',
+        related='parameter_id.source_company_id',
+        store=False,
+        readonly=True
+    )
     
     destination_company_id = fields.Many2one(
         'res.company', 
@@ -72,6 +80,7 @@ class CostAllocationDestination(models.Model):
         'account.journal',
         string='Journal',
         required=True,
+        domain="[('company_id', '=', destination_company_id)]"
     )
 
     @api.onchange('destination_company_id')

@@ -16,9 +16,11 @@
                     </group>
                     
                     <group string="Destination Companies">
-                        <field name="destination_company_ids" mode="tree" string="">
+                        <field name="destination_company_ids">
                             <tree editable="bottom">
-                                <field name="destination_company_id"/>
+                                <field name="parent_source_company_id" column_invisible="1"/>
+                                <field name="destination_company_id" 
+                                       domain="[('id', '!=', parent_source_company_id)]" /> 
                                 <field name="destination_debit_account_id"/>
                                 <field name="destination_credit_account_id"/>
                                 <field name="destination_journal_id"/>

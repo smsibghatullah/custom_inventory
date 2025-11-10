@@ -36,6 +36,7 @@
     'depends': ['account', 'sale', 'account_check_printing',
                 'base_account_budget', 'analytic'],
     'data': [
+        'security/ir_rule.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/account_financial_report_data.xml',
