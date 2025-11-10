@@ -6,6 +6,7 @@
     <field name="inherit_id" ref="base.view_company_form"/>
     <field name="arch" type="xml">
         <xpath expr="//field[@name='currency_id']" position="after">
+            <field name="brand_email" />
             <field name="brand_ids" options="{'no_create': True}" widget="many2many_tags">
             </field>
             <field name="tag_ids" options="{'no_create': True}" widget="many2many_tags">

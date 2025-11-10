@@ -10,6 +10,7 @@ from odoo.http import request
 import base64
 from odoo.service import db
 from datetime import date
+from datetime import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -20,6 +21,120 @@ class AccessToken(http.Controller):
     def __init__(self):
 
         self._token = request.env["api.access_token"]
+
+    @http.route('/api/send_survey_via_email/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
+    def send_survey_via_email(self, record_id, **kwargs):
+        """
+        API to generate survey PDF and send to recipients.
+        Expected payload:
+        {
+            "recipients": ["email1@example.com", "email2@example.com"],
+            "cc": ["cc1@example.com", "cc2@example.com"]
+        }
+        """
+        today = date.today()
+        payload = request.httprequest.data.decode()
+        payload = json.loads(payload or "{}")
+        print(payload,"=========================")
+        project_id = payload.get("project_id")
+        task_id = payload.get("task_id")
+        user_id = payload.get("user_id")
+
+        recipients = payload.get('recipients', [])
+        cc_emails = payload.get('cc', [])
+
+        print(project_id,recipients,cc_emails,"===============================")  
+
+        answer = False
+
+        if project_id:
+            answer = request.env['survey.user_input'].sudo().search([
+                ("deadline", "=", today),
+                ("state", "in", ["in_progress", "done"]),
+                ("survey_id", "=", record_id),
+                ("project_id", "=", project_id),
+            ], limit=1, order="id desc")
+
+        elif task_id:
+            answer = request.env['survey.user_input'].sudo().search([
+                ("deadline", "=", today),
+                ("state", "in", ["in_progress", "done"]),
+                ("survey_id", "=", record_id),
+                ("task_id", "=", task_id),
+            ], limit=1, order="id desc")
+        print(answer,"===============================")    
+        if not answer.exists():
+            return {"success": False, "error": "Survey answer not found"}
+
+        survey = answer.survey_id
+        company = None
+        if user_id:
+            user = request.env['res.users'].sudo().browse(int(user_id))
+            if user.exists():
+                company = user.company_id
+        if not company:
+            company = answer.company_id or request.env.user.company_id
+
+        company_logo = company.logo or False
+        print(answer,"===================================answer")
+
+        html = request.env['ir.qweb']._render('survey.survey_page_print', {
+            'is_html_empty': False,
+            'review': False,
+            'survey': survey,
+            'answer': answer,
+            'questions_to_display': answer._get_print_questions(),
+            'scoring_display_correction': survey.scoring_type in [
+                'scoring_with_answers', 'scoring_with_answers_after_page'
+            ] and answer,
+            'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
+            'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
+            'graph_data': json.dumps(
+                answer._prepare_statistics()[answer]
+            ) if answer and survey.scoring_type in [
+                'scoring_with_answers', 'scoring_with_answers_after_page'
+            ] else False,
+            'company_logo': company_logo,
+            'company_name': company.name,
+            'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
+            'user': request.env.user
+        })
+
+        pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
+        attachment = request.env['ir.attachment'].sudo().create({
+            'name': f"{survey.title or 'Survey'}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'survey.user_input',
+            'res_id': answer.id,
+            'mimetype': 'application/pdf',
+        })
+
+        mail_obj = request.env['mail.mail'].sudo()
+        for email_to in recipients:
+            if not email_to:
+                continue
+
+            mail_values = {
+                'subject': f"Survey Results: {survey.title}",
+                'body_html': f"""
+                    <p>Dear User,</p>
+                    <p>Please find attached your survey result report.</p>
+                    <p>Best regards,<br/>{company.name}</p>
+                """,
+                'email_to': email_to,
+                'email_cc': ','.join(cc_emails) if cc_emails else False,
+                'email_from': company.brand_email ,
+                'attachment_ids': [(6, 0, [attachment.id])],
+            }
+
+            mail = mail_obj.create(mail_values)
+            print(mail,"=================================================")
+            mail.send()
+
+        return {"success": True, "message": "Survey PDF sent successfully"}
+
+       
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
