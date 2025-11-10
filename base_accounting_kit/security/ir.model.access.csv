@@ -47,7 +47,9 @@ access_account_recurring_entries_line,access.account.recurring.entries.line,mode
 access_generate_recurring_entries,generate.recurring.entries.user,model_account_recurring_payments,account.group_account_user,1,1,1,1
 access_allocation,generate.allocation,model_cost_allocation_parameter,account.group_account_user,1,1,1,1
 access_destination,generate.allocation_destination,model_cost_allocation_destination,account.group_account_user,1,1,1,1
-
+access_cost_allocation,generate_cost_allocation,model_cost_allocation_wizard,account.group_account_user,1,1,1,1
+access_cost_allocation_wizzard,generate_cost_allocation,model_cost_allocation_wizard,account.group_account_user,1,1,1,1
+access_cost_allocation_wizzard_line,generate_cost_allocation_wizard_line,model_cost_allocation_wizard_line,account.group_account_user,1,1,1,1
 
 
 
