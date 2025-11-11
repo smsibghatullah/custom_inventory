@@ -447,4 +447,12 @@
         action="base_accounting_kit.action_company_cost_allocation_parameters"
         sequence="10"
     />
+    
+    <menuitem 
+        id="menu_intercompany_sale_invoice_parameter" 
+        name="Sale Invoice Parameters"
+        parent="account.account_account_menu"
+        action="base_accounting_kit.action_sales_invoice_parameter"
+        sequence="11"
+    />
 </odoo>
