@@ -20,7 +20,7 @@
                         <notebook>
                             <page string="Parameters" name="parameters_page">
                                 <group>
-                                <field name="available_sku_category_ids" invisible="1" />
+                                    <field name="available_sku_category_ids" invisible="1" />
                                     <field name="brand_ids" widget="many2many_tags"/>
                                     <field name="category_ids" widget="many2many_tags" options="{'no_create': True}"/>
                                     <field name="tag_ids" widget="many2many_tags"/>
@@ -43,19 +43,48 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <!-- Agar aap menu item bhi banana chahte hain, tou neechay di hui lines use karein -->
-        <!-- 
-        <menuitem 
-            id="menu_sales_invoice_parameter_root" 
-            name="Invoice Parameters" 
-            sequence="10""")/>>
 
-        <menuitem 
-            id="menu_sales_invoice_parameter_form" 
-            parent="menu_sales_invoice_parameter_root" 
-            action="action_sales_invoice_parameter" 
-            sequence="1""")/>>
-        -->
+        <record id="purchase_bill_parameter_form_view" model="ir.ui.view">
+            <field name="name">purchase.bill.parameter.form</field>
+            <field name="model">purchase.bill.parameter</field>
+            <field name="arch" type="xml">
+                <form string="Purchase Bill Parameters">
+                    <sheet>
+                        <group>
+                            <group string="Company Details">
+                                <field name="source_company_id"/>
+                                <field name="dest_company_id"/>
+
+                                <field name="source_vendor_id"/>
+                                <field name="dest_customer_id"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Parameters" name="parameters_page">
+                                <group>
+                                    <field name="available_sku_category_ids" invisible="1" />
+                                    <field name="brand_ids" widget="many2many_tags"/>
+                                    <field name="category_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="tag_ids" widget="many2many_tags"/>
+                                </group>
+                            </page>
+                        </notebook>
+
+                        <group string="Accounting">
+                            <field name="destination_gl_account_id"/>
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_purchase_bill_parameter" model="ir.actions.act_window">
+            <field name="name">Purchase Bill Parameters</field>
+            <field name="res_model">purchase.bill.parameter</field>
+            <field name="view_mode">tree,form</field>
+        </record>
 
     </data>
 </odoo>
