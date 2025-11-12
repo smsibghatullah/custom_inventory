@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 
+
 class SalesInvoiceParameter(models.Model):
     _name = 'sales.invoice.parameter'
     _description = 'Sales Invoice Parameter'
@@ -21,27 +22,43 @@ class SalesInvoiceParameter(models.Model):
         'res.company', 
         string='Source Customer', 
         readonly=True,
+        compute='_compute_source_customer'
     )
 
     dest_vendor_id = fields.Many2one(
         'res.company', 
         string='Destination Vendor', 
         readonly=True,
+        compute='_compute_dest_vendor_id'
     )
     
     brand_ids = fields.Many2many(
         'brand.master',
-        string='Brands'
+        string='Brands',
+        domain="[('company_ids', '=', dest_company_id)]"
     )
     
     category_ids = fields.Many2many(
         'sku.type.master', 
         string='Categories',
+        domain="[('company_id', '=', dest_company_id)]"
+    )
+
+    category_ids = fields.Many2many(
+        'sku.type.master', 
+        string='Categories',
+        domain="[('id', 'in', available_sku_category_ids)]" 
+    )
+
+    available_sku_category_ids = fields.Many2many(
+        'sku.type.master',
+        compute="_compute_available_categories",
     )
 
     tag_ids = fields.Many2many(
         'crm.tag',
-        string='Tags'
+        string='Tags',
+        domain="[('company_ids', '=', dest_company_id)]"
     )
 
     destination_gl_account_id = fields.Many2one(
@@ -53,6 +70,31 @@ class SalesInvoiceParameter(models.Model):
 
     @api.onchange('dest_company_id')
     def _onchange_destination_company(self):
+        self.brand_ids = False
+        self.category_ids = False  
+        self.tag_ids = False
+        
+    @api.depends("brand_ids")
+    def _compute_available_categories(self):
+        for record in self:
+            selected_brand_ids = record.brand_ids.ids
+            
+            if not selected_brand_ids:
+                record.available_sku_category_ids = False
+                continue
+
+            available_categories = self.env['sku.type.master'].search([
+                ('brand_id', 'in', selected_brand_ids) 
+            ])
+            
+            record.available_sku_category_ids = available_categories
+    
+    @api.depends('source_company_id')
+    def _compute_dest_vendor_id(self):
+        self.dest_vendor_id = self.source_company_id.id
+    
+    @api.depends('dest_company_id')
+    def _compute_source_customer(self):
         self.source_customer_id = self.dest_company_id.id
         brand_domain = []
         category_domain = []
