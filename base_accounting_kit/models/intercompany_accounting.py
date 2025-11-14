@@ -334,68 +334,105 @@ class AccountMove(models.Model):
             else:
                 if not move.source_company_id or not move.destination_company_id:
                      raise ValidationError("Source and Destination companies must be set.")
-                if move.move_type not in ['out_invoice', 'out_refund']:
-                    return super(AccountMove, move).action_post()
-
-                bill_params = self.env['purchase.bill.parameter'].sudo().search([
-                    ('source_company_id', '=', move.source_company_id.id),
-                    ('dest_company_id', '=', move.destination_company_id.id)
-                ], limit=1)
-
-                if bill_params:
-                    gl_account_id = bill_params.destination_gl_account_id.id
-                    purchase_journal = self.env['account.journal'].sudo().search([
-                        ('type', '=', 'purchase'),
-                        ('company_id', '=', move.destination_company_id.id),
-                        ('code', '=', 'BILL'),
+                if move.move_type in ['out_invoice', 'out_refund']:
+                    """
+                    Creating auto purchase bill when Invoice is created in source company.
+                    1. fetch details from 'purhcase.bill.parameter' and fetch account from destination company
+                    2. create bill in the destination company
+                    """
+                    bill_params = self.env['purchase.bill.parameter'].sudo().search([
+                        ('source_company_id', '=', move.source_company_id.id),
+                        ('dest_company_id', '=', move.destination_company_id.id)
                     ], limit=1)
-                    dest_move_vals = {
-                        'invoice_date': self.invoice_date,
-                        'journal_id': purchase_journal.id,
-                        'company_id': self.destination_company_id.id,
-                        'source_company_id': self.source_company_id.id,
-                        'destination_company_id': self.destination_company_id.id,
-                        'customer_description': self.customer_description,
-                        'reference': self.reference,
-                        'intercompany': True,
-                        'move_type': "in_invoice",
-                        'brand_id': self.brand_id.id if self.brand_id else False,
-                        'bom_id': self.bom_id.id if self.bom_id else False,
-                        'category_ids': [(6, 0, move.category_ids.ids)] if move.category_ids else False,
-                        'tag_ids': [(6, 0, move.tag_ids.ids)] if move.tag_ids else False,
-                        'line_ids': [(0, 0, {
-                            'product_id': line.product_id.id,
-                            'quantity': line.quantity,
-                            'price_unit': line.price_unit,
-                            'name': line.name,
-                            'account_id': gl_account_id,
-                        }) for line in move.invoice_line_ids]
-                    }
-                    result = self.env['account.move'].sudo().create(dest_move_vals)
-                    result.invoice_date = self.invoice_date
-                    result.journal_id = purchase_journal.id
-                    result.reference = self.reference
 
-        _logger.info("INVOICE CREATED ON CURRENT COMPANY")
+                    if bill_params:
+                        gl_account_id = bill_params.destination_gl_account_id.id
+                        purchase_journal = self.env['account.journal'].sudo().search([
+                            ('type', '=', 'purchase'),
+                            ('company_id', '=', move.destination_company_id.id),
+                            ('code', '=', 'BILL'),
+                        ], limit=1)
+                        if not purchase_journal:
+                            raise ValidationError(f"Purchase journal 'BILL' not found for company {move.destination_company_id.name}")
+                        
+                        dest_move_vals = {
+                            'invoice_date': self.invoice_date,
+                            'journal_id': purchase_journal.id,
+                            'company_id': self.destination_company_id.id,
+                            'source_company_id': self.source_company_id.id,
+                            'destination_company_id': self.destination_company_id.id,
+                            'customer_description': self.customer_description,
+                            'reference': self.reference,
+                            'intercompany': True,
+                            'move_type': "in_invoice",
+                            'brand_id': self.brand_id.id if self.brand_id else False,
+                            'bom_id': self.bom_id.id if self.bom_id else False,
+                            'category_ids': [(6, 0, move.category_ids.ids)] if move.category_ids else False,
+                            'tag_ids': [(6, 0, move.tag_ids.ids)] if move.tag_ids else False,
+                            'line_ids': [(0, 0, {
+                                'product_id': line.product_id.id,
+                                'quantity': line.quantity,
+                                'price_unit': line.price_unit,
+                                'name': line.name,
+                                'account_id': gl_account_id,
+                            }) for line in move.invoice_line_ids]
+                        }
+                        result = self.env['account.move'].sudo().create(dest_move_vals)
+                        result.invoice_date = self.invoice_date
+                        result.journal_id = purchase_journal.id
+                        result.reference = self.reference
+
+                elif move.move_type == "in_invoice":
+                    """
+                    Creating auto invoice when Bill is created in source company.
+                    1. fetch details from 'sales.invoice.parameter' and fetch account from destination company
+                    2. create invoice in the destination company
+                    """
+                    _logger.info("CREATING DESTINATION INVOICE")
+                    sales_invoice_params = self.env['sales.invoice.parameter'].sudo().search([
+                        ('source_company_id', '=', move.source_company_id.id),
+                        ('dest_company_id', '=', move.destination_company_id.id), 
+                    ], limit=1)
+                    
+                    if sales_invoice_params:
+                        invoice_vals = move._prepare_intercompany_invoice_vals(move.destination_company_id, sales_invoice_params)
+                        self.env['account.move'].sudo().create(invoice_vals)
+                    else:
+                         _logger.info("Skipping sales invoice creation: Parameters not found for reverse flow.")
         return super(AccountMove, move).action_post()
 
-    def _prepare_intercompany_bill_vals(self, destination_company, partner, bill_parameter):
-        gl_account_id = bill_parameter.destination_gl_account_id.id
-        if not gl_account_id:
-             raise ValidationError(f"Missing Destination GL Account on Purchase Bill Parameter record ID: {bill_parameter.id}")
+    def _prepare_intercompany_invoice_vals(self, destination_company, sales_invoice_param):
+        """Prepares values for the Sales Invoice in the Source Company context."""
+        
+        gl_account_id = sales_invoice_param.destination_gl_account_id.id
+        _logger.info(f"sale.invoice.oaram dest account invoice {gl_account_id}")
+        
+        sales_journal = self.env['account.journal'].sudo().search([
+            ('type', '=', 'sale'),
+            ('company_id', '=', destination_company.id),
+            ('code', '=', 'INV'),
+        ], limit=1)
+        _logger.info(f"sale.invoice.oaram journal {sales_journal}")
+        if not sales_journal:
+            raise ValidationError(f"Invoice journal 'INV' not found for company {destination_company.name}")
+        
+
         return {
-            'move_type': 'in_invoice', 
-            'partner_id': partner.id, 
+            'move_type': 'out_invoice',
+            'partner_id': destination_company.partner_id.id,
+            'journal_id': sales_journal.id,
             'company_id': destination_company.id,
+            'invoice_date': self.invoice_date,
+            'reference': self.reference,
+            'intercompany': True, 
             'source_company_id': self.source_company_id.id,
             'destination_company_id': self.destination_company_id.id,
-            'intercompany': True, 
+            'customer_description': self.customer_description,
             'brand_id': self.brand_id.id if self.brand_id else False,
-            'customer_description': self.customer_description, 
+            'bom_id': self.bom_id.id if self.bom_id else False,
             'category_ids': [(6, 0, self.category_ids.ids)] if self.category_ids else False,
             'tag_ids': [(6, 0, self.tag_ids.ids)] if self.tag_ids else False,
-            'invoice_date': self.invoice_date,
-            'currency_id': self.currency_id.id,
+            
             'invoice_line_ids': [(0, 0, {
                 'product_id': line.product_id.id,
                 'quantity': line.quantity,
