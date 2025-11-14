@@ -199,7 +199,7 @@ class AccountMove(models.Model):
     source_company_id = fields.Many2one(
         'res.company',
         string='Source Company',
-        domain=lambda self: [('id', 'in', self.env['sales.invoice.parameter'].search([]).mapped('source_company_id').ids)],
+        domain=lambda self: [('id', 'in', self.env['sales.invoice.parameter'].search([("source_company_id", "=", self.env.company.id)]).mapped('source_company_id').ids)],
     )
 
     destination_company_id = fields.Many2one(
@@ -305,7 +305,7 @@ class AccountMove(models.Model):
             self.brand_id = False
             
         if self.category_ids:
-            self.category_ids = False 
+            self.category_ids = False
 
     @api.onchange('intercompany', 'destination_company_id')
     def _onchange_set_customer_partner_id(self):
@@ -323,8 +323,12 @@ class AccountMove(models.Model):
             else:
                 self.partner_id = False
 
+
     def action_post(self):
         for move in self:
+            if not move.partner_id and move.intercompany and move.source_company_id and move.source_company_id.partner_id:
+                move.partner_id = move.source_company_id.partner_id.id
+
             if not move.intercompany:
                 return super(AccountMove, move).action_post()
             else:
@@ -339,45 +343,40 @@ class AccountMove(models.Model):
                 ], limit=1)
 
                 if bill_params:
+                    gl_account_id = bill_params.destination_gl_account_id.id
+                    purchase_journal = self.env['account.journal'].sudo().search([
+                        ('type', '=', 'purchase'),
+                        ('company_id', '=', move.destination_company_id.id),
+                        ('code', '=', 'BILL'),
+                    ], limit=1)
                     dest_move_vals = {
                         'invoice_date': self.invoice_date,
-                        'journal_id': 2,
+                        'journal_id': purchase_journal.id,
                         'company_id': self.destination_company_id.id,
-                        'ref': self.reference,
+                        'source_company_id': self.source_company_id.id,
+                        'destination_company_id': self.destination_company_id.id,
+                        'customer_description': self.customer_description,
+                        'reference': self.reference,
+                        'intercompany': True,
                         'move_type': "in_invoice",
-                        'invoice_line_ids': [(0, 0, {
+                        'brand_id': self.brand_id.id if self.brand_id else False,
+                        'bom_id': self.bom_id.id if self.bom_id else False,
+                        'category_ids': [(6, 0, move.category_ids.ids)] if move.category_ids else False,
+                        'tag_ids': [(6, 0, move.tag_ids.ids)] if move.tag_ids else False,
+                        'line_ids': [(0, 0, {
                             'product_id': line.product_id.id,
                             'quantity': line.quantity,
                             'price_unit': line.price_unit,
                             'name': line.name,
-                            'account_id': 30, 
-                        }) for line in self.invoice_line_ids]
+                            'account_id': gl_account_id,
+                        }) for line in move.invoice_line_ids]
                     }
-                    _logger.info(f"purchase BILL data {dest_move_vals}")
                     result = self.env['account.move'].sudo().create(dest_move_vals)
                     result.invoice_date = self.invoice_date
-                    result.journal_id = 2
+                    result.journal_id = purchase_journal.id
                     result.reference = self.reference
-                    _logger.info(f"purchase BILL {result}")
 
-                source_move_vals = {
-                    'date': self.invoice_date,
-                    'journal_id': 10,
-                    'company_id': self.source_company_id.id,
-                    'ref': self.ref,
-                    'move_type': "out_invoice",
-                    'invoice_line_ids': [(0, 0, {
-                        'product_id': line.product_id.id,
-                        'quantity': line.quantity,
-                        'price_unit': line.price_unit,
-                        'name': line.name,
-                        'account_id': 104, 
-                    }) for line in self.invoice_line_ids]
-                }
-                _logger.info(f"source mov vale {source_move_vals}")
-                result = self.env['account.move'].sudo().create(source_move_vals)
-                _logger.info(f"source mov vale done!! {result}")
-                
+        _logger.info("INVOICE CREATED ON CURRENT COMPANY")
         return super(AccountMove, move).action_post()
 
     def _prepare_intercompany_bill_vals(self, destination_company, partner, bill_parameter):

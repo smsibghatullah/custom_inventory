@@ -102,22 +102,24 @@
                     <attribute name="domain">[('id', 'in', available_brands_ids)]</attribute>
                 </xpath>
 
-                <xpath expr="//field[@name='partner_id']/.." position="replace">
-                    <group>
-                        <field name="partner_id" invisible="intercompany == True"/>
-                        <field name="intercompany"/>
-                    </group>
-
-                    <!-- Naye fields ko ek alag GROUP mein daalein labels ke liye -->
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="readonly">intercompany == True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
                     <group>
                         <field name="available_destination_companies" invisible="1"/>
                         <field name="available_brands_ids" invisible="1"/>
-                        <field name="source_company_id"/>
-                        <field name="destination_company_id" 
-                            domain="[('id', 'in', available_destination_companies)]"/>
-                        
+
+                        <field name="intercompany"/>
+
+                        <field name="source_company_id" invisible="intercompany == False"/>
+                        <field name="destination_company_id"
+                            domain="[('id','in', available_destination_companies)]"
+                            invisible="intercompany == False"/>
+
                     </group>
                 </xpath>
+                
             </field>
         </record>
     </data>
