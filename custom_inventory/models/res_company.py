@@ -33,6 +33,11 @@ class ResCompany(models.Model):
 
     brand_email = fields.Char(string='Brand Email')
 
+    primary_partner = fields.Many2one(
+        'res.partner', 
+        string='Primary Partner',
+        help='Select the primary partner for this company.'
+    )
 
     @api.onchange('tag_ids')
     def _onchange_tag_ids(self):

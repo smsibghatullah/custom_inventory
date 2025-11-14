@@ -86,5 +86,39 @@
             <field name="view_mode">tree,form</field>
         </record>
 
+
+        <record id="view_move_form_intercompany" model="ir.ui.view">
+            <field name="name">account.move.form.intercompany</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_date']" position="after">
+                    <field name="available_bom_ids" invisible="1" />
+                </xpath>
+                <xpath expr="//field[@name='bom_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', available_bom_ids)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='brand_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', available_brands_ids)]</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='partner_id']/.." position="replace">
+                    <group>
+                        <field name="partner_id" invisible="intercompany == True"/>
+                        <field name="intercompany"/>
+                    </group>
+
+                    <!-- Naye fields ko ek alag GROUP mein daalein labels ke liye -->
+                    <group>
+                        <field name="available_destination_companies" invisible="1"/>
+                        <field name="available_brands_ids" invisible="1"/>
+                        <field name="source_company_id"/>
+                        <field name="destination_company_id" 
+                            domain="[('id', 'in', available_destination_companies)]"/>
+                        
+                    </group>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>
