@@ -9,7 +9,6 @@ class AccountMove(models.Model):
     brand_id = fields.Many2one(
         'brand.master', 
         string='Brand',
-         domain="[('company_ids', 'in', company_id)]",
         help='Select the brand associated with this sale order'
     )
 
@@ -29,11 +28,13 @@ class AccountMove(models.Model):
     formatted_invoice_date = fields.Char(
         string="Formatted Invoice Date",
         compute="_compute_formatted_dates",
+        store=True,
     )
 
     formatted_due_date = fields.Char(
         string="Formatted Due Date",
         compute="_compute_formatted_dates",
+        store=True,
     )
 
     tag_ids = fields.One2many(
@@ -64,8 +65,8 @@ class AccountMove(models.Model):
         help='Select the Categories associated with the selected brand'
     )
     customer_description = fields.Text(string="Customer Description") 
-    formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates")
-    formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates")
+    # formatted_invoice_date = fields.Char(string="Formatted Invoice Date", compute="_compute_formatted_dates")
+    # formatted_due_date = fields.Char(string="Formatted Due Date", compute="_compute_formatted_dates")
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):

@@ -35,4 +35,5 @@ from . import recurring_payments
 from . import account_payment
 from . import res_company
 from . import cost_allocation
+from . import intercompany_accounting
 

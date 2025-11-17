@@ -4,7 +4,7 @@
         <!-- 1. Temporarily set noupdate to False for the record -->
         <function name="write" model="ir.model.data">
             <function name="search" model="ir.model.data">
-                <value eval="[('module', '=', 'account'), ('name', '=', 'account_comp_rule')]"/>
+                <value eval="[('module', '=', 'account'), ('name', 'in', ['account_comp_rule', 'journal_comp_rule'])]"/>
             </function>
             <value eval="{'noupdate': False}"/>
         </function>
@@ -13,11 +13,15 @@
         <record id="account.account_comp_rule" model="ir.rule">
             <field name="active" eval="False"/>
         </record>
+        
+        <record id="account.journal_comp_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
 
         <!-- 3. (Optional) Set noupdate back to True -->
         <function name="write" model="ir.model.data">
             <function name="search" model="ir.model.data">
-                <value eval="[('module', '=', 'account'), ('name', '=', 'account_comp_rule')]"/>
+                <value eval="[('module', '=', 'account'), ('name', 'in', ['account_comp_rule', 'journal_comp_rule'])]"/>
             </function>
             <value eval="{'noupdate': True}"/>
         </function>

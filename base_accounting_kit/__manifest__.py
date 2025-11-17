@@ -34,7 +34,7 @@
     'maintainer': 'Cybrosys Techno Solutions',
     'website': "https://www.cybrosys.com",
     'depends': ['account', 'sale', 'account_check_printing',
-                'base_account_budget', 'analytic'],
+                'base_account_budget', 'analytic', 'custom_inventory'],
     'data': [
         'security/ir_rule.xml',
         'security/security.xml',
@@ -55,6 +55,7 @@
         'views/followup_report.xml',
         'wizard/asset_depreciation_confirmation_wizard_views.xml',
         'views/cost_allocation_view.xml',
+        'views/intercompany_accounting_view.xml',
         'wizard/asset_modify_views.xml',
         'views/account_asset_views.xml',
         'views/account_move_views.xml',
