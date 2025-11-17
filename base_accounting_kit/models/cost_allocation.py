@@ -25,19 +25,19 @@ class CostAllocationParameter(models.Model):
         'account.account',
         string='Debit Account',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('account_type', '=', 'asset_receivable')]"
+        domain="[('company_id', '=', source_company_id)]"
     )
     source_credit_account_id = fields.Many2one(
         'account.account', 
         string='Credit Account',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('account_type', 'in', ['expense', 'expense_depreciation', 'expense_direct_cost'])]"
+        domain="[('company_id', '=', source_company_id)]"
     )
     source_journal_id = fields.Many2one(
         'account.journal',
         string='Journal',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('type', '=', 'general')]"
+        domain="[('company_id', '=', source_company_id)]"
     )
 
     destination_company_ids = fields.One2many(
