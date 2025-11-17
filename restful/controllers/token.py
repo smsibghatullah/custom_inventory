@@ -21,29 +21,22 @@ class AccessToken(http.Controller):
     def __init__(self):
 
         self._token = request.env["api.access_token"]
-
+        
     @http.route('/api/send_survey_via_email/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
     def send_survey_via_email(self, record_id, **kwargs):
-        """
-        API to generate survey PDF and send to recipients.
-        Expected payload:
-        {
-            "recipients": ["email1@example.com", "email2@example.com"],
-            "cc": ["cc1@example.com", "cc2@example.com"]
-        }
-        """
         today = date.today()
         payload = request.httprequest.data.decode()
         payload = json.loads(payload or "{}")
-        print(payload,"=========================")
+        print(payload, "=========================")
+
         project_id = payload.get("project_id")
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
 
-        recipients = payload.get('recipients', [])
-        cc_emails = payload.get('cc', [])
+        recipient_ids = payload.get('recipients', [])
+        cc_emails = payload.get('cc', []) or payload.get('ccEmail', [])
 
-        print(project_id,recipients,cc_emails,"===============================")  
+        print(project_id, recipient_ids, cc_emails, "===============================")
 
         answer = False
 
@@ -54,7 +47,6 @@ class AccessToken(http.Controller):
                 ("survey_id", "=", record_id),
                 ("project_id", "=", project_id),
             ], limit=1, order="id desc")
-
         elif task_id:
             answer = request.env['survey.user_input'].sudo().search([
                 ("deadline", "=", today),
@@ -62,11 +54,15 @@ class AccessToken(http.Controller):
                 ("survey_id", "=", record_id),
                 ("task_id", "=", task_id),
             ], limit=1, order="id desc")
-        print(answer,"===============================")    
+
+        print(answer, "===============================")
+
         if not answer.exists():
             return {"success": False, "error": "Survey answer not found"}
 
         survey = answer.survey_id
+
+        # Get company from user_id or fallback
         company = None
         if user_id:
             user = request.env['res.users'].sudo().browse(int(user_id))
@@ -76,8 +72,9 @@ class AccessToken(http.Controller):
             company = answer.company_id or request.env.user.company_id
 
         company_logo = company.logo or False
-        print(answer,"===================================answer")
+        print(answer, "===================================answer")
 
+        # Render survey HTML
         html = request.env['ir.qweb']._render('survey.survey_page_print', {
             'is_html_empty': False,
             'review': False,
@@ -100,6 +97,7 @@ class AccessToken(http.Controller):
             'user': request.env.user
         })
 
+        # Generate PDF
         pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
         attachment = request.env['ir.attachment'].sudo().create({
             'name': f"{survey.title or 'Survey'}.pdf",
@@ -111,30 +109,42 @@ class AccessToken(http.Controller):
         })
 
         mail_obj = request.env['mail.mail'].sudo()
-        for email_to in recipients:
-            if not email_to:
-                continue
 
-            mail_values = {
-                'subject': f"Survey Results: {survey.title}",
-                'body_html': f"""
-                    <p>Dear User,</p>
-                    <p>Please find attached your survey result report.</p>
-                    <p>Best regards,<br/>{company.name}</p>
-                """,
-                'email_to': email_to,
-                'email_cc': ','.join(cc_emails) if cc_emails else False,
-                'email_from': company.brand_email ,
-                'attachment_ids': [(6, 0, [attachment.id])],
-            }
+        # Convert partner IDs to emails
+        # partner_emails = []
+        # for rid in recipient_ids:
+        #     try:
+        #         partner = request.env['res.partner'].sudo().browse(int(rid))
+        #         if partner and partner.email:
+        #             partner_emails.append(partner.email)
+        #         else:
+        #             print(f"⚠️ No email found for partner ID {rid}")
+        #     except Exception as e:
+        #         print(f"Error fetching partner {rid}: {e}")
 
-            mail = mail_obj.create(mail_values)
-            print(mail,"=================================================")
-            mail.send()
+        # if not partner_emails:
+        #     return {"success": False, "error": "No valid recipient emails found"}
+
+        mail_values = {
+            'subject': f"Survey Results: {survey.title}",
+            'body_html': f"""
+                <p>Dear User,</p>
+                <p>Please find attached your survey result report.</p>
+                <p>Best regards,<br/>{company.name}</p>
+            """,
+            'email_to': recipient_ids,
+            'email_cc': ','.join(cc_emails) if cc_emails else False,
+            'email_from': company.brand_email or request.env.user.email_formatted,
+            'attachment_ids': [(6, 0, [attachment.id])],
+        }
+
+        mail = mail_obj.create(mail_values)
+        print(mail, "=================================================")
+        mail.send()
 
         return {"success": True, "message": "Survey PDF sent successfully"}
 
-       
+        
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
