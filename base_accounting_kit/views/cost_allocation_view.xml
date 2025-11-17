@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_cost_allocation_parameter_form" model="ir.ui.view">
+        <field name="name">cost.allocation.parameter.form</field>
+        <field name="model">cost.allocation.parameter</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group string="Source Company">
+                        <field name="source_company_id"/>
+                        <field name="source_debit_account_id"/>
+                        <field name="source_credit_account_id"/>
+                        <field name="source_journal_id"/>
+                    </group>
+                    
+                    <group string="Destination Companies">
+                        <field name="destination_company_ids">
+                            <tree editable="bottom">
+                                <field name="parent_source_company_id" column_invisible="1"/>
+                                <field name="destination_company_id" 
+                                       domain="[('id', '!=', parent_source_company_id)]" /> 
+                                <field name="destination_debit_account_id"/>
+                                <field name="destination_credit_account_id"/>
+                                <field name="destination_journal_id"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_cost_allocation_parameter_tree" model="ir.ui.view">
+        <field name="name">cost.allocation.parameter.tree</field>
+        <field name="model">cost.allocation.parameter</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="source_company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_company_cost_allocation_parameters">
+        <field name="name">Company Cost Allocation Parameters</field>
+        <field name="res_model">cost.allocation.parameter</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="view_cost_allocation_parameter_tree"/>
+    </record>
+
+    <!-- Add cost allocation button -->
+    <record id="view_invoice_form_inherit_cost_allocation" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.cost.allocation</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_register_payment']" position="after">
+                <button 
+                    name="action_open_cost_allocation" 
+                    string="Expense Allocation"
+                    type="object" 
+                    class="btn-primary"
+                    groups="account.group_account_user"
+                    invisible="move_type not in ['in_invoice']"
+                />
+            </xpath>
+            
+        </field>
+    </record>
+
+
+    <record id="view_cost_allocation_wizard_form" model="ir.ui.view">
+        <field name="name">cost.allocation.wizard.form</field>
+        <field name="model">cost.allocation.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="source_bill_id" invisible="1"/>
+                        <field name="gross_amount" readonly="1"/>
+                        <field name="source_company_amount" readonly="1"/>
+                        <field name="allocation_date"/>
+                    </group>
+                    
+                    <group string="Allocation to Companies">
+                        <field name="allocation_line_ids" string="">
+                            <tree editable="bottom">
+                                <field name="available_company_ids" column_invisible="1"/>
+                                <field name="available_debit_account_ids" column_invisible="1"/>
+                                <field name="destination_company_id"/>
+                                <field name="dest_debit_account_id" string="Payable Account" domain="[('id', 'in', available_debit_account_ids)]"/>
+                                <field name="dest_journal_id"/>
+                                <field name="percentage"/>
+                                <field name="amount" readonly="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_post_allocation" string="Post Allocation" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

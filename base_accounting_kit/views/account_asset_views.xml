@@ -439,4 +439,12 @@
               id="menu_action_account_asset_asset_list_normal_purchase"
               action="action_account_asset_asset_list_normal_purchase"
               sequence="6"/>
+
+    <menuitem 
+        id="menu_company_cost_allocation_parameters" 
+        name="Cost Allocation Parameters"
+        parent="account.account_account_menu"
+        action="base_accounting_kit.action_company_cost_allocation_parameters"
+        sequence="10"
+    />
 </odoo>
