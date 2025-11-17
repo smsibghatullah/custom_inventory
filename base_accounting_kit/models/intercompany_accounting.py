@@ -311,8 +311,10 @@ class AccountMove(models.Model):
     def _onchange_set_customer_partner_id(self):
         if not self.intercompany:
             self.partner_id = False
+            self.source_company_id = False
         
         elif self.intercompany:
+            self.source_company_id = self.env.company.id
             if self.destination_company_id:
                 default_partner = self.destination_company_id.primary_partner
                 

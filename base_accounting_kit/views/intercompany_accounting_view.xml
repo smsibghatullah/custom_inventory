@@ -112,7 +112,7 @@
 
                         <field name="intercompany"/>
 
-                        <field name="source_company_id" invisible="intercompany == False"/>
+                        <field name="source_company_id" invisible="1"/>
                         <field name="destination_company_id"
                             domain="[('id','in', available_destination_companies)]"
                             invisible="intercompany == False"/>
