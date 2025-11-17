@@ -111,37 +111,36 @@ class AccessToken(http.Controller):
         mail_obj = request.env['mail.mail'].sudo()
 
         # Convert partner IDs to emails
-        partner_emails = []
-        for rid in recipient_ids:
-            try:
-                partner = request.env['res.partner'].sudo().browse(int(rid))
-                if partner and partner.email:
-                    partner_emails.append(partner.email)
-                else:
-                    print(f"⚠️ No email found for partner ID {rid}")
-            except Exception as e:
-                print(f"Error fetching partner {rid}: {e}")
+        # partner_emails = []
+        # for rid in recipient_ids:
+        #     try:
+        #         partner = request.env['res.partner'].sudo().browse(int(rid))
+        #         if partner and partner.email:
+        #             partner_emails.append(partner.email)
+        #         else:
+        #             print(f"⚠️ No email found for partner ID {rid}")
+        #     except Exception as e:
+        #         print(f"Error fetching partner {rid}: {e}")
 
-        if not partner_emails:
-            return {"success": False, "error": "No valid recipient emails found"}
+        # if not partner_emails:
+        #     return {"success": False, "error": "No valid recipient emails found"}
 
-        for email_to in partner_emails:
-            mail_values = {
-                'subject': f"Survey Results: {survey.title}",
-                'body_html': f"""
-                    <p>Dear User,</p>
-                    <p>Please find attached your survey result report.</p>
-                    <p>Best regards,<br/>{company.name}</p>
-                """,
-                'email_to': email_to,
-                'email_cc': ','.join(cc_emails) if cc_emails else False,
-                'email_from': company.brand_email or request.env.user.email_formatted,
-                'attachment_ids': [(6, 0, [attachment.id])],
-            }
+        mail_values = {
+            'subject': f"Survey Results: {survey.title}",
+            'body_html': f"""
+                <p>Dear User,</p>
+                <p>Please find attached your survey result report.</p>
+                <p>Best regards,<br/>{company.name}</p>
+            """,
+            'email_to': recipient_ids,
+            'email_cc': ','.join(cc_emails) if cc_emails else False,
+            'email_from': company.brand_email or request.env.user.email_formatted,
+            'attachment_ids': [(6, 0, [attachment.id])],
+        }
 
-            mail = mail_obj.create(mail_values)
-            print(mail, "=================================================")
-            mail.send()
+        mail = mail_obj.create(mail_values)
+        print(mail, "=================================================")
+        mail.send()
 
         return {"success": True, "message": "Survey PDF sent successfully"}
 
