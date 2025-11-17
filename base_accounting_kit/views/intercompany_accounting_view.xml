@@ -43,6 +43,17 @@
             <field name="view_mode">tree,form</field>
         </record>
 
+        <record id="view_sales_invoice_parameter_tree" model="ir.ui.view">
+            <field name="name">sales.invoice.parameter.tree</field>
+            <field name="model">sales.invoice.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Sales Invoice Parameters">
+                    <field name="source_company_id"/>
+                    <field name="dest_company_id"/>
+                </tree>
+            </field>
+        </record>
+
 
         <record id="purchase_bill_parameter_form_view" model="ir.ui.view">
             <field name="name">purchase.bill.parameter.form</field>
@@ -84,6 +95,17 @@
             <field name="name">Purchase Bill Parameters</field>
             <field name="res_model">purchase.bill.parameter</field>
             <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="view_purchase_bill_parameter_tree" model="ir.ui.view">
+            <field name="name">purchase.bill.parameter.tree</field>
+            <field name="model">purchase.bill.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Purchase Bill Parameters">
+                    <field name="source_company_id"/>
+                    <field name="dest_company_id"/>
+                </tree>
+            </field>
         </record>
 
 
