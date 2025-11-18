@@ -213,6 +213,7 @@ class CostAllocationWizard(models.TransientModel):
                     'company_id': line.destination_company_id.id,
                     'customer_description': self.source_bill_id.customer_description,
                     'reference': f'Cost Allocation: {self.source_bill_id.name}',
+                    'payment_reference': self.source_bill_id.payment_reference,
                     'brand_id': self.source_bill_id.brand_id.id if self.source_bill_id.brand_id else False,
                     'bom_id': self.source_bill_id.bom_id.id if self.source_bill_id.bom_id else False,
                     'category_ids': [(6, 0, self.source_bill_id.category_ids.ids)] if self.source_bill_id.category_ids else False,

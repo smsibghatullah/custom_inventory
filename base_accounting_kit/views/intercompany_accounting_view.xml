@@ -114,6 +114,9 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="allowed_partner_ids" invisible="1"/>
+            </field>
                 <xpath expr="//field[@name='invoice_date']" position="after">
                     <field name="available_bom_ids" invisible="1" />
                 </xpath>
@@ -125,7 +128,7 @@
                 </xpath>
 
                 <xpath expr="//field[@name='partner_id']" position="attributes">
-                    <attribute name="readonly">intercompany == True</attribute>
+                    <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <group>

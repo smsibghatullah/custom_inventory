@@ -22,17 +22,15 @@ class SalesInvoiceParameter(models.Model):
     )
 
     source_customer_id = fields.Many2one(
-        'res.company', 
+        'res.partner', 
         string='Source Customer', 
-        readonly=True,
-        compute='_compute_source_customer'
+        required=True,
     )
 
     dest_vendor_id = fields.Many2one(
-        'res.company', 
+        'res.partner', 
         string='Destination Vendor', 
-        readonly=True,
-        compute='_compute_dest_vendor_id'
+        required=True,
     )
     
     brand_ids = fields.Many2many(
@@ -71,7 +69,7 @@ class SalesInvoiceParameter(models.Model):
         self.brand_ids = False
         self.category_ids = False  
         self.tag_ids = False
-        
+            
     @api.depends("brand_ids")
     def _compute_available_categories(self):
         for record in self:
@@ -86,14 +84,6 @@ class SalesInvoiceParameter(models.Model):
             ])
             
             record.available_sku_category_ids = available_categories
-    
-    @api.depends('source_company_id')
-    def _compute_dest_vendor_id(self):
-        self.dest_vendor_id = self.source_company_id.id
-    
-    @api.depends('dest_company_id')
-    def _compute_source_customer(self):
-        self.source_customer_id = self.dest_company_id.id
 
 
 class PurchaseBillParameter(models.Model):
@@ -225,6 +215,8 @@ class AccountMove(models.Model):
         compute='_compute_available_boms_by_company',
         store=False,
     )
+    allowed_partner_ids = fields.Many2many('res.partner', compute='_compute_allowed_partner_ids')
+
 
     @api.depends('destination_company_id', 'brand_id')
     def _compute_available_boms_by_company(self):
@@ -252,19 +244,11 @@ class AccountMove(models.Model):
 
     @api.depends('destination_company_id', 'intercompany')
     def _compute_available_brands(self):
-        
-        self.available_brands_ids = False
-        
-        if self.intercompany and self.destination_company_id:
-            sales_invoice_params = self.env['sales.invoice.parameter'].search([('dest_company_id', '=', self.destination_company_id.id), ('source_company_id', '=', self.source_company_id.id)])
-            self.available_brands_ids = [(6, 0, sales_invoice_params.brand_ids.ids)]
-        
-        else:
-            default_brands = self.env['brand.master'].search([
-                    ('company_ids', 'in', self.env.company.id)
-                ])        
-            if default_brands:
-                    self.available_brands_ids = [(6, 0, default_brands.ids)]
+        default_brands = self.env['brand.master'].search([
+                ('company_ids', 'in', self.env.company.id)
+            ])        
+        if default_brands:
+                self.available_brands_ids = [(6, 0, default_brands.ids)]
 
 
     @api.depends('destination_company_id', 'intercompany', 'source_company_id')
@@ -312,19 +296,46 @@ class AccountMove(models.Model):
         if not self.intercompany:
             self.partner_id = False
             self.source_company_id = False
+            return {'domain': {'partner_id': []}}
         
         elif self.intercompany:
             self.source_company_id = self.env.company.id
-            if self.destination_company_id:
-                default_partner = self.destination_company_id.primary_partner
-                
-                if default_partner:
-                    self.partner_id = default_partner.id
-                else:
-                    self.partner_id = False
-            else:
-                self.partner_id = False
+            _logger.info(f"Source COmpany SET==== {self.source_company_id}")
+            params = self.env['sales.invoice.parameter'].search([
+                ('source_company_id', '=', self.source_company_id.id)
+            ])
+            allowed_partners = params.mapped('source_customer_id').ids
+            _logger.info(f"Source COmpany SET==== {allowed_partners}")
 
+            return {
+                'domain': {
+                    'partner_id': [('id', 'in', allowed_partners)]
+                }
+            }
+
+    @api.onchange("partner_id")
+    def _onchange_partner_id(self):
+        if self.intercompany:
+            sale_inv_param = self.env['sales.invoice.parameter'].search(
+                [('source_company_id', '=', self.source_company_id.id), ('source_customer_id', '=', self.partner_id.id)], 
+            limit=1)
+            
+            self.destination_company_id = sale_inv_param.dest_company_id 
+
+    @api.depends('intercompany', 'source_company_id')
+    def _compute_allowed_partner_ids(self):
+        for record in self:
+            if record.intercompany and record.source_company_id:
+                params = self.env['sales.invoice.parameter'].search([('source_company_id', '=', record.source_company_id.id)])
+                record.allowed_partner_ids = params.mapped('source_customer_id')
+            else:
+                partner_domain = [
+                    '|',
+                    ('company_id', '=', self.env.company.id),
+                    ('company_id', '=', False),
+                ]
+                partners = self.env['res.partner'].sudo().search(partner_domain)
+                record.allowed_partner_ids = partners
 
     def action_post(self):
         for move in self:
