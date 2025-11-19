@@ -196,6 +196,7 @@ class AccountMove(models.Model):
     destination_company_id = fields.Many2one(
         'res.company',
         string='Destination Company',
+        readonly=True
     )
 
     available_destination_companies = fields.Many2many(
@@ -248,28 +249,33 @@ class AccountMove(models.Model):
         
         elif self.intercompany:
             self.source_company_id = self.env.company.id
+            self.set_destination_company()
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
         if self.intercompany and self.partner_id and self.source_company_id:
-            intercompany_param = self.env['intercompany.parameter'].search(
+            self.set_destination_company()
+        elif not self.intercompany:
+            self.destination_company_id = False
+
+    def set_destination_company(self):
+        intercompany_param = self.env['intercompany.parameter'].search(
                 [('source_company_id', '=', self.source_company_id.id)],
                 limit=1
             )
 
-            if intercompany_param:
-                destination_param = intercompany_param.intercompany_destination_company_ids.filtered(
-                    lambda r: r.source_customer_id.id == self.partner_id.id
-                )
-                
-                if destination_param:
-                    self.destination_company_id = destination_param[0].destination_company_id.id
-                else:
-                    self.destination_company_id = False
+        if intercompany_param:
+            destination_param = intercompany_param.intercompany_destination_company_ids.filtered(
+                lambda r: r.source_customer_id.id == self.partner_id.id
+            )
+            
+            if destination_param:
+                self.destination_company_id = destination_param[0].destination_company_id.id
             else:
                 self.destination_company_id = False
-        elif not self.intercompany:
+        else:
             self.destination_company_id = False
+
 
     @api.depends('intercompany', 'source_company_id')
     def _compute_allowed_partner_ids(self):
