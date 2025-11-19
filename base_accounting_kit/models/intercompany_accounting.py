@@ -196,7 +196,6 @@ class AccountMove(models.Model):
     destination_company_id = fields.Many2one(
         'res.company',
         string='Destination Company',
-        readonly=True
     )
 
     available_destination_companies = fields.Many2many(

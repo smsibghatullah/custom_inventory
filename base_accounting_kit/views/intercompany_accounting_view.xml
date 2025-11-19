@@ -140,7 +140,9 @@
                         <field name="source_company_id" invisible="1"/>
                         <field name="destination_company_id"
                             domain="[('id','in', available_destination_companies)]"
-                            invisible="intercompany == False" />
+                            invisible="intercompany == False" 
+                            readonly="intercompany == True"
+                            force_save="1"/>
 
                     </group>
                 </xpath>
