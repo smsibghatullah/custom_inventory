@@ -59,24 +59,45 @@
                             <field name="source_company_id"/>
                             <field name="destination_vendor_id" invisible="1"/>
                         </group>
-                        <group string="Destination Companies">
-                            <field name="intercompany_destination_company_ids">
-                                <tree editable="bottom">
-                                    <field name="available_sku_category_ids" invisible="1" />
-                                    <field name="intercompany_source_company_id" column_invisible="1"/>
-                                    <field name="destination_company_id" 
-                                        domain="[('id', '!=', intercompany_source_company_id)]" />
-                                    <field name="destination_vendor_id"/> 
-                                    <field name="source_customer_id"/>
-                                    <field name="brand_ids" widget="many2many_tags"/>
-                                    <field name="category_ids" widget="many2many_tags"/>
-                                    <field name="tag_ids" widget="many2many_tags"/>
-                                    <field name="destination_invoice_gl_account_id"/>
-                                    <field name="destination_bill_gl_account_id"/>
-                                </tree>
-                            </field>
+                        <group col="1">
+                            <group string="Destination Sale Invoice Parameter Companies">
+                                <field name="intercompany_invoice_destination_company_ids" context="{'default_parameter_type': 'invoice'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id"/> 
+                                        <field name="source_customer_id"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="destination_invoice_gl_account_id"/>
+                                        <field name="destination_bill_gl_account_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        
+                            <group string="Destination Purchase Bill Parameter Companies">
+                                <field name="intercompany_bill_destination_company_ids" context="{'default_parameter_type': 'bill'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id"/> 
+                                        <field name="source_customer_id"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="destination_invoice_gl_account_id"/>
+                                        <field name="destination_bill_gl_account_id"/>
+                                    </tree>
+                                </field>
+                            </group>
                         </group>
-                        \
                     </sheet>
                 </form>
             </field>
@@ -89,8 +110,8 @@
             <field name="arch" type="xml">
                 <tree string="Intercompany Parameters">
                     <field name="source_company_id"/>
-                    <field name="destination_vendor_id"/>
-                    <field name="intercompany_destination_company_ids" widget="many2many_tags"/> <!-- Shows count of mappings -->
+                    <field name="intercompany_invoice_destination_company_ids" widget="many2many_tags"/>
+                    <field name="intercompany_bill_destination_company_ids" widget="many2many_tags"/>
                 </tree>
             </field>
         </record>

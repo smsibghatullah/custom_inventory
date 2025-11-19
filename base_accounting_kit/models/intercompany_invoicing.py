@@ -23,6 +23,19 @@ class IntercompanyParameter(models.Model):
         required=True,
     )
 
+    intercompany_invoice_destination_company_ids = fields.One2many(
+        'intercompany.destination.parameter', 
+        'intercompany_parameter_id',
+        domain=[('parameter_type', '=', 'invoice')]
+    )
+
+    intercompany_bill_destination_company_ids = fields.One2many(
+        'intercompany.destination.parameter', 
+        'intercompany_parameter_id',
+        domain=[('parameter_type', '=', 'bill')]
+    )
+
+    #Deprecated: should be removed
     intercompany_destination_company_ids = fields.One2many(
         'intercompany.destination.parameter', 
         'intercompany_parameter_id',
@@ -35,6 +48,11 @@ class IntercompanyDestinationParameter(models.Model):
     _description = 'Intercompany Destination Parameter'
 
     intercompany_parameter_id = fields.Many2one('intercompany.parameter', string='Intercompany Source Parameter', required=True, ondelete='cascade')
+
+    parameter_type = fields.Selection([
+        ('invoice', 'Sales Invoice'),
+        ('bill', 'Purchase Bill'),
+    ], string='Parameter Type', required=True, default='invoice')
 
     intercompany_source_company_id = fields.Many2one(
         'res.company',

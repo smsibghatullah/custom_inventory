@@ -262,16 +262,18 @@ class AccountMove(models.Model):
                 [('source_company_id', '=', self.source_company_id.id)],
                 limit=1
             )
-
-        if intercompany_param:
-            destination_param = intercompany_param.intercompany_destination_company_ids.filtered(
+        if intercompany_param and self.move_type == "out_invoice":
+            destination_param = intercompany_param.intercompany_bill_destination_company_ids.filtered(
+                lambda r: r.source_customer_id.id == self.partner_id.id
+            )
+        elif intercompany_param and self.move_type == "in_invoice":
+            destination_param = intercompany_param.intercompany_invoice_destination_company_ids.filtered(
                 lambda r: r.source_customer_id.id == self.partner_id.id
             )
             
-            if destination_param:
-                self.destination_company_id = destination_param[0].destination_company_id.id
-            else:
-                self.destination_company_id = False
+        if destination_param:
+            self.destination_company_id = destination_param[0].destination_company_id.id
+
         else:
             self.destination_company_id = False
 
@@ -283,8 +285,10 @@ class AccountMove(models.Model):
                 params = self.env['intercompany.parameter'].search([
                     ('source_company_id', '=', self.source_company_id.id)
                 ])
-                
-                record.allowed_partner_ids = params.mapped('intercompany_destination_company_ids.source_customer_id').ids
+                if params and self.move_type == "out_invoice":
+                    record.allowed_partner_ids = params.mapped('intercompany_bill_destination_company_ids.source_customer_id').ids
+                elif params and self.move_type == "in_invoice":
+                    record.allowed_partner_ids = params.mapped('intercompany_invoice_destination_company_ids.source_customer_id').ids
             else:
                 partner_domain = [
                     '|',
@@ -312,7 +316,7 @@ class AccountMove(models.Model):
                     ], limit=1)
 
                     if ic_param:
-                        dest_param = ic_param.intercompany_destination_company_ids.filtered(
+                        dest_param = ic_param.intercompany_bill_destination_company_ids.filtered(
                             lambda r: r.destination_company_id.id == move.destination_company_id.id
                         )
 
@@ -357,7 +361,7 @@ class AccountMove(models.Model):
                             dest_move_vals = {
                                 'invoice_date': self.invoice_date,
                                 # 'journal_id': purchase_journal.id,
-                                'partner_id': self.partner_id.id,
+                                'partner_id': dest_param.destination_vendor_id.id,
                                 'company_id': self.destination_company_id.id,
                                 'source_company_id': self.source_company_id.id,
                                 'destination_company_id': self.destination_company_id.id,
@@ -412,7 +416,7 @@ class AccountMove(models.Model):
                     ], limit=1)
 
                     if ic_param:
-                        dest_param = ic_param.intercompany_destination_company_ids.filtered(
+                        dest_param = ic_param.intercompany_invoice_destination_company_ids.filtered(
                             lambda r: r.destination_company_id.id == move.destination_company_id.id
                         )
                     
@@ -453,7 +457,7 @@ class AccountMove(models.Model):
 
         return {
             'move_type': 'out_invoice',
-            'partner_id': self.partner_id.id,
+            'partner_id': dest_param.destination_vendor_id.id,
             'company_id': destination_company.id,
             'invoice_date': self.invoice_date,
             'reference': self.reference,
