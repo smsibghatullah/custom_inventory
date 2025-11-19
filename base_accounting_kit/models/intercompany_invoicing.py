@@ -50,6 +50,12 @@ class IntercompanyDestinationParameter(models.Model):
         required=True,
     )
 
+    destination_vendor_id = fields.Many2one(
+        'res.partner', 
+        string='Destination Vendor', 
+        required=True,
+    )
+
     source_customer_id = fields.Many2one(
         'res.partner', 
         string='Source Customer', 
