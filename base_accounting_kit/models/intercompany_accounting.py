@@ -262,16 +262,18 @@ class AccountMove(models.Model):
                 [('source_company_id', '=', self.source_company_id.id)],
                 limit=1
             )
+
         if intercompany_param and self.move_type == "out_invoice":
-            destination_param = intercompany_param.intercompany_bill_destination_company_ids.filtered(
-                lambda r: r.source_customer_id.id == self.partner_id.id
-            )
-        elif intercompany_param and self.move_type == "in_invoice":
             destination_param = intercompany_param.intercompany_invoice_destination_company_ids.filtered(
                 lambda r: r.source_customer_id.id == self.partner_id.id
             )
+        elif intercompany_param and self.move_type == "in_invoice":
+            destination_param = intercompany_param.intercompany_bill_destination_company_ids.filtered(
+                lambda r: r.source_customer_id.id == self.partner_id.id
+            )
             
-        if destination_param:
+        if self.partner_id and destination_param:
+            _logger.info(f"==== {destination_param}")
             self.destination_company_id = destination_param[0].destination_company_id.id
 
         else:
@@ -286,9 +288,11 @@ class AccountMove(models.Model):
                     ('source_company_id', '=', self.source_company_id.id)
                 ])
                 if params and self.move_type == "out_invoice":
-                    record.allowed_partner_ids = params.mapped('intercompany_bill_destination_company_ids.source_customer_id').ids
-                elif params and self.move_type == "in_invoice":
                     record.allowed_partner_ids = params.mapped('intercompany_invoice_destination_company_ids.source_customer_id').ids
+                elif params and self.move_type == "in_invoice":
+                    record.allowed_partner_ids = params.mapped('intercompany_bill_destination_company_ids.source_customer_id').ids
+                else:
+                    record.allowed_partner_ids = False
             else:
                 partner_domain = [
                     '|',
