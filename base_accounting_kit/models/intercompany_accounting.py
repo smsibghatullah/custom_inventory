@@ -323,6 +323,9 @@ class AccountMove(models.Model):
                         dest_param = ic_param.intercompany_bill_destination_company_ids.filtered(
                             lambda r: r.destination_company_id.id == move.destination_company_id.id
                         )
+                        source_param = ic_param.intercompany_invoice_destination_company_ids.filtered(
+                            lambda r: r.source_customer_id.id == move.partner_id.id
+                        )
 
                         if dest_param:
                             gl_account_id = dest_param.destination_bill_gl_account_id.id
@@ -365,7 +368,7 @@ class AccountMove(models.Model):
                             dest_move_vals = {
                                 'invoice_date': self.invoice_date,
                                 # 'journal_id': purchase_journal.id,
-                                'partner_id': dest_param.destination_vendor_id.id,
+                                'partner_id': source_param.destination_vendor_id.id,
                                 'company_id': self.destination_company_id.id,
                                 'source_company_id': self.source_company_id.id,
                                 'destination_company_id': self.destination_company_id.id,
@@ -423,9 +426,12 @@ class AccountMove(models.Model):
                         dest_param = ic_param.intercompany_invoice_destination_company_ids.filtered(
                             lambda r: r.destination_company_id.id == move.destination_company_id.id
                         )
+                        source_param = ic_param.intercompany_bill_destination_company_ids.filtered(
+                            lambda r: r.source_customer_id.id == move.partner_id.id
+                        )
                     
                         if dest_param:
-                            invoice_vals = move._prepare_intercompany_invoice_vals(move.destination_company_id, dest_param)
+                            invoice_vals = move._prepare_intercompany_invoice_vals(move.destination_company_id, dest_param, source_param)
                             result = self.env['account.move'].sudo().create(invoice_vals)
 
                             message_body = f"""
@@ -449,7 +455,7 @@ class AccountMove(models.Model):
     def get_first_id(self, recordset):
         return recordset[0].id if recordset else False
     
-    def _prepare_intercompany_invoice_vals(self, destination_company, dest_param):
+    def _prepare_intercompany_invoice_vals(self, destination_company, dest_param, source_param):
         """Prepares values for the Sales Invoice in the Source Company context."""
         
         gl_account_id = dest_param.destination_invoice_gl_account_id.id
@@ -461,7 +467,7 @@ class AccountMove(models.Model):
 
         return {
             'move_type': 'out_invoice',
-            'partner_id': dest_param.destination_vendor_id.id,
+            'partner_id': source_param.destination_vendor_id.id,
             'company_id': destination_company.id,
             'invoice_date': self.invoice_date,
             'reference': self.reference,
