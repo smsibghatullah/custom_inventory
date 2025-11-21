@@ -258,10 +258,14 @@ class AccountMove(models.Model):
             self.destination_company_id = False
 
     def set_destination_company(self):
+        destination_param = False
         intercompany_param = self.env['intercompany.parameter'].search(
                 [('source_company_id', '=', self.source_company_id.id)],
                 limit=1
             )
+        if not intercompany_param:
+            self.destination_company_id = False
+            return
 
         if intercompany_param and self.move_type == "out_invoice":
             destination_param = intercompany_param.intercompany_invoice_destination_company_ids.filtered(
