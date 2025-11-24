@@ -87,8 +87,8 @@
                                         <field name="intercompany_source_company_id" column_invisible="1"/>
                                         <field name="destination_company_id" 
                                             domain="[('id', '!=', intercompany_source_company_id)]" />
-                                        <field name="destination_vendor_id"/> 
-                                        <field name="source_customer_id"/>
+                                        <field name="destination_vendor_id" string="Destination Customer"/> 
+                                        <field name="source_customer_id" string="Source Vendor"/>
                                         <field name="brand_ids" widget="many2many_tags"/>
                                         <field name="category_ids" widget="many2many_tags"/>
                                         <field name="tag_ids" widget="many2many_tags"/>
