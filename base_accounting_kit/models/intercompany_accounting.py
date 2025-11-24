@@ -312,7 +312,7 @@ class AccountMove(models.Model):
                 return super(AccountMove, move).action_post()
             else:
                 if not move.source_company_id or not move.destination_company_id:
-                     raise ValidationError("Source and Destination companies must be set.")
+                    raise ValidationError("Source and Destination companies must be set.")
                 if move.move_type in ['out_invoice', 'out_refund']:
                     """
                     Creating auto purchase bill when Invoice is created in source company.
@@ -365,9 +365,9 @@ class AccountMove(models.Model):
                                     'display_type': line.display_type,
                                 }))
 
-                            first_brand_id = move.get_first_id(dest_param.brand_ids)
-                            first_category_id = move.get_first_id(dest_param.category_ids)
-                            first_tag_id = move.get_first_id(dest_param.tag_ids)
+                            first_brand_id = move.get_first_id(source_param.brand_ids)
+                            first_category_id = move.get_first_id(source_param.category_ids)
+                            first_tag_id = move.get_first_id(source_param.tag_ids)
 
                             dest_move_vals = {
                                 'invoice_date': self.invoice_date,
@@ -465,9 +465,9 @@ class AccountMove(models.Model):
         gl_account_id = dest_param.destination_invoice_gl_account_id.id
         _logger.info(f"sale.invoice.oaram dest account invoice {gl_account_id}")
         
-        first_brand_id = self.get_first_id(dest_param.brand_ids)
-        first_category_id = self.get_first_id(dest_param.category_ids)
-        first_tag_id = self.get_first_id(dest_param.tag_ids)
+        first_brand_id = self.get_first_id(source_param.brand_ids)
+        first_category_id = self.get_first_id(source_param.category_ids)
+        first_tag_id = self.get_first_id(source_param.tag_ids)
 
         return {
             'move_type': 'out_invoice',
