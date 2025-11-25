@@ -20,7 +20,6 @@ class IntercompanyParameter(models.Model):
     destination_vendor_id = fields.Many2one(
         'res.partner', 
         string='Destination Vendor', 
-        required=True,
     )
 
     intercompany_invoice_destination_company_ids = fields.One2many(
