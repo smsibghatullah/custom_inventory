@@ -131,6 +131,7 @@
             <field name="arch" type="xml">
             <field name="partner_id" position="after">
                 <field name="allowed_partner_ids" invisible="1"/>
+                <field name="auto_created_doc" invisible="1"/>
             </field>
                 <xpath expr="//field[@name='invoice_date']" position="after">
                     <field name="available_bom_ids" invisible="1" />
@@ -155,7 +156,7 @@
                         <field name="source_company_id" invisible="1"/>
                         <field name="destination_company_id"
                             domain="[('id','in', available_destination_companies)]"
-                            invisible="intercompany == False"/>
+                            invisible="intercompany == False or auto_created_doc == True"/>
 
                     </group>
                 </xpath>

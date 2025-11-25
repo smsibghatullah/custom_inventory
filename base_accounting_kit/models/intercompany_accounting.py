@@ -216,7 +216,10 @@ class AccountMove(models.Model):
         store=False,
     )
     allowed_partner_ids = fields.Many2many('res.partner', compute='_compute_allowed_partner_ids')
-
+    auto_created_doc = fields.Boolean(
+        store=True,
+        default=False,
+    )
 
     @api.depends('destination_company_id', 'brand_id')
     def _compute_available_boms_by_company(self):
@@ -378,6 +381,7 @@ class AccountMove(models.Model):
                                 'payment_reference': self.payment_reference,
                                 'intercompany': True,
                                 'move_type': "in_invoice",
+                                'auto_created_doc': True,
                                 'brand_id': first_brand_id,
                                 'bom_id': self.bom_id.id if self.bom_id else False,                                
                                 'category_ids': [(6, 0, [first_category_id])] if first_category_id else False,
@@ -394,6 +398,7 @@ class AccountMove(models.Model):
                             result = self.env['account.move'].sudo().create(dest_move_vals)
                             result.invoice_date = self.invoice_date
                             result.reference = self.reference
+                            result.action_post()
                             # result.sudo().action_post()
 
                             message_body = f"""
@@ -431,6 +436,7 @@ class AccountMove(models.Model):
                         if source_param:
                             invoice_vals = move._prepare_intercompany_invoice_vals(move.destination_company_id, source_param)
                             result = self.env['account.move'].sudo().create(invoice_vals)
+                            result.action_post()
 
                             message_body = f"""
                                 <p>Invoice Created.</p>
@@ -475,6 +481,7 @@ class AccountMove(models.Model):
             'destination_company_id': self.destination_company_id.id,
             'customer_description': self.customer_description,
             'brand_id': first_brand_id,
+            'auto_created_doc': True,
             'bom_id': self.bom_id.id if self.bom_id else False,                                
             'category_ids': [(6, 0, [first_category_id])] if first_category_id else False,
             'tag_ids': [(6, 0, [first_tag_id])] if first_tag_id else False,
