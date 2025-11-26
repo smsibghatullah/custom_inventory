@@ -316,7 +316,13 @@ class CostAllocationWizardLine(models.TransientModel):
                     )                    
                     debit_accounts = filtered_records.mapped('destination_debit_account_id')
                     
-                    line.available_debit_account_ids = debit_accounts
+
+                    destination_company_accounts = self.env['account.account'].with_company(line.destination_company_id).search([
+                        ('company_id', '=', line.destination_company_id.id),
+                        ('deprecated', '=', False),
+                    ])
+                    line.available_debit_account_ids = debit_accounts + destination_company_accounts
+
                 else:
                     line.available_debit_account_ids = False
             else:
