@@ -311,6 +311,8 @@ class AccountMove(models.Model):
 
     def action_post(self):
         for move in self:
+            if move.auto_created_doc == True:
+                continue
             if not move.intercompany:
                 return super(AccountMove, move).action_post()
             else:
