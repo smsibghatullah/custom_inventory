@@ -22,129 +22,97 @@ class AccessToken(http.Controller):
 
         self._token = request.env["api.access_token"]
         
-    @http.route('/api/send_survey_via_email/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
-    def send_survey_via_email(self, record_id, **kwargs):
-        today = date.today()
-        payload = request.httprequest.data.decode()
-        payload = json.loads(payload or "{}")
-        print(payload, "=========================")
+    @http.route('/api/send_survey_via_email', type='json', auth='user', methods=['POST'], csrf=False)
+    def send_survey_via_email(self, **kwargs):
+        # Decode & parse JSON
+        payload_str = request.httprequest.data.decode()
+        print(payload_str, "=========================")
 
-        project_id = payload.get("project_id")
-        task_id = payload.get("task_id")
+        try:
+            payload = json.loads(payload_str or "{}")
+        except Exception as e:
+            return {"success": False, "error": f"Invalid JSON: {str(e)}"}
+
+        user_input_ids = payload.get("user_input_ids", [])
         user_id = payload.get("user_id")
-
         recipient_ids = payload.get('recipients', [])
         cc_emails = payload.get('cc', []) or payload.get('ccEmail', [])
 
-        print(project_id, recipient_ids, cc_emails, "===============================")
+        if not user_input_ids:
+            return {"success": False, "error": "No survey inputs provided"}
 
-        answer = False
+        attachments = []
 
-        if project_id:
-            answer = request.env['survey.user_input'].sudo().search([
-                ("deadline", "=", today),
-                ("state", "in", ["in_progress", "done"]),
-                ("survey_id", "=", record_id),
-                ("project_id", "=", project_id),
-            ], limit=1, order="id desc")
-        elif task_id:
-            answer = request.env['survey.user_input'].sudo().search([
-                ("deadline", "=", today),
-                ("state", "in", ["in_progress", "done"]),
-                ("survey_id", "=", record_id),
-                ("task_id", "=", task_id),
-            ], limit=1, order="id desc")
+        for u_input_id in user_input_ids:
+            answer = request.env['survey.user_input'].sudo().browse(u_input_id)
+            if not answer.exists():
+                continue
 
-        print(answer, "===============================")
+            survey = answer.survey_id
 
-        if not answer.exists():
-            return {"success": False, "error": "Survey answer not found"}
+            # Determine company
+            company = None
+            if user_id:
+                user = request.env['res.users'].sudo().browse(int(user_id))
+                if user.exists():
+                    company = user.company_id
+            if not company:
+                company = answer.company_id or request.env.user.company_id
 
-        survey = answer.survey_id
+            company_logo = company.logo or False
 
-        # Get company from user_id or fallback
-        company = None
-        if user_id:
-            user = request.env['res.users'].sudo().browse(int(user_id))
-            if user.exists():
-                company = user.company_id
-        if not company:
-            company = answer.company_id or request.env.user.company_id
+            # Render HTML
+            html = request.env['ir.qweb']._render('survey.survey_page_print', {
+                'is_html_empty': False,
+                'review': False,
+                'survey': survey,
+                'answer': answer,
+                'questions_to_display': answer._get_print_questions(),
+                'scoring_display_correction': survey.scoring_type in [
+                    'scoring_with_answers', 'scoring_with_answers_after_page'
+                ] and answer,
+                'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
+                'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
+                'graph_data': json.dumps(answer._prepare_statistics()[answer]) if answer and survey.scoring_type in [
+                    'scoring_with_answers', 'scoring_with_answers_after_page'
+                ] else False,
+                'company_logo': company_logo,
+                'company_name': company.name,
+                'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
+                'user': request.env.user
+            })
 
-        company_logo = company.logo or False
-        print(answer, "===================================answer")
+            pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
+            attachment = request.env['ir.attachment'].sudo().create({
+                'name': f"{survey.title or 'Survey'}_{answer.id}.pdf",
+                'type': 'binary',
+                'datas': base64.b64encode(pdf_content),
+                'res_model': 'survey.user_input',
+                'res_id': answer.id,
+                'mimetype': 'application/pdf',
+            })
+            attachments.append(attachment.id)
 
-        # Render survey HTML
-        html = request.env['ir.qweb']._render('survey.survey_page_print', {
-            'is_html_empty': False,
-            'review': False,
-            'survey': survey,
-            'answer': answer,
-            'questions_to_display': answer._get_print_questions(),
-            'scoring_display_correction': survey.scoring_type in [
-                'scoring_with_answers', 'scoring_with_answers_after_page'
-            ] and answer,
-            'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
-            'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
-            'graph_data': json.dumps(
-                answer._prepare_statistics()[answer]
-            ) if answer and survey.scoring_type in [
-                'scoring_with_answers', 'scoring_with_answers_after_page'
-            ] else False,
-            'company_logo': company_logo,
-            'company_name': company.name,
-            'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
-            'user': request.env.user
-        })
-
-        # Generate PDF
-        pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
-        attachment = request.env['ir.attachment'].sudo().create({
-            'name': f"{survey.title or 'Survey'}.pdf",
-            'type': 'binary',
-            'datas': base64.b64encode(pdf_content),
-            'res_model': 'survey.user_input',
-            'res_id': answer.id,
-            'mimetype': 'application/pdf',
-        })
-
-        mail_obj = request.env['mail.mail'].sudo()
-
-        # Convert partner IDs to emails
-        # partner_emails = []
-        # for rid in recipient_ids:
-        #     try:
-        #         partner = request.env['res.partner'].sudo().browse(int(rid))
-        #         if partner and partner.email:
-        #             partner_emails.append(partner.email)
-        #         else:
-        #             print(f"⚠️ No email found for partner ID {rid}")
-        #     except Exception as e:
-        #         print(f"Error fetching partner {rid}: {e}")
-
-        # if not partner_emails:
-        #     return {"success": False, "error": "No valid recipient emails found"}
+        if not attachments:
+            return {"success": False, "error": "No valid survey PDFs generated"}
 
         mail_values = {
-            'subject': f"Survey Results: {survey.title}",
+            'subject': f"Survey Results",
             'body_html': f"""
                 <p>Dear User,</p>
-                <p>Please find attached your survey result report.</p>
+                <p>Please find attached your survey result reports.</p>
                 <p>Best regards,<br/>{company.name}</p>
             """,
-            'email_to': recipient_ids,
+            'email_to': ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids,
             'email_cc': ','.join(cc_emails) if cc_emails else False,
             'email_from': company.brand_email or request.env.user.email_formatted,
-            'attachment_ids': [(6, 0, [attachment.id])],
+            'attachment_ids': [(6, 0, attachments)],
         }
 
-        mail = mail_obj.create(mail_values)
-        print(mail, "=================================================")
+        mail = request.env['mail.mail'].sudo().create(mail_values)
         mail.send()
 
-        return {"success": True, "message": "Survey PDF sent successfully"}
-
-        
+        return {"success": True, "message": "Survey PDFs sent successfully"}
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
