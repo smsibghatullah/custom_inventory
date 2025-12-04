@@ -1,0 +1,9 @@
+<odoo>
+    <menuitem
+        id="menu_intercompany_trading_parameter" 
+        name="Intercompany Trading Parameter" 
+        parent="sale.menu_sales_config" 
+        action="custom_intercompany_trading.action_intercompany_trading_parameter" 
+        sequence="11"
+    />
+</odoo>

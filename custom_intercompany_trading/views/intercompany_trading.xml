@@ -1,0 +1,75 @@
+<odoo>
+    <record id="action_intercompany_trading_parameter" model="ir.actions.act_window">
+            <field name="name">Intercompany Trading Parameters</field>
+            <field name="res_model">intercompany.trading.parameter</field>
+            <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Parent Model: IntercompanyParameter Form View -->
+        <record id="view_intercompany_trading_parameter_form" model="ir.ui.view">
+            <field name="name">intercompany.trading.parameter.form</field>
+            <field name="model">intercompany.trading.parameter</field>
+            <field name="arch" type="xml">
+                <form string="Intercompany Trading Parameters">
+                    <sheet>
+                        <group string="Source Company">
+                            <field name="source_company_id"/>
+                            <field name="destination_vendor_id" invisible="1"/>
+                        </group>
+                        <group col="1">
+                            <group string="Destination Sale Invoice Parameter Companies">
+                                <field name="intercompany_sale_destination_company_ids" context="{'default_parameter_type': 'sale'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id"/> 
+                                        <field name="source_customer_id"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <!-- <field name="destination_bill_account_id"/>
+                                        <field name="destination_invoice_account_id"/> -->
+                                    </tree>
+                                </field>
+                            </group>
+                        
+                            <group string="Destination Purchase Order Parameter Companies">
+                                <field name="intercompany_purchase_destination_company_ids" context="{'default_parameter_type': 'purchase'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id" string="Destination Customer"/> 
+                                        <field name="source_customer_id" string="Source Vendor"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <!-- <field name="destination_bill_account_id"/>
+                                        <field name="destination_invoice_account_id"/> -->
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Parent Model: IntercompanyParameter Tree/List View -->
+        <record id="view_intercompany_parameter_tree" model="ir.ui.view">
+            <field name="name">intercompany.trading.parameter.tree</field>
+            <field name="model">intercompany.trading.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Intercompany Trading Parameters">
+                    <field name="source_company_id"/>
+                    <field name="intercompany_sale_destination_company_ids" widget="many2many_tags"/>
+                    <field name="intercompany_purchase_destination_company_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+</odoo>
