@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- 1. Temporarily set noupdate to False for the record -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'purchase'), ('name', 'in', ['purchase_order_comp_rule'])]"/>
+            </function>
+            <value eval="{'noupdate': False}"/>
+        </function>
+
+        <!-- 2. Deactivate the rule -->
+        <record id="purchase.purchase_order_comp_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        
+        <!-- 3. (Optional) Set noupdate back to True -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'purchase'), ('name', 'in', ['purchase_order_comp_rule'])]"/>
+            </function>
+            <value eval="{'noupdate': True}"/>
+        </function>
+    </data>
+    
+    <data>
+        <!-- 1. Temporarily set noupdate to False for the record -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'account'), ('name', 'in', ['account_move_line_comp_rule', 'account_move_comp_rule'])]"/>
+            </function>
+            <value eval="{'noupdate': False}"/>
+        </function>
+
+        <!-- 2. Deactivate the rule -->
+        <record id="account.account_move_comp_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        
+        <record id="account.account_move_line_comp_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- 3. (Optional) Set noupdate back to True -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'account'), ('name', 'in', ['account_move_line_comp_rule', 'account_move_comp_rule'])]"/>
+            </function>
+            <value eval="{'noupdate': True}"/>
+        </function>
+    </data>
+</odoo>

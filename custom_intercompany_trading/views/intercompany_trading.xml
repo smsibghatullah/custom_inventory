@@ -72,4 +72,27 @@
                 </tree>
             </field>
         </record>
+
+
+        <record id="view_sale_order_form_intercompany" model="ir.ui.view">
+            <field name="name">sale.order.form.intercompany</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="custom_inventory.view_order_form_inherit_brand"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="allowed_partner_ids" invisible="1"/>
+                </field>
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='brand_id']" position="before">
+                    <field name="intercompany"/>
+                    <field name="source_company_id" invisible="1"/>
+                    <field name="destination_company_id"
+                        invisible="intercompany == False" 
+                        readonly="intercompany == True"
+                        force_save="1"/>
+                </xpath>
+            </field>
+        </record>
 </odoo>

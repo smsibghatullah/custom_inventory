@@ -18,10 +18,11 @@ Long description of module's purpose
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['sale', 'custom_inventory'],
+    'depends': ['sale', 'base_accounting_kit', 'custom_inventory'],
 
     # always loaded
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',

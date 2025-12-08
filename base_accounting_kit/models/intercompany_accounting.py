@@ -5,6 +5,7 @@ import logging
 _logger = logging.getLogger(__name__)
 from markupsafe import Markup
 
+#TODO: Deprecated, SHould be removed
 class SalesInvoiceParameter(models.Model):
     _name = 'sales.invoice.parameter'
     _description = 'Sales Invoice Parameter'
@@ -86,7 +87,7 @@ class SalesInvoiceParameter(models.Model):
             
             record.available_sku_category_ids = available_categories
 
-
+#TODO: Deprecated, SHould be removed
 class PurchaseBillParameter(models.Model):
     _name = 'purchase.bill.parameter'
     _description = 'Purchase Bill Parameter'
@@ -456,7 +457,6 @@ class AccountMove(models.Model):
                             )
                     else:
                          _logger.info("Skipping sales invoice creation: Parameters not found for reverse flow.")
-        return super(AccountMove, move).action_post()
 
     def get_first_id(self, recordset):
         return recordset[0].id if recordset else False
