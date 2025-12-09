@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from markupsafe import Markup
 
 
 import logging
@@ -146,6 +147,15 @@ class TradingSaleOrder(models.Model):
         default=False,
     )
 
+    def add_histroy_comment(self, subject, message_body):
+        self.message_post(
+            body=Markup(message_body),
+            subject=subject,
+            message_type='comment',
+            subtype_xmlid='mail.mt_note'
+        )
+
+
     @api.depends('intercompany')
     def _compute_allowed_partner_ids(self):
         for record in self:
@@ -232,7 +242,7 @@ class TradingSaleOrder(models.Model):
             ], limit=1).id
         outbound = self.env['account.payment.method.line'].search([
                 ('code', '=', 'manual'), 
-                ('payment_type', '=', 'outbound')
+                ('payment_type', '=', 'outbound'),
                 ('journal_id', '=', journal_id)
             ])
         payment_data = {
@@ -269,7 +279,18 @@ class TradingSaleOrder(models.Model):
                     invoice.action_post()
                     self._register_payment_for_invoice(invoice=invoice)
                     
-                self._create_purchase_order_from_sale_order(order)
+                purchase_order = self._create_purchase_order_from_sale_order(order)
+
+                message_body = f"""
+                    <p>Intercompany Purchase Order Created</p>
+                    <ul>
+                        <li><strong>Source company:</strong> <a href="#" data-oe-id="{self.source_company_id.id}" data-oe-model="account.move">{self.source_company_id.name}</a></li>
+                        <li><strong>Destination Company:</strong> {order.destination_company_id.name}</li>
+                        <li><strong>Connected Intercompany Purchase Order:</strong> {purchase_order.name}</li>
+                    </ul>
+                """
+
+                self.add_histroy_comment(subject="Sale Order Created", message_body=message_body)
                 
         return res
     
@@ -328,10 +349,13 @@ class TradingSaleOrder(models.Model):
         new_po.action_create_invoice()
 
         for bill in new_po.invoice_ids:
-            bill.write({'invoice_date': fields.Date.today()})
+            bill.write({
+                'invoice_date': fields.Date.today(), 
+            })
             bill.action_post()
             self._register_payment_for_bill(bill, sale_order.destination_company_id)
 
+        return new_po
 
 class SaleOrderLineInheritCustom(models.Model):
     _inherit = 'sale.order.line'
@@ -377,6 +401,14 @@ class TradingPurchaseOrder(models.Model):
         store=True,
         default=False,
     )
+
+    def add_histroy_comment(self, subject, message_body):
+        self.message_post(
+            body=Markup(message_body),
+            subject=subject,
+            message_type='comment',
+            subtype_xmlid='mail.mt_note'
+        )
 
     @api.depends('intercompany_trading')
     def _compute_allowed_partner_ids(self):
@@ -467,8 +499,8 @@ class TradingPurchaseOrder(models.Model):
             ], limit=1).id
         outbound = self.env['account.payment.method.line'].search([
                 ('code', '=', 'manual'), 
-                ('payment_type', '=', 'outbound')
-                ('jounal_id', '=', journal_id)
+                ('payment_type', '=', 'outbound'),
+                ('journal_id', '=', journal_id)
             ])
         payment_data = {
             'amount': bill.amount_residual,
@@ -506,7 +538,18 @@ class TradingPurchaseOrder(models.Model):
                     if vendor_bill.state == 'posted' and vendor_bill.amount_residual > 0:
                         self._register_payment_for_bill(vendor_bill)
                     
-                self._create_sale_order_from_purchase_order(order)
+                sale_order = self._create_sale_order_from_purchase_order(order)
+
+                message_body = f"""
+                    <p>Intercompany Purchase Order Created</p>
+                    <ul>
+                        <li><strong>Source company:</strong> <a href="#" data-oe-id="{self.source_company_id.id}" data-oe-model="account.move">{self.source_company_id.name}</a></li>
+                        <li><strong>Destination Company:</strong> {order.destination_company_id.name}</li>
+                        <li><strong>Connected Intercomapny Trading Sale Order:</strong> {sale_order.name}</li>
+                    </ul>
+                """
+
+                self.add_histroy_comment(subject="Purchase Order Created", message_body=message_body)
                 
         return res
     
@@ -571,6 +614,8 @@ class TradingPurchaseOrder(models.Model):
         for invoice in invoices:
             invoice.action_post()
             self._register_payment_for_invoice(invoice, purchase_order.destination_company_id)
+
+        return new_sale_order
 
 
 class PurchaseOrderLineInheritCustom(models.Model):

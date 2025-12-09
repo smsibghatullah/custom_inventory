@@ -86,7 +86,7 @@
                     <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
                 </xpath>
                 <xpath expr="//field[@name='brand_id']" position="before">
-                    <field name="intercompany"/>
+                    <field name="intercompany" readonly="state == 'sale'"/>
                     <field name="source_company_id" invisible="1"/>
                     <field name="destination_company_id"
                         invisible="intercompany == False" 
@@ -108,7 +108,7 @@
                     <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
                 </xpath>
                 <xpath expr="//field[@name='brand_id']" position="before">
-                    <field name="intercompany_trading"/>
+                    <field name="intercompany_trading" readonly="state == 'purchase'"/>
                     <field name="source_company_id" invisible="1"/>
                     <field name="destination_company_id"
                         invisible="intercompany_trading == False" 
