@@ -46,6 +46,8 @@
                                             domain="[('id', '!=', intercompany_source_company_id)]" />
                                         <field name="destination_vendor_id" string="Destination Customer"/> 
                                         <field name="source_customer_id" string="Source Vendor"/>
+                                        <field name="default_reference" required="1"/>
+                                        <field name="default_bci_project_id" required="1"/>
                                         <field name="brand_ids" widget="many2many_tags"/>
                                         <field name="category_ids" widget="many2many_tags"/>
                                         <field name="tag_ids" widget="many2many_tags"/>

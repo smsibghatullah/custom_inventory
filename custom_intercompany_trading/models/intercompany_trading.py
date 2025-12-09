@@ -107,6 +107,9 @@ class IntercompanyTradingDestinationParameter(models.Model):
         domain="[('company_id', '=', destination_company_id), ('deprecated', '=', False)]"
     )
 
+    default_reference = fields.Char(String="Default Reference")
+    default_bci_project_id = fields.Char(String="Default BCI Project ID")
+
     @api.depends("brand_ids")
     def _compute_available_categories(self):
         for record in self:
@@ -589,11 +592,13 @@ class TradingPurchaseOrder(models.Model):
                 'name': line.name,
             }))
 
+        _logger.info(f"3e3e3 {source_param.default_reference}")
+        _logger.info(f"3e3e32222 {source_param.default_bci_project_id}")
         sale_order_vals = {
             'company_id': purchase_order.destination_company_id.id,
             'partner_id': vendor.id,
-            'reference': purchase_order.partner_ref,
-            'bci_project': purchase_order.partner_ref,
+            'reference': source_param.default_reference,
+            'bci_project': source_param.default_bci_project_id,
             'origin': purchase_order.name, 
             'order_line': purchase_order_lines,
             'payment_term_id': purchase_order.payment_term_id.id,
