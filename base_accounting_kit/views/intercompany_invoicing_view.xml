@@ -151,7 +151,7 @@
                         <field name="available_destination_companies" invisible="1"/>
                         <field name="available_brands_ids" invisible="1"/>
 
-                        <field name="intercompany"/>
+                        <field name="intercompany" readonly="state == 'posted'"/>
 
                         <field name="source_company_id" invisible="1"/>
                         <field name="destination_company_id"

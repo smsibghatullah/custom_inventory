@@ -581,26 +581,24 @@ class TradingPurchaseOrder(models.Model):
         first_category_id = purchase_order.get_first_id(source_param.category_ids)
         first_tag_id = purchase_order.get_first_id(source_param.tag_ids)
 
-        purchase_order_lines = []
+        sale_order_lines = []
         for line in purchase_order.order_line:
-            purchase_order_lines.append((0, 0, {
+            sale_order_lines.append((0, 0, {
                 'product_id': line.product_id.id,
                 'product_uom': line.product_uom.id,
-                'product_qty': line.product_uom_qty,
+                'product_uom_qty': line.product_uom_qty,
                 'qty_invoiced': line.product_uom_qty,
                 'price_unit': line.price_unit, 
                 'name': line.name,
             }))
 
-        _logger.info(f"3e3e3 {source_param.default_reference}")
-        _logger.info(f"3e3e32222 {source_param.default_bci_project_id}")
         sale_order_vals = {
             'company_id': purchase_order.destination_company_id.id,
             'partner_id': vendor.id,
             'reference': source_param.default_reference,
             'bci_project': source_param.default_bci_project_id,
             'origin': purchase_order.name, 
-            'order_line': purchase_order_lines,
+            'order_line': sale_order_lines,
             'payment_term_id': purchase_order.payment_term_id.id,
             'brand_id': first_brand_id,
             'category_ids': [(6, 0, [first_category_id])] if first_category_id else False,
