@@ -356,7 +356,7 @@ class TradingSaleOrder(models.Model):
                 'invoice_date': fields.Date.today(), 
             })
             bill.action_post()
-            self._register_payment_for_bill(bill, sale_order.destination_company_id)
+            # self._register_payment_for_bill(bill, sale_order.destination_company_id)
 
         return new_po
 
@@ -618,7 +618,7 @@ class TradingPurchaseOrder(models.Model):
                 
         for invoice in invoices:
             invoice.action_post()
-            self._register_payment_for_invoice(invoice, purchase_order.destination_company_id)
+            # self._register_payment_for_invoice(invoice, purchase_order.destination_company_id)
 
         return new_sale_order
 
