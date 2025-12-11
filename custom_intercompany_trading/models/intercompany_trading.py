@@ -255,8 +255,7 @@ class TradingSaleOrder(models.Model):
             'payment_date': effective_date_val, 
             'communication': bill.name, 
         }
-
-        payment_wizard = self.env['account.payment.register'].with_context(
+        payment_wizard = self.env['account.payment.register'].with_company(destination_company_id.id).with_context(
             active_model='account.move',
             active_ids=bill.ids,
         ).create(payment_data)
@@ -350,13 +349,12 @@ class TradingSaleOrder(models.Model):
             skip_journal=True,
         ).button_validate()
         new_po.action_create_invoice()
-
         for bill in new_po.invoice_ids:
             bill.write({
                 'invoice_date': fields.Date.today(), 
             })
             bill.action_post()
-            # self._register_payment_for_bill(bill, sale_order.destination_company_id)
+            self._register_payment_for_bill(bill, sale_order.destination_company_id)
 
         return new_po
 
@@ -487,7 +485,7 @@ class TradingPurchaseOrder(models.Model):
             'communication': invoice.name, 
         }
         
-        payment_wizard = self.env['account.payment.register'].with_context(
+        payment_wizard = self.env['account.payment.register'].with_company(destination_company.id).with_context(
             active_model='account.move',
             active_ids=invoice.ids,
         ).create(payment_data)
@@ -613,10 +611,9 @@ class TradingPurchaseOrder(models.Model):
         ).button_validate()
 
         invoices = new_sale_order._create_invoices(final=True)
-                
         for invoice in invoices:
             invoice.action_post()
-            # self._register_payment_for_invoice(invoice, purchase_order.destination_company_id)
+            self._register_payment_for_invoice(invoice, purchase_order.destination_company_id)
 
         return new_sale_order
 
