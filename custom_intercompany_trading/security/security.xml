@@ -11,7 +11,11 @@
 
         <!-- 2. Deactivate the rule -->
         <record id="purchase.purchase_order_comp_rule" model="ir.rule">
-            <field name="active" eval="False"/>
+            <field name="active" eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="True"/>
         </record>
         
         <!-- 3. (Optional) Set noupdate back to True -->
