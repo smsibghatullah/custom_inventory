@@ -305,14 +305,14 @@ class TradingSaleOrder(models.Model):
         ], limit=1)
 
         if not ic_param:
-            raise UserError("Intercompany parameters nahi milay source company k liye.")
+            raise UserError("Could not find Intercompany parameters for the source company.")
 
         source_param = ic_param.intercompany_sale_destination_company_ids.filtered(
             lambda r: r.source_customer_id.id == sale_order.partner_id.id
         )
 
         if not source_param:
-             raise UserError("Specific destination parameters nahi milay customer k liye.")
+             raise UserError("Could not find destiantion company parameters for the source company")
 
 
         vendor = source_param.destination_vendor_id
@@ -562,8 +562,8 @@ class TradingPurchaseOrder(models.Model):
             ('source_company_id', '=', purchase_order.source_company_id.id),
         ], limit=1)
 
-        if not ic_param:
-            raise UserError("Intercompany parameters nahi milay source company k liye.")
+        if not ic_param:            
+            raise UserError("Could not find the intercompany parameters for the source company")
 
         source_param = ic_param.intercompany_purchase_destination_company_ids.filtered(
             lambda r: r.source_customer_id.id == purchase_order.partner_id.id
