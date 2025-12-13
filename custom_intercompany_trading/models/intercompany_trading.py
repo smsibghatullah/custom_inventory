@@ -95,12 +95,14 @@ class IntercompanyTradingDestinationParameter(models.Model):
         string='Tags',
     )
 
+    #Deprecared: Needs to be removed
     destination_invoice_account_id = fields.Many2one(
         'account.account', 
         string='Destination Invoice Account', 
         domain="[('company_id', '=', destination_company_id), ('deprecated', '=', False)]"
     )
 
+    #Deprecared: Needs to be removed
     destination_bill_account_id = fields.Many2one(
         'account.account', 
         string='Destination Bill Account', 
@@ -109,6 +111,11 @@ class IntercompanyTradingDestinationParameter(models.Model):
 
     default_reference = fields.Char(String="Default Reference")
     default_bci_project_id = fields.Char(String="Default BCI Project ID")
+    tax_id = fields.Many2one(
+        'account.tax',
+        string='Default Tax',
+        domain="['&', ('company_id', '=', destination_company_id), ('type_tax_use', 'not in', [parameter_type, False])]" 
+    )
 
     @api.depends("brand_ids")
     def _compute_available_categories(self):
@@ -330,6 +337,7 @@ class TradingSaleOrder(models.Model):
                 'qty_invoiced': line.product_uom_qty,
                 'price_unit': line.price_unit, 
                 'name': line.name,
+                'taxes_id': [(6, 0, [source_param.tax_id.id])] if source_param.tax_id else False,
             }))
 
         purchase_order_vals = {
@@ -476,7 +484,6 @@ class TradingPurchaseOrder(models.Model):
                 ('payment_type', '=', 'inbound'),
                 ('journal_id', '=', journal_id)
             ])
-        _logger.info(f"eeeeeee {payment_method}")
         payment_data = {
             'amount': invoice.amount_residual,
             'journal_id': journal_id,
@@ -588,6 +595,7 @@ class TradingPurchaseOrder(models.Model):
                 'qty_invoiced': line.product_uom_qty,
                 'price_unit': line.price_unit, 
                 'name': line.name,
+                'tax_id': [(6, 0, [source_param.tax_id.id])] if source_param.tax_id else False,
             }))
 
         sale_order_vals = {

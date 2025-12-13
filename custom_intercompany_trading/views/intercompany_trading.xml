@@ -30,6 +30,7 @@
                                         <field name="brand_ids" widget="many2many_tags"/>
                                         <field name="category_ids" widget="many2many_tags"/>
                                         <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="tax_id"/>
                                         <!-- <field name="destination_bill_account_id"/>
                                         <field name="destination_invoice_account_id"/> -->
                                     </tree>
@@ -51,6 +52,7 @@
                                         <field name="brand_ids" widget="many2many_tags"/>
                                         <field name="category_ids" widget="many2many_tags"/>
                                         <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="tax_id"/>
                                         <!-- <field name="destination_bill_account_id"/>
                                         <field name="destination_invoice_account_id"/> -->
                                     </tree>
@@ -117,6 +119,23 @@
                         readonly="intercompany_trading == True"
                         force_save="1"/>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="purchase_rfq" model="ir.actions.act_window">
+            <field name="name">Requests for Quotation (Filtered)</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+            <field name="domain">[('company_id', 'in', context.get('allowed_company_ids'))]</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="context">{'quotation_only': True}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                No request for quotation found. Let's create one!
+              </p><p>
+                Requests for quotation are documents that will be sent to your suppliers to request prices for different products you consider buying.
+                Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders.
+              </p>
             </field>
         </record>
 </odoo>
