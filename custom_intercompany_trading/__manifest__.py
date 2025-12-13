@@ -18,7 +18,7 @@ Long description of module's purpose
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['sale', 'base_accounting_kit', 'custom_inventory'],
+    'depends': ['sale', 'base_accounting_kit', 'custom_inventory', 'purchase'],
 
     # always loaded
     'data': [

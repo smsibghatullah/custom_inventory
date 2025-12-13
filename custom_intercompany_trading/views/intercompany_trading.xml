@@ -122,8 +122,8 @@
             </field>
         </record>
 
-        <record id="purchase_rfq" model="ir.actions.act_window">
-            <field name="name">Requests for Quotation (Filtered)</field>
+        <record id="purchase_rfq_custom" model="ir.actions.act_window">
+            <field name="name">Requests for Quotation</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
             <field name="domain">[('company_id', 'in', context.get('allowed_company_ids'))]</field>
@@ -137,5 +137,9 @@
                 Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders.
               </p>
             </field>
+        </record>
+
+        <record id="purchase.menu_purchase_rfq" model="ir.ui.menu">
+            <field name="action" ref="purchase_rfq_custom" /> 
         </record>
 </odoo>
