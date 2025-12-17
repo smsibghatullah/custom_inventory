@@ -260,7 +260,8 @@ class TradingSaleOrder(models.Model):
             'journal_id': journal_id,
             'payment_method_line_id': outbound.id,
             'payment_date': effective_date_val, 
-            'communication': bill.name, 
+            'communication': bill.name,
+            'partner_id': bill.partner_id.id,
         }
         payment_wizard = self.env['account.payment.register'].with_company(destination_company_id.id).with_context(
             active_model='account.move',
