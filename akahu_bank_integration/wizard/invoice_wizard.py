@@ -2,6 +2,9 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError
 from datetime import datetime
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class MatchInvoiceWizard(models.TransientModel):
     _name = 'match.invoice.wizard'
     _description = 'Match Transaction with Invoices'
@@ -14,14 +17,15 @@ class MatchInvoiceWizard(models.TransientModel):
     def action_create_payments(self):
         selected_invoices = self.invoice_line_ids.filtered(lambda l: l.selected).mapped('invoice_id')
         invoices_to_pay = selected_invoices.filtered(lambda inv: inv.state == 'posted' and inv.payment_state != 'paid')
-
+        destination_partner = self.env.context.get("destination_partner")
         if not invoices_to_pay:
             raise UserError("No valid invoices or bills to pay.")
 
         partners = invoices_to_pay.mapped('partner_id')
+        _logger.info(f"5------------------- {partners}")
         if len(partners) > 1:
             raise UserError("All selected invoices/bills must belong to the same partner.")
-        partner = partners[0]
+        partner = destination_partner if destination_partner else partners[0]
 
         match = self.env['akahu.transaction'].search([('reference', '=', self.transaction_ref)], limit=1)
         if not match:
@@ -115,7 +119,7 @@ class MatchInvoiceWizard(models.TransientModel):
             }
             account_type = 'asset_receivable'
 
-
+        _logger.info(f"5------------------- {partner}")
         payment = self.env['account.payment'].sudo().create(payment_vals)
         payment.action_post()
 
