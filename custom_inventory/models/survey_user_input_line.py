@@ -1,4 +1,5 @@
 from odoo import models, fields,_
+import textwrap
 
 class SurveyUserInputLine(models.Model):
     _inherit = 'survey.user_input.line'
