@@ -50,7 +50,8 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/res_users_view.xml',
         'views/product_category_view.xml',
         'views/hr_attendance_view.xml',
-        'views/survey_send_pdf_wizard_view.xml'
+        'views/survey_send_pdf_wizard_view.xml',
+        'views/survey_question_views.xml'
     ],
 
 
