@@ -25,7 +25,7 @@ class SurveyQuestion(models.Model):
         string="Subtitle"
     )
 
-    description = fields.Text(
+    description = fields.Char(
         string="Description / Helper Text"
     )
 
