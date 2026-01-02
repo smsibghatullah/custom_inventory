@@ -275,30 +275,72 @@ class AccessToken(http.Controller):
             if not survey.exists():
                 return {"error": "Survey not found"}
 
-            questions_data = []
-            questions = request.env['survey.question'].sudo().search([('id', 'in', survey.question_ids.ids)])
+            questions = request.env['survey.question'].sudo().search([
+                ('id', 'in', survey.question_ids.ids)
+            ])
+
+            grouped_data = {}
+
             for question in questions:
-                answer_ids = question.suggested_answer_ids.ids + question.matrix_row_ids.ids
-                answers = request.env['survey.question.answer'].sudo().search([('id', 'in', answer_ids)])
-                answers_data = [
-                    {
-                        "answer_id": answer.id,
-                        "answer_value": answer.value,
-                        "answer_type": answer.question_type,
+
+                group = question.group_id
+                group_id = group.id if group else 0
+                group_name = group.name if group else ""
+
+                if group_id not in grouped_data:
+                    grouped_data[group_id] = {
+                        "group_id": group_id,
+                        "group_name": group_name,
+                        "heading": {}
                     }
-                    for answer in answers
-                ]
-                questions_data.append({
+
+                heading = question.heading_id
+                heading_id = heading.id if heading else 0
+                heading_name = heading.name if heading else ""
+
+                if heading_id not in grouped_data[group_id]["heading"]:
+                    grouped_data[group_id]["heading"][heading_id] = {
+                        "heading_id": heading_id,
+                        "heading_name": heading_name,
+                        "questions": []
+                    }
+
+                answer_ids = (
+                    question.suggested_answer_ids.ids +
+                    question.matrix_row_ids.ids
+                )
+
+                answers = request.env['survey.question.answer'].sudo().search([
+                    ('id', 'in', answer_ids)
+                ])
+
+                answers_data = [{
+                    "answer_id": ans.id,
+                    "answer_value": ans.value,
+                    "answer_type": ans.question_type,
+                } for ans in answers]
+                print(question.id,"===============================================123456789")
+                grouped_data[group_id]["heading"][heading_id]["questions"].append({
                     "question_id": question.id,
                     "question_name": question.display_name,
                     "question_type": question.question_type,
+                    "subtitle": question.subtitle,
+                    "auto_filled": question.auto_filled,
+                    "description": question.description,
                     "answers": answers_data
                 })
+
+            result = []
+            for group in grouped_data.values():
+                group["heading"] = list(group["heading"].values())
+                result.append(group)
+
             response_data = {
                 "survey_id": survey.id,
                 "survey_title": survey.title,
-                "questions": questions_data
+                "questions_by_heading": result
             }
+
             return valid_response(response_data)
 
         except AccessError as e:
@@ -306,6 +348,7 @@ class AccessToken(http.Controller):
 
         except Exception as e:
             return {"error": "Unexpected error", "message": str(e)}
+
 
     @http.route('/api/list_databases', type="http", auth="public", methods=["GET"], csrf=False)
     def list_databases(self, **kwargs):

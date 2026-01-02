@@ -18,5 +18,8 @@ from . import hr_attendance
 from . import sequence_mixin
 from . import report
 from . import survey_send_pdf_wizard
+from . import survey_question
+from . import survey_user_input_line
+
 
 

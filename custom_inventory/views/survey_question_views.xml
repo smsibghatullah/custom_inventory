@@ -1,0 +1,166 @@
+<odoo>
+    <record id="view_survey_question_form_inherit_signature" model="ir.ui.view">
+        <field name="name">survey.question.form.signature</field>
+        <field name="model">survey.question</field>
+        <field name="inherit_id" ref="survey.survey_question_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='question_type']" position="inside">
+                <attribute name="selection">
+                    [('digital_signature', 'Digital Signature')]
+                </attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='title']" position="after">
+                 <group>
+                    <field name="group_id" />
+                    <field name="heading_id" string="Heading"/>
+                    <field name="subtitle"/>
+                    <field name="description"/>
+                    <field name="auto_filled"/>
+                    <field name="question_id"  options="{'no_create': True, 'no_open': True}" domain="[('survey_id','=',survey_id), ('id','!=',id)]" required="auto_filled == True"  invisible="auto_filled != True"/>
+                </group>
+            </xpath>
+
+              <xpath expr="//notebook/page[@name='answers']" position="inside">
+                <!-- Add Table Rows field -->
+                   <group>
+                      <field name="static_content" invisible="question_type != 'static_content'"/>
+                   </group>
+                    <group>
+                        <field name="table_row_ids" string="Table Rows" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
+                            <tree editable="bottom">
+                                <field name="name"/>
+                                <field name="sequence"/>
+                            </tree>
+                        </field>
+                    </group>
+
+                    <!-- Add Table Columns field -->
+                    <group>
+                        <field name="table_column_ids" string="Table Columns" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
+                            <tree editable="bottom">
+                                <field name="name"/>
+                                <field name="input_type"/>
+                                <field name="dropdown_options"/>
+                                <field name="sequence"/>
+                            </tree>
+                        </field>
+                    </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="survey.survey_user_input_line_view_form" model="ir.ui.view">
+        <field name="name">survey.user_input.line.view.form</field>
+        <field name="model">survey.user_input.line</field>
+        <field name="arch" type="xml">
+            <form string="User input line details" create="false">
+                <sheet>
+                    <group col="4">
+                        <field name="question_id"/>
+                        <field name="create_date"/>
+                        <field name="answer_type"/>
+                        <field name="skipped" />
+                        <field name="answer_score" groups="base.group_no_one"/>
+                    </group>
+                    <group>
+                        <field name="value_char_box" colspan='2' invisible="answer_type != 'char_box'"/>
+                        <field name="value_numerical_box" colspan='2' invisible="answer_type != 'numerical_box'"/>
+                        <field name="value_date" colspan='2' invisible="answer_type != 'date'"/>
+                        <field name="value_datetime" colspan='2' invisible="answer_type != 'datetime'"/>
+                        <field name="value_text_box" colspan='2' invisible="answer_type != 'text_box'"/>
+                        <field name="digital_signature" colspan='2' widget="signature" invisible="answer_type != 'digital_signature'"/>
+                        <field name="static_content" colspan='2' widget="html" invisible="answer_type != 'static_content'"/>
+                        <field name="matrix_row_id" colspan='2' />
+                        <field name="suggested_answer_id" colspan='2' invisible="answer_type != 'suggestion'"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="survey.survey_user_input_view_form" model="ir.ui.view">
+        <field name="name">survey.user_input.view.form</field>
+        <field name="model">survey.user_input</field>
+        <field name="arch" type="xml">
+            <form string="Survey User inputs" create="false">
+                <header>
+                    <button name="action_resend" string="Resend Invitation" type="object" class="oe_highlight"
+                        invisible="state == 'done' or not partner_id and not email"/>
+                    <button name="action_print_answers" invisible="state != 'done'" string="Print" type="object"  class="oe_highlight"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <field name="attempts_count" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_redirect_to_attempts"
+                            type="object"
+                            class="oe_stat_button"
+                            invisible="attempts_count == 1"
+                            icon="fa-files-o">
+                            <field string="Attempts" name="attempts_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <field name="test_entry" invisible="1"/>
+                    <widget name="web_ribbon" title="Test Entry" bg_color="text-bg-info"
+                        invisible="not test_entry"/>
+                    <widget name="web_ribbon" title="Failed" bg_color="text-bg-danger"
+                        invisible="test_entry or scoring_type == 'no_scoring' or scoring_success"/>
+                    <widget name="web_ribbon" title="Passed"
+                        invisible="test_entry or scoring_type == 'no_scoring' or not scoring_success"/>
+                    <group col="2">
+                        <group>
+                            <field name="survey_id"/>
+                            <field name="create_date"/>
+                            <field name="deadline" invisible="state == 'done' and not deadline"/>
+                            <field name="is_attempts_limited" invisible="1"/>
+                            <label for="attempts_number" string="Attempt n°" invisible="not is_attempts_limited or test_entry or state != 'done'"/>
+                            <div invisible="not is_attempts_limited or test_entry or state != 'done'" class="d-inline-flex">
+                                <field name="attempts_number" nolabel="1"/>
+                                 / 
+                                <field name="attempts_limit" nolabel="1"/>
+                            </div>
+                            <field name="test_entry" groups="base.group_no_one"/>
+                        </group>
+                        <group>
+                            <field name="scoring_type" invisible="1"/>
+                            <field name="scoring_success" invisible="1"/>
+                            <label for="scoring_percentage" string="Score" invisible="scoring_type == 'no_scoring'"/>
+                            <div invisible="scoring_type == 'no_scoring'" class="d-inline-flex">
+                                <field name="scoring_percentage" nolabel="1"/>
+                                <span>%</span>
+                            </div>
+                            <field name="partner_id"/>
+                            <field name="email" widget="email"/>
+                            <field name="access_token" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Answers" name="page_answers">
+                            <field name="user_input_line_ids" mode="tree" readonly="True" no_label="1">
+                                <tree decoration-muted="skipped == True">
+                                    <field name="question_sequence" column_invisible="True"/>
+                                    <field name="create_date" optional="hidden"/>
+                                    <field name="page_id" optional="hidden"/>
+                                    <field name="question_id"/>
+                                    <field name="answer_type" optional="hidden"/>
+                                    <field name="skipped" hide="1"/>
+                                    <field name="display_name" string="Answer"/>
+                                    <field name="digital_signature"  widget="signature" invisible="answer_type != 'digital_signature'"/>
+                                    <field name="static_content" widget="html" invisible="answer_type != 'static_content'"/>
+                                    <field name="answer_is_correct"/>
+                                    <field name="answer_score" sum="Score"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>
