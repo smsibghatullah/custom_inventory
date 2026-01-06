@@ -100,7 +100,7 @@ class ShiftRole(models.Model):
                             for question in assigned_form.survey_id.question_ids:
                                 if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                     answer_type = 'suggestion'
-                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content']:
+                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk']:
                                     answer_type = question.question_type
                                 else:
                                     answer_type = 'text_box'
@@ -114,15 +114,34 @@ class ShiftRole(models.Model):
                                 }
 
                                 if answer_type == 'text_box':
-                                    vals["value_text_box"] = ""
+                                    vals["value_text_box"] = (
+                                        question.prefill_text if question.pre_filled else ""
+                                    )
+
                                 elif answer_type == 'char_box':
-                                    vals["value_char_box"] = ""
+                                    vals["value_char_box"] = (
+                                        question.prefill_char if question.pre_filled else ""
+                                    )
+
                                 elif answer_type == 'numerical_box':
-                                    vals["value_numerical_box"] = 0.0  
+                                    vals["value_numerical_box"] = (
+                                        question.prefill_number if question.pre_filled else 0.0
+                                    )
+
                                 elif answer_type == 'date':
-                                    vals["value_date"] = False
+                                    vals["value_date"] = (
+                                        question.prefill_date if question.pre_filled else False
+                                    )
+
                                 elif answer_type == 'datetime':
-                                    vals["value_datetime"] = False
+                                    vals["value_datetime"] = (
+                                        question.prefill_datetime if question.pre_filled else False
+                                    )
+
+                                elif answer_type == 'digital_signature':
+                                    vals["value_binary"] = (
+                                        question.prefill_signature if question.pre_filled else False
+                                    )
                                 elif answer_type == 'suggestion':
                                     vals["suggested_answer_id"] = False
 
@@ -177,7 +196,7 @@ class ShiftRole(models.Model):
                                 for question in assigned_form.survey_id.question_ids:
                                     if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                         answer_type = 'suggestion'
-                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content']:
+                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk']:
                                         answer_type = question.question_type
                                     else:
                                         answer_type = 'text_box'
@@ -191,15 +210,34 @@ class ShiftRole(models.Model):
                                     }
 
                                     if answer_type == 'text_box':
-                                        vals["value_text_box"] = ""
+                                        vals["value_text_box"] = (
+                                            question.prefill_text if question.pre_filled else ""
+                                        )
+
                                     elif answer_type == 'char_box':
-                                        vals["value_char_box"] = ""
+                                        vals["value_char_box"] = (
+                                            question.prefill_char if question.pre_filled else ""
+                                        )
+
                                     elif answer_type == 'numerical_box':
-                                        vals["value_numerical_box"] = 0.0  
+                                        vals["value_numerical_box"] = (
+                                            question.prefill_number if question.pre_filled else 0.0
+                                        )
+
                                     elif answer_type == 'date':
-                                        vals["value_date"] = False
+                                        vals["value_date"] = (
+                                            question.prefill_date if question.pre_filled else False
+                                        )
+
                                     elif answer_type == 'datetime':
-                                        vals["value_datetime"] = False
+                                        vals["value_datetime"] = (
+                                            question.prefill_datetime if question.pre_filled else False
+                                        )
+
+                                    elif answer_type == 'digital_signature':
+                                        vals["value_binary"] = (
+                                            question.prefill_signature if question.pre_filled else False
+                                        )
                                     elif answer_type == 'suggestion':
                                         vals["suggested_answer_id"] = False
 

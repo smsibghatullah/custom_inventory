@@ -319,16 +319,81 @@ class AccessToken(http.Controller):
                     "answer_value": ans.value,
                     "answer_type": ans.question_type,
                 } for ans in answers]
-                print(question.id,"===============================================123456789")
+                print(question,"===============================================123456789")
+                risk = []
+                if question.question_type == 'risk':
+                    for hazard in question.potential_hazard_ids:
+                        print(hazard.hazard_consequence_id,"=======================================")
+                        risk.append({
+                            "question_id":question.id,
+                            "hazard_id": hazard.id,
+                            "hazard_name": hazard.name,
+
+                            "hazard_consequence": {
+                                "id": hazard.hazard_consequence_id.id if hazard.hazard_consequence_id else None,
+                                "name": hazard.hazard_consequence_id.name if hazard.hazard_consequence_id else None,
+                                "rating": hazard.hazard_consequence_id.rating if hazard.hazard_consequence_id else None,
+                            },
+
+                            "likelihood": {
+                                "id": hazard.likelihood_id.id if hazard.likelihood_id else None,
+                                "name": hazard.likelihood_id.name if hazard.likelihood_id else None,
+                                "rating": hazard.likelihood_id.rating if hazard.likelihood_id else None,
+                            },
+
+                            "initial_risk": {
+                                "score": hazard.initial_risk_score,
+                                "level": hazard.initial_risk_level,
+                            },
+
+                            "controls": [
+                                {
+                                    "id": control.id,
+                                    "name": control.name,
+                                } for control in hazard.control_ids
+                            ],
+
+                            "post_control_hazard_consequence": {
+                                "id": hazard.post_control_hazard_consequence_id.id if hazard.post_control_hazard_consequence_id else None,
+                                "name": hazard.post_control_hazard_consequence_id.name if hazard.post_control_hazard_consequence_id else None,
+                                "rating": hazard.post_control_hazard_consequence_id.rating if hazard.post_control_hazard_consequence_id else None,
+                            },
+
+                            "post_control_likelihood": {
+                                "id": hazard.post_control_likelihood_id.id if hazard.post_control_likelihood_id else None,
+                                "name": hazard.post_control_likelihood_id.name if hazard.post_control_likelihood_id else None,
+                                "rating": hazard.post_control_likelihood_id.rating if hazard.post_control_likelihood_id else None,
+                            },
+
+                            "post_control_risk": {
+                                "score": hazard.post_control_risk_score,
+                                "level": hazard.post_control_risk_level,
+                            },
+                        })
+
                 grouped_data[group_id]["heading"][heading_id]["questions"].append({
                     "question_id": question.id,
                     "question_name": question.display_name,
                     "question_type": question.question_type,
                     "subtitle": question.subtitle,
                     "auto_filled": question.auto_filled,
+                    "pre_filled": question.pre_filled,
+                    "prefill_value": (
+                        question.prefill_text if question.pre_filled and question.question_type == 'text_box' else
+                        question.prefill_char if question.pre_filled and question.question_type == 'char_box' else
+                        question.prefill_number if question.pre_filled and question.question_type == 'numerical_box' else
+                        question.prefill_date if question.pre_filled and question.question_type == 'date' else
+                        question.prefill_datetime if question.pre_filled and question.question_type == 'datetime' else
+                        question.prefill_signature if question.pre_filled and question.question_type == 'digital_signature' else
+                        None
+                    ),
+                    "refrence_question_id": question.question_id.id,
                     "description": question.description,
-                    "answers": answers_data
+                    "answers": answers_data,
+                    'risk':risk
                 })
+
+               
 
             result = []
             for group in grouped_data.values():

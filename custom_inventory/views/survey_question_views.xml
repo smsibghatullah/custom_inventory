@@ -16,9 +16,47 @@
                     <field name="heading_id" string="Heading"/>
                     <field name="subtitle"/>
                     <field name="description"/>
-                    <field name="auto_filled"/>
-                    <field name="question_id"  options="{'no_create': True, 'no_open': True}" domain="[('survey_id','=',survey_id), ('id','!=',id)]" required="auto_filled == True"  invisible="auto_filled != True"/>
                 </group>
+            </xpath>
+            <xpath expr="//field[@name='question_type']" position="after">
+                    <field name="auto_filled" invisible="question_type == False"/>
+
+                    <field name="question_id"
+                        options="{'no_create': True, 'no_open': True}"
+                        domain="[
+                            ('survey_id', '=', survey_id),
+                            ('question_type', '=', question_type),
+                            ('id', '!=', id)
+                        ]"
+                        required="auto_filled == True"
+                        invisible="auto_filled != True"/>
+
+                    <field name="pre_filled"/>
+                    <!-- TEXT BOX -->
+                    <field name="prefill_text"
+                        invisible="not pre_filled or question_type != 'text_box'"/>
+
+                    <!-- CHAR BOX -->
+                    <field name="prefill_char"
+                        invisible="not pre_filled or question_type != 'char_box'"/>
+
+                    <!-- NUMBER -->
+                    <field name="prefill_number"
+                        invisible="not pre_filled or question_type != 'numerical_box'"/>
+
+                    <!-- DATE -->
+                    <field name="prefill_date"
+                        invisible="not pre_filled or question_type != 'date'"/>
+
+                    <!-- DATETIME -->
+                    <field name="prefill_datetime"
+                        invisible="not pre_filled or question_type != 'datetime'"/>
+
+                    <!-- DIGITAL SIGNATURE -->
+                    <field name="prefill_signature"
+                        widget="signature"
+                        invisible="not pre_filled or question_type != 'digital_signature'"/>
+   
             </xpath>
 
               <xpath expr="//notebook/page[@name='answers']" position="inside">
@@ -26,6 +64,40 @@
                    <group>
                       <field name="static_content" invisible="question_type != 'static_content'"/>
                    </group>
+                   <group string="Potential Hazards / Risks" invisible="question_type != 'risk'">
+                   </group>
+                     <field name="potential_hazard_ids"
+                            nolabel="1"
+                            invisible="question_type != 'risk'"
+                            context="{'default_question_id': active_id}">
+
+                            <tree editable="bottom">
+                                <field name="name" width="220"/>
+
+                                <field name="hazard_consequence_id" width="220"/>
+                                <field name="likelihood_id" width="180"/>
+
+                                <field name="initial_risk_level"
+                                    widget="badge"
+                                    readonly="1"
+                                    width="160"/>
+
+                                <field name="control_ids"
+                                    widget="many2many_tags"
+                                    width="260"/>
+
+                                <field name="post_control_hazard_consequence_id" width="260"/>
+                                <field name="post_control_likelihood_id" width="240"/>
+
+                                <field name="post_control_risk_level"
+                                    widget="badge"
+                                    readonly="1"
+                                    width="200"/>
+                            </tree>
+
+                        </field>
+
+                   
                     <group>
                         <field name="table_row_ids" string="Table Rows" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
                             <tree editable="bottom">
@@ -74,6 +146,44 @@
                         <field name="matrix_row_id" colspan='2' />
                         <field name="suggested_answer_id" colspan='2' invisible="answer_type != 'suggestion'"/>
                     </group>
+                      <notebook>
+
+                    <!-- 🟠 RISK ASSESSMENT TAB -->
+                    <page string="Risk Assessment" invisible="answer_type != 'risk'">
+
+                        <field name="hazard_ids" nolabel="1">
+                            <tree editable="bottom">
+
+                                <field name="name" width="240"/>
+
+                                <field name="hazard_consequence_id" width="200"/>
+                                <field name="likelihood_id" width="180"/>
+
+                                <field name="initial_risk_level"
+                                       widget="badge"
+                                       readonly="1"
+                                       width="160"/>
+
+                                <field name="control_ids"
+                                       widget="many2many_tags"
+                                       width="260"/>
+
+                                <field name="post_control_hazard_consequence_id"
+                                       width="240"/>
+
+                                <field name="post_control_likelihood_id"
+                                       width="220"/>
+
+                                <field name="post_control_risk_level"
+                                       widget="badge"
+                                       readonly="1"
+                                       width="200"/>
+                            </tree>
+                        </field>
+
+                    </page>
+
+                </notebook>
                 </sheet>
             </form>
         </field>
@@ -163,4 +273,221 @@
             </form>
         </field>
     </record>
+
+    <record id="view_survey_hazard_consequence_tree" model="ir.ui.view">
+        <field name="name">survey.hazard.consequence.tree</field>
+        <field name="model">survey.hazard_consequence</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="rating"/>
+                <field name="potential_hazard_id"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_survey_hazard_consequence_form" model="ir.ui.view">
+        <field name="name">survey.hazard.consequence.form</field>
+        <field name="model">survey.hazard_consequence</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="rating"/>
+                        <field name="potential_hazard_id"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_survey_likelihood_tree" model="ir.ui.view">
+        <field name="name">survey.likelihood.tree</field>
+        <field name="model">survey.likelihood</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="rating"/>
+                <field name="potential_hazard_id"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_survey_likelihood_form" model="ir.ui.view">
+        <field name="name">survey.likelihood.form</field>
+        <field name="model">survey.likelihood</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="rating"/>
+                        <field name="potential_hazard_id"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_survey_controls_tree" model="ir.ui.view">
+        <field name="name">survey.controls.tree</field>
+        <field name="model">survey.controls</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="potential_hazard_id"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_survey_controls_form" model="ir.ui.view">
+        <field name="name">survey.controls.form</field>
+        <field name="model">survey.controls</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="potential_hazard_id"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_post_control_hazard_consequence_tree" model="ir.ui.view">
+        <field name="name">survey.post.control.hazard.consequence.tree</field>
+        <field name="model">survey.post_control_hazard_consequence</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="rating"/>
+                <field name="potential_hazard_id"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_post_control_hazard_consequence_form" model="ir.ui.view">
+        <field name="name">survey.post.control.hazard.consequence.form</field>
+        <field name="model">survey.post_control_hazard_consequence</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="rating"/>
+                        <field name="potential_hazard_id"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_post_control_likelihood_tree" model="ir.ui.view">
+        <field name="name">survey.post.control.likelihood.tree</field>
+        <field name="model">survey.post_control_likelihood</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="rating"/>
+                <field name="potential_hazard_id"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_post_control_likelihood_form" model="ir.ui.view">
+        <field name="name">survey.post.control.likelihood.form</field>
+        <field name="model">survey.post_control_likelihood</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="rating"/>
+                        <field name="potential_hazard_id"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_survey_configuration"
+            name="Configuration"
+            parent="survey.menu_surveys"
+            sequence="100"
+            
+            />
+
+    <record id="action_survey_hazard_consequence" model="ir.actions.act_window">
+        <field name="name">Hazard Consequences</field>
+        <field name="res_model">survey.hazard_consequence</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_survey_hazard_consequence"
+            parent="menu_survey_configuration"
+            action="action_survey_hazard_consequence"
+            name="Hazard Consequences"/>
+
+    <record id="action_survey_likelihood" model="ir.actions.act_window">
+        <field name="name">Likelihood</field>
+        <field name="res_model">survey.likelihood</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_survey_likelihood"
+            parent="menu_survey_configuration"
+            action="action_survey_likelihood"
+            name="Likelihood"/>
+
+
+    <record id="action_post_control_hazard_consequence" model="ir.actions.act_window">
+        <field name="name">Post Control Hazard Consequences</field>
+        <field name="res_model">survey.post_control_hazard_consequence</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_post_control_hazard_consequence"
+            parent="menu_survey_configuration"
+            action="action_post_control_hazard_consequence"
+            name="Post Control Hazard Consequences"/>
+
+    <record id="action_post_control_likelihood" model="ir.actions.act_window">
+        <field name="name">Post Control Likelihood</field>
+        <field name="res_model">survey.post_control_likelihood</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_post_control_likelihood"
+            parent="menu_survey_configuration"
+            action="action_post_control_likelihood"
+            name="Post Control Likelihood"/>
+
+
+
+
+
+
 </odoo>

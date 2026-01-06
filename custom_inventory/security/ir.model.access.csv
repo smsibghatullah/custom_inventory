@@ -33,6 +33,13 @@ access_survey_heading,name_survey_heading,model_survey_heading,base.group_user,1
 access_survey_group,name_survey_group,model_survey_group,base.group_user,1,1,1,1
 access_survey_table_row,name_survey_table_row,model_survey_table_row,base.group_user,1,1,1,1
 access_survey_table_column,name_survey_table_column,model_survey_table_column,base.group_user,1,1,1,1
+access_survey_table_column,survey_table_column,model_survey_table_column,base.group_user,1,1,1,1
+access_survey_potential_hazard,survey_potential_hazard,model_survey_potential_hazard,base.group_user,1,1,1,1
+access_survey_hazard_consequence,survey_hazard_consequence,model_survey_hazard_consequence,base.group_user,1,1,1,1
+access_survey_likelihood,survey_likelihood,model_survey_likelihood,base.group_user,1,1,1,1
+access_survey_controls,survey_controls,model_survey_controls,base.group_user,1,1,1,1
+access_survey_post_control_hazard_consequence,survey_post_control_hazard_consequence,model_survey_post_control_hazard_consequence,base.group_user,1,1,1,1
+access_survey_post_control_likelihood,survey_post_control_likelihood,model_survey_post_control_likelihood,base.group_user,1,1,1,1
 
 
 

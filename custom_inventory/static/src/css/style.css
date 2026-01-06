@@ -25,3 +25,28 @@
 table.cr-table tbody tr:last-child {
     height: 100%;
 }
+
+
+/* LOW - Green */
+.o_badge.o_selection_badge[data-value="low"] {
+   background-color: #1f8f4e !important;
+   color: #ffffff !important;
+}
+
+/* MEDIUM - Orange */
+.o_badge.o_selection_badge[data-value="medium"] {
+   background-color: #f4a100 !important;
+   color: #ffffff !important;
+}
+
+/* HIGH - Red */
+.o_badge.o_selection_badge[data-value="high"] {
+   background-color: #d93025 !important;
+   color: #ffffff !important;
+}
+
+/* EMPTY / FALSE */
+.o_badge.o_selection_badge[data-value="false"] {
+   background-color: #9e9e9e !important;
+   color: #ffffff !important;
+}

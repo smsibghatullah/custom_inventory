@@ -54,6 +54,11 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
         'views/survey_question_views.xml'
     ],
 
+    'assets': {
+        'web.assets_backend': [
+            'custom_inventory/static/src/css/style.css',
+        ],
+    },
 
 
     'installable': True,
