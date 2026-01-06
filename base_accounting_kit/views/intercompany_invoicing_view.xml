@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Child Model: IntercompanyDestinationParameter Tree View (for nested list) -->
+        <record id="view_intercompany_destination_param_tree" model="ir.ui.view">
+            <field name="name">intercompany.destination.parameter.tree</field>
+            <field name="model">intercompany.destination.parameter</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom"> <!-- Allows inline editing within the parent form -->
+                    <field name="destination_company_id"/>
+                    <field name="source_customer_id"/>
+                    <field name="destination_invoice_gl_account_id"/>
+                    <field name="destination_bill_gl_account_id"/>
+                    <!-- Brands, Categories, Tags ko tree view mein aksar chupa diya jata hai ya form view mein dekha jata hai -->
+                </tree>
+            </field>
+        </record>
+
+        <!-- Child Model: IntercompanyDestinationParameter Form View -->
+        <record id="view_intercompany_destination_param_form" model="ir.ui.view">
+            <field name="name">intercompany.destination.parameter.form</field>
+            <field name="model">intercompany.destination.parameter</field>
+            <field name="arch" type="xml">
+                <form string="Destination Parameters">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="destination_company_id"/>
+                                <field name="source_customer_id"/>
+                            </group>
+                            <group>
+                                <field name="destination_invoice_gl_account_id"/>
+                                <field name="destination_bill_gl_account_id"/>
+                            </group>
+                        </group>
+                        <!-- Tab structure for brands/categories/tags if needed -->
+                        <notebook>
+                            <page string="Filters">
+                                <field name="brand_ids" widget="many2many_tags"/>
+                                <field name="category_ids" widget="many2many_tags"/>
+                                <field name="available_sku_category_ids" invisible="1"/> 
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </page>
+                        </notebook>
+                        
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Parent Model: IntercompanyParameter Form View -->
+        <record id="view_intercompany_parameter_form" model="ir.ui.view">
+            <field name="name">intercompany.parameter.form</field>
+            <field name="model">intercompany.parameter</field>
+            <field name="arch" type="xml">
+                <form string="Intercompany Parameters">
+                    <sheet>
+                        <group string="Source Company">
+                            <field name="source_company_id"/>
+                            <field name="destination_vendor_id" invisible="1"/>
+                        </group>
+                        <group col="1">
+                            <group string="Destination Sale Invoice Parameter Companies">
+                                <field name="intercompany_invoice_destination_company_ids" context="{'default_parameter_type': 'invoice'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id"/> 
+                                        <field name="source_customer_id"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="destination_invoice_gl_account_id"/>
+                                        <field name="destination_bill_gl_account_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        
+                            <group string="Destination Purchase Bill Parameter Companies">
+                                <field name="intercompany_bill_destination_company_ids" context="{'default_parameter_type': 'bill'}">
+                                    <tree editable="bottom">
+                                        <field name="parameter_type" column_invisible="1"/>
+                                        <field name="available_sku_category_ids" column_invisible="1" />
+                                        <field name="intercompany_source_company_id" column_invisible="1"/>
+                                        <field name="destination_company_id" 
+                                            domain="[('id', '!=', intercompany_source_company_id)]" />
+                                        <field name="destination_vendor_id" string="Destination Customer"/> 
+                                        <field name="source_customer_id" string="Source Vendor"/>
+                                        <field name="brand_ids" widget="many2many_tags"/>
+                                        <field name="category_ids" widget="many2many_tags"/>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                        <field name="destination_invoice_gl_account_id"/>
+                                        <field name="destination_bill_gl_account_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Parent Model: IntercompanyParameter Tree/List View -->
+        <record id="view_intercompany_parameter_tree" model="ir.ui.view">
+            <field name="name">intercompany.parameter.tree</field>
+            <field name="model">intercompany.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Intercompany Parameters">
+                    <field name="source_company_id"/>
+                    <field name="intercompany_invoice_destination_company_ids" widget="many2many_tags"/>
+                    <field name="intercompany_bill_destination_company_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Window for the main menu item -->
+        <record id="action_intercompany_invoicing_parameter" model="ir.actions.act_window">
+            <field name="name">Intercompany Parameters</field>
+            <field name="res_model">intercompany.parameter</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <record id="view_move_form_intercompany" model="ir.ui.view">
+            <field name="name">account.move.form.intercompany</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="allowed_partner_ids" invisible="1"/>
+                <field name="auto_created_doc" invisible="1"/>
+            </field>
+                <xpath expr="//field[@name='invoice_date']" position="after">
+                    <field name="available_bom_ids" invisible="1" />
+                </xpath>
+                <xpath expr="//field[@name='bom_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', available_bom_ids)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='brand_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', available_brands_ids)]</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <group>
+                        <field name="available_destination_companies" invisible="1"/>
+                        <field name="available_brands_ids" invisible="1"/>
+
+                        <field name="intercompany" readonly="state == 'posted'"/>
+
+                        <field name="source_company_id" invisible="1"/>
+                        <field name="destination_company_id"
+                            domain="[('id','in', available_destination_companies)]"
+                            invisible="intercompany == False or auto_created_doc == True"/>
+
+                    </group>
+                </xpath>
+                
+            </field>
+        </record>
+    </data>
+</odoo>

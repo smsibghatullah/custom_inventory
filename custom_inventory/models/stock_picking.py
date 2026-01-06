@@ -38,11 +38,13 @@ class StockPicking(models.Model):
         return [key for key, _ in self.fields_get(allfields=['state'])['state']['selection']]
 
     def button_validate(self):
-        for picking in self:
-            if picking.sale_id:
-                picking.sale_id.create_journal_entry()
-            elif picking.purchase_id:
-                picking.purchase_id.create_journal_entry()
+        skip_journal = self.env.context.get("skip_journal")
+        if not skip_journal:
+            for picking in self:
+                if picking.sale_id:
+                    picking.sale_id.create_journal_entry()
+                elif picking.purchase_id:
+                    picking.purchase_id.create_journal_entry()
 
         res = super(StockPicking, self).button_validate()
         return res

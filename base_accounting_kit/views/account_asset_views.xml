@@ -449,18 +449,10 @@
     />
     
     <menuitem 
-        id="menu_intercompany_sale_invoice_parameter" 
-        name="Sale Invoice Parameters"
+        id="menu_intercompany_invoicing_parameters" 
+        name="Intercompany Invoicing Parameters"
         parent="account.account_account_menu"
-        action="base_accounting_kit.action_sales_invoice_parameter"
-        sequence="11"
-    />
-
-    <menuitem 
-        id="menu_intercompany_purchase_parameter" 
-        name="Purchase Bill Parameters"
-        parent="account.account_account_menu"
-        action="base_accounting_kit.action_purchase_bill_parameter"
-        sequence="12"
+        action="base_accounting_kit.action_intercompany_invoicing_parameter"
+        sequence="13"
     />
 </odoo>

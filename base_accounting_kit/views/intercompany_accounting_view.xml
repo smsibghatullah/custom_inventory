@@ -43,6 +43,17 @@
             <field name="view_mode">tree,form</field>
         </record>
 
+        <record id="view_sales_invoice_parameter_tree" model="ir.ui.view">
+            <field name="name">sales.invoice.parameter.tree</field>
+            <field name="model">sales.invoice.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Sales Invoice Parameters">
+                    <field name="source_company_id"/>
+                    <field name="dest_company_id"/>
+                </tree>
+            </field>
+        </record>
+
 
         <record id="purchase_bill_parameter_form_view" model="ir.ui.view">
             <field name="name">purchase.bill.parameter.form</field>
@@ -86,12 +97,26 @@
             <field name="view_mode">tree,form</field>
         </record>
 
+        <record id="view_purchase_bill_parameter_tree" model="ir.ui.view">
+            <field name="name">purchase.bill.parameter.tree</field>
+            <field name="model">purchase.bill.parameter</field>
+            <field name="arch" type="xml">
+                <tree string="Purchase Bill Parameters">
+                    <field name="source_company_id"/>
+                    <field name="dest_company_id"/>
+                </tree>
+            </field>
+        </record>
+
 
         <record id="view_move_form_intercompany" model="ir.ui.view">
             <field name="name">account.move.form.intercompany</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="allowed_partner_ids" invisible="1"/>
+            </field>
                 <xpath expr="//field[@name='invoice_date']" position="after">
                     <field name="available_bom_ids" invisible="1" />
                 </xpath>
@@ -103,7 +128,7 @@
                 </xpath>
 
                 <xpath expr="//field[@name='partner_id']" position="attributes">
-                    <attribute name="readonly">intercompany == True</attribute>
+                    <attribute name="domain">[('id', 'in', allowed_partner_ids)]</attribute>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <group>
@@ -112,10 +137,12 @@
 
                         <field name="intercompany"/>
 
-                        <field name="source_company_id" invisible="intercompany == False"/>
+                        <field name="source_company_id" invisible="1"/>
                         <field name="destination_company_id"
                             domain="[('id','in', available_destination_companies)]"
-                            invisible="intercompany == False"/>
+                            invisible="intercompany == False" 
+                            readonly="intercompany == True"
+                            force_save="1"/>
 
                     </group>
                 </xpath>

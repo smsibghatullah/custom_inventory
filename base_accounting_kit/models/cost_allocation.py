@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
+from markupsafe import Markup
 
 
 import logging
@@ -24,19 +25,19 @@ class CostAllocationParameter(models.Model):
         'account.account',
         string='Debit Account',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('account_type', '=', 'asset_receivable')]"
+        domain="[('company_id', '=', source_company_id)]"
     )
     source_credit_account_id = fields.Many2one(
         'account.account', 
         string='Credit Account',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('account_type', 'in', ['expense', 'expense_depreciation', 'expense_direct_cost'])]"
+        domain="[('company_id', '=', source_company_id)]"
     )
     source_journal_id = fields.Many2one(
         'account.journal',
         string='Journal',
         required=True,
-        domain="[('company_id', '=', source_company_id), ('type', '=', 'general')]"
+        domain="[('company_id', '=', source_company_id)]"
     )
 
     destination_company_ids = fields.One2many(
@@ -165,7 +166,12 @@ class CostAllocationWizard(models.TransientModel):
             'date': self.allocation_date,
             'journal_id': source_mapping.source_journal_id.id,
             'company_id': self.source_company_id.id,
-            'ref': f'Cost Allocation: {self.source_bill_id.name}',
+            'customer_description': self.source_bill_id.customer_description,
+            'reference': f'Cost Allocation: {self.source_bill_id.name}',
+            'brand_id': self.source_bill_id.brand_id.id if self.source_bill_id.brand_id else False,
+            'bom_id': self.source_bill_id.bom_id.id if self.source_bill_id.bom_id else False,
+            'category_ids': [(6, 0, self.source_bill_id.category_ids.ids)] if self.source_bill_id.category_ids else False,
+            'tag_ids': [(6, 0, self.source_bill_id.tag_ids.ids)] if self.source_bill_id.tag_ids else False,
             'line_ids': [
                 (0, 0, {
                     'account_id': source_mapping.source_debit_account_id.id,
@@ -181,7 +187,6 @@ class CostAllocationWizard(models.TransientModel):
                 }),
             ]
         }
-
 
         source_move = self.env['account.move'].create(source_move_vals)
         source_move.action_post()
@@ -206,7 +211,13 @@ class CostAllocationWizard(models.TransientModel):
                     'date': self.allocation_date,
                     'journal_id': dest_company_line.destination_journal_id.id,
                     'company_id': line.destination_company_id.id,
-                    'ref': f'Cost Allocation: {self.source_bill_id.name}',
+                    'customer_description': self.source_bill_id.customer_description,
+                    'reference': f'Cost Allocation: {self.source_bill_id.name}',
+                    'payment_reference': self.source_bill_id.payment_reference,
+                    'brand_id': self.source_bill_id.brand_id.id if self.source_bill_id.brand_id else False,
+                    'bom_id': self.source_bill_id.bom_id.id if self.source_bill_id.bom_id else False,
+                    'category_ids': [(6, 0, self.source_bill_id.category_ids.ids)] if self.source_bill_id.category_ids else False,
+                    'tag_ids': [(6, 0, self.source_bill_id.tag_ids.ids)] if self.source_bill_id.tag_ids else False,
                     'line_ids': [
                         (0, 0, {
                             'account_id': line.dest_debit_account_id.id,
@@ -225,6 +236,22 @@ class CostAllocationWizard(models.TransientModel):
                 dest_move = self.env['account.move'].with_company(line.destination_company_id.id).sudo().create(dest_move_vals)
                 dest_move.action_post()
                 _logger.info("=== Destination Journal Created: %s", dest_move.name)
+
+                message_body = f"""
+                    <p>Cost Allocation Process Completed.</p>
+                    <ul>
+                        <li><strong>Source company:</strong> <a href="#" data-oe-id="{self.source_company_id.id}" data-oe-model="account.move">{self.source_company_id.name}</a></li>
+                        <li><strong>Destination Company:</strong> {line.destination_company_id.name}</li>
+                        <li><strong>Total Amount Allocated:</strong> {line.amount}</li>
+                        <li><strong>Journal Entry :</strong> <a href="#" data-oe-id="{dest_move.id}" data-oe-model="account.move">{dest_move.name}</a></li>
+                    </ul>
+                """
+                self.source_bill_id.message_post(
+                    body=Markup(message_body),
+                    subject="Cost Allocation Details",
+                    message_type='comment', # Ya 'notification' ya 'chatter_update'
+                    subtype_xmlid='mail.mt_note' # mt_note is usually for internal notes
+                )
 
         return {'type': 'ir.actions.act_window_close'}
     
@@ -289,7 +316,13 @@ class CostAllocationWizardLine(models.TransientModel):
                     )                    
                     debit_accounts = filtered_records.mapped('destination_debit_account_id')
                     
-                    line.available_debit_account_ids = debit_accounts
+
+                    destination_company_accounts = self.env['account.account'].with_company(line.destination_company_id).search([
+                        ('company_id', '=', line.destination_company_id.id),
+                        ('deprecated', '=', False),
+                    ])
+                    line.available_debit_account_ids = debit_accounts + destination_company_accounts
+
                 else:
                     line.available_debit_account_ids = False
             else:
@@ -308,6 +341,16 @@ class CostAllocationWizardLine(models.TransientModel):
                 )
                 if dest_record:
                     self.dest_journal_id = dest_record.destination_journal_id
+
+    @api.onchange('destination_company_id')
+    def _onchange_destination_company(self):
+        if self.destination_company_id:
+            dest_record = self.env['cost.allocation.destination'].search([
+                ('parent_source_company_id', '=', self.wizard_id.source_company_id.id),
+                ('destination_company_id', '=', self.destination_company_id.id)
+            ], limit=1)
+            self.dest_debit_account_id = dest_record.destination_debit_account_id
+            self.dest_journal_id = dest_record.destination_journal_id
 
     @api.onchange('percentage', 'wizard_id.gross_amount')
     def _onchange_percentage(self):
