@@ -24,12 +24,7 @@ class AkahuTransaction(models.Model):
     description = fields.Char(string="Description")  
     amount = fields.Float(string="Amount")  
     balance = fields.Float(string="Balance After Transaction")  
-    type = fields.Selection([
-        ('PAYMENT', 'Payment'),
-        ('TRANSFER', 'Transfer'),
-        ('INCOME', 'Income'),
-        ('OTHER', 'Other')
-    ], string="Transaction Type")  
+    transection_type = fields.Char(string="Transaction Type") 
 
     hash = fields.Char(string="Hash")  
 
@@ -115,7 +110,7 @@ class AkahuTransaction(models.Model):
                     'created_at': self.parse_datetime_safe(trans_data.get('created_at')),
                     'updated_at': self.parse_datetime_safe(trans_data.get('updated_at')),
                     'balance': trans_data.get('balance'),
-                    'type': transaction_type,  
+                    'transection_type': transaction_type,  
                     # 'status': 'completed',
                     'reference': trans_data.get('_id'),
                     'hash': trans_data.get('hash'),
@@ -281,4 +276,18 @@ class TransactionCommentLine(models.Model):
     create_uid = fields.Many2one('res.users', string='Added By', readonly=True)
     create_date = fields.Datetime(string='Date', readonly=True)
     currency_id = fields.Many2one('res.currency', readonly=True)
+
+class AkahuPendingTransaction(models.Model):
+    _name = 'akahu.pending.transaction'
+    _description = 'Pending Akahu Transactions'
+    _order = 'date desc'
+
+    name = fields.Char(string="Transaction ID", required=True)
+    akahu_account_id = fields.Char(string="Akahu Account")
+    akahu_user_id = fields.Char(string="Akahu User ID")
+    akahu_connection_id = fields.Char(string="Connection ID") 
+    transection_type = fields.Char(string="Transaction Type")
+    amount = fields.Float(string="Amount")
+    date = fields.Date(string="Transaction Date")    
+    transaction_link_id = fields.Many2one('akahu.transaction.link', string="Transaction Link")
 

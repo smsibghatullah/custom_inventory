@@ -90,6 +90,7 @@ class AccountJournal(models.Model):
             AkahuAccount = self.env['akahu.bank.account']
             AkahuTransaction = self.env['akahu.transaction']
             TransactionLink = self.env['akahu.transaction.link']
+            PendingAkahuTransaction = self.env['akahu.pending.transaction']
             created_transaction = []
 
             headers = {
@@ -109,6 +110,33 @@ class AccountJournal(models.Model):
                         continue 
                     
                     transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions?start=2025-09-01:00:00Z", headers=headers)
+                    pending_transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions/pending", headers=headers)
+                    if pending_transection_response.status_code == 200:
+                        pending_transection_data = pending_transection_response.json()
+                        print(pending_transection_data,"====================================qwest")
+                    transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
+                    if not transaction_link:
+                        transaction_link = TransactionLink.create({
+                            'name': f'{matched_account.name}',
+                            'akahu_account_id': matched_account.id,
+                        })
+                    self.env['akahu.pending.transaction'].search([
+                        ('transaction_link_id', '=', transaction_link.id)
+                    ]).unlink()      
+
+                    for trans_data in pending_transection_data.get('items', []):
+                           
+
+                        transaction = PendingAkahuTransaction.create({
+                                'name': trans_data.get('description'),
+                                'amount': trans_data.get('amount'),
+                                'date': self.convert_iso_to_odoo(trans_data.get('date')),
+                                'transection_type': trans_data.get('type'),
+                                'akahu_account_id': matched_account.akahu_account_id,
+                                'akahu_user_id': trans_data.get('_user'),
+                                'akahu_connection_id': trans_data.get('_connection'),
+                                'transaction_link_id':transaction_link.id
+                        })       
 
                     if transection_response.status_code == 200:
                         transection_data = transection_response.json()
@@ -126,7 +154,6 @@ class AccountJournal(models.Model):
                         print(trans_data.get('_id'),"trans_data.get('description')=============================================")
 
                         if not transaction:
-                            transaction_type = 'INCOME' if trans_data.get('type') == 'credit' else 'PAYMENT'
 
                             transaction = AkahuTransaction.create({
                                 'name': trans_data.get('description'),
@@ -137,7 +164,7 @@ class AccountJournal(models.Model):
                                 'created_at': self.convert_iso_to_odoo(trans_data.get('created_at')),
                                 'updated_at': self.convert_iso_to_odoo(trans_data.get('updated_at')),
                                 'balance': trans_data.get('balance'),
-                                'type': transaction_type,
+                                'transection_type': trans_data.get('type'),
                                 'reference': reference,
                                 'hash': trans_data.get('hash'),
                                 'akahu_account_id': matched_account.akahu_account_id,
@@ -238,7 +265,7 @@ class ResPartnerBank(models.Model):
                         'created_at': self._parse_datetime_safe(trans_data.get('created_at')),
                         'updated_at': self._parse_datetime_safe(trans_data.get('updated_at')),
                         'balance': trans_data.get('balance'),
-                        'type': transaction_type,
+                        'transection_type': transaction_type,
                         'reference': reference,
                         'hash': trans_data.get('hash'),
                         'akahu_account_id': matched_account.akahu_account_id,

@@ -9,7 +9,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="amount"/>
-                <field name="type"/>
+                <field name="transection_type"/>
                 <field name="balance"/>
                 <field name="reference"/>
             </tree>
@@ -38,7 +38,7 @@
                         <group>
                             <field name="amount"/>
                             <field name="balance"/>
-                            <field name="type"/>
+                            <field name="transection_type"/>
                             <field name="hash"/>
                         </group>
                         <group>

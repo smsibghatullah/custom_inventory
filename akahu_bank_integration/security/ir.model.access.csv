@@ -8,6 +8,7 @@ access_match_invoice_wizard_payment,match.invoice.wizard.payment,model_match_inv
 access_invoice_attachment_wizard,invoice.attachment.wizard,model_invoice_attachment_wizard,,1,1,1,0
 access_transaction_comment_wizard,transaction.comment.wizard,model_transaction_comment_wizard,,1,1,1,0
 access_transaction_comment_line,transaction.comment.line,model_transaction_comment_line,,1,1,1,1
+access_akahu_pending_transaction,akahu.pending.transaction,model_akahu_pending_transaction,base.group_user,1,1,1,1
 
 
 

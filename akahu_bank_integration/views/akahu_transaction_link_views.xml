@@ -19,69 +19,116 @@
                         <button type="object" name="action_filter_unmatched" class="oe_stat_button" icon="fa-times text-danger">
                             <field string="Unmatched" name="unmatched_transactions" widget="statinfo"/>
                         </button>
+
+                        <button type="object" name="action_open_pending_transactions"
+                                class="oe_stat_button"
+                                icon="fa-clock-o text-info">
+                            <field string="Pending" name="pending_transaction_count" widget="statinfo"/>
+                        </button>
+
                     </div>
 
                     <group>
                         <field name="name"/>
                     </group>
 
-                    <separator string="Linked Akahu Transactions"/>
-                    <div style="max-height:300px; overflow-y:auto;">
-                        <field nolabel="1" name="transaction_ids" >
-                            <tree decoration-danger="has_comment">
-                                <field name="name"/>
-                                <field name="amount"/>
-                                <field name="amount_due"/>
-                                <field name="akahu_account_id"/>
-                                <field name="reference"/>
-                                <field name="type"/>
-                                <field name="has_comment" column_invisible="True"/>
-                                <field name="date"/>
-                                <field name="match_status" widget="badge"/>
-                                <button name="action_match_transaction" class="btn btn-primary" type="object" string="Match" icon="fa-check"/>
-                                <button name="action_match_invoice" class="btn btn-primary" type="object" string="Manual" icon="fa-hand-paper-o"/>
-                                <button name="action_open_comment_wizard" class="btn btn-primary" type="object" string="Comment" icon="fa-comment"/>
-                            </tree>
-                            <form create='false' edit='false' string="Transaction">
-                                <sheet>
-                                <div class="oe_button_box" name="button_box">
-                                        <button name="sync_transactions" type="object" string="Refresh" class="oe_stat_button" icon="fa-refresh">
-                                        </button>
-                                    </div>
-                                    <group>
-                                        <group>
-                                            <field name="name"/>
-                                            <field name="date"/>
-                                            <field name="created_at"/>
-                                            <field name="updated_at"/>
-                                        </group>
-                                        <group>
-                                            <field name="amount"/>
-                                            <field name="balance"/>
-                                            <field name="type"/>
-                                            <field name="hash"/>
-                                        </group>
-                                        <group>
-                                            <field name="akahu_account_id"/>
-                                            <field name="akahu_user_id"/>
-                                            <field name="akahu_connection_id"/>
-                                        </group>
-                                        <group>
-                                            <field name="description"/>
-                                            <field name="particulars"/>
-                                            <field name="code"/>
-                                            <field name="reference"/>
-                                            <field name="other_account"/>
-                                        </group>
-                                    </group>
-                                </sheet>
-                                <div class="oe_chatter">
-                                        <field name="message_follower_ids" widget="mail_followers"/>
-                                        <field name="message_ids" widget="mail_thread"/>
-                                </div>
-                            </form>
-                        </field>
-                    </div>
+                <notebook>
+
+                  <page string="Linked Akahu Transactions">   
+                            <separator string="Linked Akahu Transactions"/>
+                            <div style="max-height:300px; overflow-y:auto;">
+                                <field nolabel="1" name="transaction_ids" >
+                                    <tree decoration-danger="has_comment">
+                                        <field name="name"/>
+                                        <field name="amount"/>
+                                        <field name="amount_due"/>
+                                        <field name="akahu_account_id"/>
+                                        <field name="reference"/>
+                                        <field name="transection_type"/>
+                                        <field name="has_comment" column_invisible="True"/>
+                                        <field name="date"/>
+                                        <field name="match_status" widget="badge"/>
+                                        <button name="action_match_transaction" class="btn btn-primary" type="object" string="Match" icon="fa-check"/>
+                                        <button name="action_match_invoice" class="btn btn-primary" type="object" string="Manual" icon="fa-hand-paper-o"/>
+                                        <button name="action_open_comment_wizard" class="btn btn-primary" type="object" string="Comment" icon="fa-comment"/>
+                                    </tree>
+                                    <form create='false' edit='false' string="Transaction">
+                                        <sheet>
+                                        <div class="oe_button_box" name="button_box">
+                                                <button name="sync_transactions" type="object" string="Refresh" class="oe_stat_button" icon="fa-refresh">
+                                                </button>
+                                            </div>
+                                            <group>
+                                                <group>
+                                                    <field name="name"/>
+                                                    <field name="date"/>
+                                                    <field name="created_at"/>
+                                                    <field name="updated_at"/>
+                                                </group>
+                                                <group>
+                                                    <field name="amount"/>
+                                                    <field name="balance"/>
+                                                    <field name="transection_type"/>
+                                                    <field name="hash"/>
+                                                </group>
+                                                <group>
+                                                    <field name="akahu_account_id"/>
+                                                    <field name="akahu_user_id"/>
+                                                    <field name="akahu_connection_id"/>
+                                                </group>
+                                                <group>
+                                                    <field name="description"/>
+                                                    <field name="particulars"/>
+                                                    <field name="code"/>
+                                                    <field name="reference"/>
+                                                    <field name="other_account"/>
+                                                </group>
+                                            </group>
+                                        </sheet>
+                                        <div class="oe_chatter">
+                                                <field name="message_follower_ids" widget="mail_followers"/>
+                                                <field name="message_ids" widget="mail_thread"/>
+                                        </div>
+                                    </form>
+                                </field>
+                            </div>
+
+                        </page>
+                        <page string="Pending Akahu Transactions">    
+                            <separator string="Pending Akahu Transactions" />
+                            <div style="max-height:300px; overflow-y:auto;">
+                                <field nolabel="1" name="pending_transaction_ids"  >
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="amount"/>
+                                        <field name="akahu_account_id"/>
+                                        <field name="transection_type"/>
+                                        <field name="date"/>
+                                    </tree>
+                                    <form create='false' edit='false' string="Transaction">
+                                        <sheet>
+                                            <group>
+                                                <group>
+                                                    <field name="name"/>
+                                                    <field name="date"/>
+                                                </group>
+                                                <group>
+                                                    <field name="amount"/>
+                                                    <field name="transection_type"/>
+                                                </group>
+                                                <group>
+                                                    <field name="akahu_account_id"/>
+                                                    <field name="akahu_user_id"/>
+                                                    <field name="akahu_connection_id"/>
+                                                </group>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </div>
+                        </page>    
+                      
+                    </notebook>        
                     <notebook>
                         <page string="Amount and Customer or Supplier Name Match">
                             <field nolabel="1" options="{'no_open': True}"

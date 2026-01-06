@@ -75,6 +75,33 @@ class AkahuTransactionLink(models.Model):
     unmatched_transactions = fields.Integer(string="Unmatched", compute="_compute_transaction_counts")
     partial_matched_transactions = fields.Integer(string="Partial Matched", compute="_compute_transaction_counts")
 
+    pending_transaction_ids = fields.One2many(
+        'akahu.pending.transaction',
+        'transaction_link_id',
+        string="Pending Transactions"
+    )
+
+    pending_transaction_count = fields.Integer(
+        string="Pending Transactions",
+        compute="_compute_pending_transaction_count"
+    )
+
+    show_pending = fields.Boolean(
+        string="Show Pending",
+        default=False
+    )
+
+    def action_open_pending_transactions(self):
+        self.ensure_one()
+        print(self.show_pending,"12345567=========================================")
+        self.show_pending = not self.show_pending
+        print(self.show_pending)
+
+    def _compute_pending_transaction_count(self):
+        for rec in self:
+            rec.pending_transaction_count = len(rec.pending_transaction_ids)
+
+
     def action_create_multi_payments(self):
         for rec in self:
             selected_invoices = rec.invoice_ids_criteria_5.filtered(lambda inv: inv.selected)
