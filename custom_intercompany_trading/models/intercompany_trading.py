@@ -195,6 +195,27 @@ class TradingSaleOrder(models.Model):
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
+        if self.partner_id:
+            lines = []
+
+            if self.partner_id.name:
+                lines.append(f"{self.partner_id.name}")
+            if self.partner_id.street:
+                lines.append(f"{self.partner_id.street}")
+            if self.partner_id.street2:
+                lines.append(f"{self.partner_id.street2}")
+            if self.partner_id.city:
+                lines.append(f"{self.partner_id.city}")
+            if self.partner_id.state_id:
+                lines.append(f"{self.partner_id.state_id.name}")
+            if self.partner_id.zip:
+                lines.append(f"{self.partner_id.zip}")
+            if self.partner_id.country_id:
+                lines.append(f"{self.partner_id.country_id.name}")
+
+            self.customer_description = '\n'.join(lines)
+        else:
+            self.customer_description = False
         if self.intercompany and self.partner_id and self.source_company_id:
             self.set_destination_company()
         elif not self.intercompany:
