@@ -127,17 +127,14 @@ class CrmLead(models.Model):
             total_cost = 0.0
             company_currency = lead.company_currency or self.env.company.currency_id
             
-            # Saare timesheets trace karein jo SO -> Project -> Task se linked hain
-            timesheets = lead.order_ids.mapped('project_id.task_ids.timesheet_ids').filtered(lambda t: t.amount != 0)
-
+            timesheets = lead.order_ids.mapped('project_id.task_ids.timesheet_ids').filtered(lambda t: t.unit_amount != 0)
             for sheet in timesheets:
-                # Odoo mein 'amount' field already (Hours Spent * Employee Rate) hota hai.
                 if sheet.currency_id and sheet.currency_id != company_currency:
                      total_cost += sheet.currency_id._convert(
-                        sheet.amount, company_currency, sheet.company_id, sheet.date or fields.Date.today()
+                        sheet.unit_amount, company_currency, sheet.company_id, sheet.date or fields.Date.today()
                     )
                 else:
-                    total_cost += sheet.amount
+                    total_cost += sheet.unit_amount
 
             lead.total_cost_amount = total_cost
             lead.cost_count = len(timesheets)
@@ -165,10 +162,7 @@ class CrmLead(models.Model):
         return action
     
     def action_view_costs(self):
-        timesheets = self.order_ids.mapped('project_id.task_ids.timesheet_ids')
-        action = self.env['ir.actions.actions']._for_xml_id('hr_timesheet.hr_timesheet_action_from_employee')
-        action['domain'] = [('id', 'in', timesheets.ids)]
-        return action
+        return False
     
     def _prepare_opportunity_quotation_context(self):
         """ Prepares the context for a new quotation (sale.order) by sharing the values of common fields """
@@ -321,7 +315,14 @@ class SaleOrderLead(models.Model):
 
     amount_invoiced_so = fields.Monetary(compute='_compute_amounts_so', string="Invoiced Amount", currency_field='currency_id')
     amount_paid_so = fields.Monetary(compute='_compute_amounts_so', string="Paid Amount", currency_field='currency_id')
+    amount_cost_so = fields.Monetary(compute='_compute_cost_so', string="Total Cost", currency_field='currency_id')
 
+    lead_id = fields.Many2one(
+        'crm.lead', 
+        string='Related Lead', 
+        domain="[('company_id', '=', company_id)]",
+        help="Link this sales order to a specific lead from the same company."
+    )    
     
     @api.depends('invoice_ids.payment_state', 'invoice_ids.amount_total', 'invoice_ids.amount_residual')
     def _compute_amounts_so(self):
@@ -344,3 +345,20 @@ class SaleOrderLead(models.Model):
             order.amount_invoiced_so = total_invoiced
             order.amount_paid_so = total_paid
 
+    @api.depends('project_id.task_ids.timesheet_ids.amount')
+    def _compute_cost_so(self):
+        for order in self:
+            total_cost = 0.0
+            currency = order.currency_id or self.env.company.currency_id
+
+            timesheets = order.project_id.task_ids.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+
+            for sheet in timesheets:
+                if sheet.currency_id and sheet.currency_id != currency:
+                     total_cost += sheet.currency_id._convert(
+                        sheet.unit_amount, currency, order.company_id, sheet.date or fields.Date.today()
+                    )
+                else:
+                    total_cost += sheet.unit_amount
+            
+            order.amount_cost_so = total_cost
