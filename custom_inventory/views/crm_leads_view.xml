@@ -1,0 +1,67 @@
+<odoo>
+    <data>
+        <record id="view_crm_lead_invoice_payment_buttons" model="ir.ui.view">
+            <field name="name">crm.lead.invoice.payment.buttons.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_sale_order']" position="after">
+
+                    <!-- INVOICE Button -->
+                    <button class="oe_stat_button" type="object" invisible="invoice_count == 0 or type == 'lead'"
+                        name="action_view_invoices" icon="fa-pencil-square-o">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="invoice_total_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
+                            <span class="o_stat_text"> Invoiced </span>
+                            <field name="invoice_count" invisible="1"/>
+                        </div>
+                    </button>
+
+                    <!-- PAYMENTS Button -->
+                    <button class="oe_stat_button" type="object" invisible="payment_count == 0 or type == 'lead'"
+                        name="action_view_payments" icon="fa-money">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="total_payment" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
+                            <span class="o_stat_text"> Payments </span>
+                            <field name="payment_count" invisible="1"/>
+                        </div>
+                    </button>
+
+                    <!-- COST Button (Placeholder) -->
+                    <button class="oe_stat_button" type="object"
+                        name="action_view_costs" icon="fa-calculator">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_text"> Costs (TBD) </span>
+                        </div>
+                    </button>
+
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="view_crm_lead_so_details_tab" model="ir.ui.view">
+            <field name="name">crm.lead.so.details.tab.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='internal_notes']" position="before">
+                    
+                    <page string="Attached SO Details" name="attached_so_details_tab">
+                        <field name="order_ids" widget="section_and_note_one2many">
+                            <tree string="Sale Orders" delete="false">
+                                <field name="name" string="SO Number"/>
+                                <field name="state" string="SO Status"/>
+                                <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                
+                                <field name="amount_invoiced_so" string="Invoiced Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_paid_so" string="Paid Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </tree>
+                        </field>
+                    </page>
+                    
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

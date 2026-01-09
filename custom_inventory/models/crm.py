@@ -4,7 +4,8 @@ from odoo import models, fields, api, tools, Command, _
 from odoo.exceptions import UserError,ValidationError
 import re
 import base64
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class CrmLead(models.Model):
     _inherit = "crm.lead"
@@ -51,6 +52,14 @@ class CrmLead(models.Model):
     is_tag_access = fields.Boolean(compute="_compute_tag_access")
     has_tag_required = fields.Boolean(compute="_compute_has_tag_required", store=True)
 
+    invoice_total_amount = fields.Monetary(compute='_compute_invoice_payment_data', string="Invoices", currency_field='company_currency')
+    total_payment = fields.Monetary(compute='_compute_invoice_payment_data', string="Payments", currency_field='company_currency')
+    invoice_count = fields.Integer(compute='_compute_invoice_payment_data', string="Number of Invoices")
+    payment_count = fields.Integer(compute='_compute_invoice_payment_data', string="Number of Register Payments")
+
+    total_cost_amount = fields.Monetary(compute='_compute_cost_data', string="Total Cost", currency_field='company_currency')
+    cost_count = fields.Integer(compute='_compute_cost_data', string="Number of Timesheets")
+
     @api.model
     def create(self, vals):
         if vals.get('expected_revenue', 0) <= 0:
@@ -86,8 +95,81 @@ class CrmLead(models.Model):
             record.available_sku_category_ids = self.env.user.sku_category_ids
             print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
+    
+    @api.depends('order_ids.state', 'order_ids.invoice_ids.payment_state', 'order_ids.invoice_ids.amount_total')
+    def _compute_invoice_payment_data(self):
+        for lead in self:
+            total_invoiced = 0.0
+            total_paid = 0.0
+            company_currency = lead.company_currency or self.env.company.currency_id
+            
+            invoices = lead.order_ids.mapped('invoice_ids').filtered(lambda inv: inv.move_type == 'out_invoice' and inv.state != 'cancel')
+
+            for invoice in invoices:
+                total_invoiced += invoice.currency_id._convert(
+                    invoice.amount_total, company_currency, invoice.company_id, invoice.invoice_date or fields.Date.today()
+                )
+                
+                amount_paid = invoice.amount_total - invoice.amount_residual
+                total_paid += invoice.currency_id._convert(
+                    amount_paid, company_currency, invoice.company_id, invoice.invoice_date or fields.Date.today()
+                )
+                
+            lead.invoice_total_amount = total_invoiced
+            lead.total_payment = total_paid
+
+            lead.invoice_count = len(invoices)
+            lead.payment_count = len(invoices)
+
+    @api.depends('order_ids.project_id.task_ids.timesheet_ids.amount')
+    def _compute_cost_data(self):
+        for lead in self:
+            total_cost = 0.0
+            company_currency = lead.company_currency or self.env.company.currency_id
+            
+            # Saare timesheets trace karein jo SO -> Project -> Task se linked hain
+            timesheets = lead.order_ids.mapped('project_id.task_ids.timesheet_ids').filtered(lambda t: t.amount != 0)
+
+            for sheet in timesheets:
+                # Odoo mein 'amount' field already (Hours Spent * Employee Rate) hota hai.
+                if sheet.currency_id and sheet.currency_id != company_currency:
+                     total_cost += sheet.currency_id._convert(
+                        sheet.amount, company_currency, sheet.company_id, sheet.date or fields.Date.today()
+                    )
+                else:
+                    total_cost += sheet.amount
+
+            lead.total_cost_amount = total_cost
+            lead.cost_count = len(timesheets)
 
 
+    def action_view_invoices(self):
+        invoices = self.order_ids.mapped('invoice_ids').filtered(lambda inv: inv.move_type == 'out_invoice')
+        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')
+        action['domain'] = [('id', 'in', invoices.ids)]
+        return action
+
+    def action_view_payments(self):
+        invoices = self.order_ids.mapped('invoice_ids').filtered(lambda inv: inv.move_type == 'out_invoice' and inv.payment_state in ('paid', 'in_payment'))
+        payment_ids = []
+        for invoice in invoices:
+            for move_line in invoice.line_ids:
+                if move_line.account_type in ('asset_receivable', 'liability_payable'):
+                    payment_lines = move_line.matched_debit_ids.mapped('debit_move_id') + move_line.matched_credit_ids.mapped('credit_move_id')
+                    payment_ids.extend(payment_lines.mapped('payment_id').ids)
+
+
+        action = self.env['ir.actions.actions']._for_xml_id('account.action_account_payments')
+        
+        action['domain'] = [('id', 'in', payment_ids)]
+        return action
+    
+    def action_view_costs(self):
+        timesheets = self.order_ids.mapped('project_id.task_ids.timesheet_ids')
+        action = self.env['ir.actions.actions']._for_xml_id('hr_timesheet.hr_timesheet_action_from_employee')
+        action['domain'] = [('id', 'in', timesheets.ids)]
+        return action
+    
     def _prepare_opportunity_quotation_context(self):
         """ Prepares the context for a new quotation (sale.order) by sharing the values of common fields """
         self.ensure_one()
@@ -234,8 +316,31 @@ class MailComposeMessage(models.TransientModel):
         return messages
 
 
+class SaleOrderLead(models.Model):
+    _inherit = 'sale.order'
 
+    amount_invoiced_so = fields.Monetary(compute='_compute_amounts_so', string="Invoiced Amount", currency_field='currency_id')
+    amount_paid_so = fields.Monetary(compute='_compute_amounts_so', string="Paid Amount", currency_field='currency_id')
 
     
+    @api.depends('invoice_ids.payment_state', 'invoice_ids.amount_total', 'invoice_ids.amount_residual')
+    def _compute_amounts_so(self):
+        for order in self:
+            total_invoiced = 0.0
+            total_paid = 0.0
+            currency = order.currency_id or self.env.company.currency_id
 
+            invoices = order.invoice_ids.filtered(lambda inv: inv.move_type == 'out_invoice' and inv.state != 'cancel')
+
+            for invoice in invoices:
+                total_invoiced += invoice.currency_id._convert(
+                    invoice.amount_total, currency, order.company_id, invoice.invoice_date or fields.Date.today()
+                )
+                amount_paid = invoice.amount_total - invoice.amount_residual
+                total_paid += invoice.currency_id._convert(
+                    amount_paid, currency, order.company_id, invoice.invoice_date or fields.Date.today()
+                )
+            
+            order.amount_invoiced_so = total_invoiced
+            order.amount_paid_so = total_paid
 
