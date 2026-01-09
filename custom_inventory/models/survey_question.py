@@ -44,8 +44,7 @@ class SurveyQuestion(models.Model):
         ondelete="set null"
     )
 
-    table_row_ids = fields.One2many('survey.table.row', 'question_id', string="Table Rows")
-    table_column_ids = fields.One2many('survey.table.column', 'question_id', string="Table Columns")
+    table_ids = fields.One2many('survey.table', 'question_id', string="Table")
     static_content = fields.Html("Static Content")
 
     prefill_text = fields.Text(string='Prefill Text')
@@ -58,8 +57,47 @@ class SurveyQuestion(models.Model):
     potential_hazard_ids = fields.Many2many(
         'survey.potential_hazard',relation='survey_assessment_hazard_rel', string="Potential Hazards / Risks"
     )
-   
 
+class SurveyTable(models.Model):
+    _name = 'survey.table'
+    _description = 'Survey Table'
+
+    question_id = fields.Many2one('survey.question', string="Question", ondelete='cascade')
+    row_no = fields.Integer(string="Row No")
+    column_no = fields.Integer(string="Column No")
+    column_name = fields.Char(string="Column Name")
+    value = fields.Char(string="Value")
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super(SurveyTable, self).default_get(fields_list)
+        question_id = self._context.get('default_question_id')
+        if question_id:
+            column_no = res.get('column_no', 1)
+            res['column_no'] = column_no
+
+            parent_question = self.env['survey.question'].browse(question_id)
+            existing_rows = parent_question.table_ids.filtered(lambda t: t.column_no == column_no)
+            last_row_no = max([t.row_no for t in existing_rows], default=0)
+
+            res['row_no'] = last_row_no + 1
+
+            res['column_name'] = f"Column {column_no}"
+
+           
+
+        return res
+
+    @api.onchange('column_no')
+    def _onchange_column_no(self):
+        if self.column_no and self.question_id:
+            parent_question = self.question_id
+            existing_rows = parent_question.table_ids.filtered(lambda t: t.column_no == self.column_no and t != self)
+            last_row_no = max([t.row_no for t in existing_rows], default=0)
+            self.row_no = last_row_no + 1
+            self.column_name = f"Column {self.column_no}"
+
+ 
 
 class SurveyPotentialHazard(models.Model):
     _name = "survey.potential_hazard"
@@ -68,10 +106,6 @@ class SurveyPotentialHazard(models.Model):
 
     name = fields.Char(string="Potential Hazard / Risk", required=True)
     question_id = fields.Many2one('survey.question', string="Question", ondelete='cascade')
-    user_input_line_id = fields.Many2one(
-        'survey.user_input.line',
-        ondelete='cascade'
-    )
     sequence = fields.Integer(string="Sequence", default=10)
     active = fields.Boolean(default=True)  
 
@@ -212,28 +246,6 @@ class SurveyPostControlLikelihood(models.Model):
     sequence = fields.Integer(string="Sequence", default=10)
     active = fields.Boolean(default=True)    
 
-class SurveyTableRow(models.Model):
-    _name = 'survey.table.row'
-    _description = 'Survey Table Row'
-
-    question_id = fields.Many2one('survey.question', string="Question", ondelete='cascade')
-    name = fields.Char(string="Row Title")
-    sequence = fields.Integer(string="Sequence", default=10)
-
-
-class SurveyTableColumn(models.Model):
-    _name = 'survey.table.column'
-    _description = 'Survey Table Column'
-
-    question_id = fields.Many2one('survey.question', string="Question", ondelete='cascade')
-    name = fields.Char(string="Column Title")
-    input_type = fields.Selection([
-        ('text', 'Text'),
-        ('numeric', 'Numeric'),
-        ('dropdown', 'Dropdown')
-    ], string="Input Type", default='text')
-    sequence = fields.Integer(string="Sequence", default=10)
-    dropdown_options = fields.Text(string="Dropdown Options (comma separated)")
 
 
 class SurveyHeading(models.Model):

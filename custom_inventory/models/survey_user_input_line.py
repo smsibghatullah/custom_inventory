@@ -9,13 +9,15 @@ class SurveyUserInputLine(models.Model):
     answer_type = fields.Selection(selection_add=[
         ('digital_signature', 'Digital Signature'),
         ('static_content', 'Static Content') ,
-        ('risk', 'Risk')
+        ('risk', 'Risk'),
+        ('table', 'Table'),
     ])
     hazard_ids = fields.Many2many(
         'survey.potential_hazard',
         relation='survey_input_assessment_hazard_rel', 
         string="Risk Assessment"
     )
+    table_ids = fields.Many2many('survey.table', relation='survey_input_assessment_table_rel', string="Table")
 
     def _compute_display_name(self):
         for line in self:
@@ -34,7 +36,9 @@ class SurveyUserInputLine(models.Model):
             elif line.answer_type == 'static_content':
                 line.display_name = 'Static Content' 
             elif line.answer_type == 'risk':
-                line.display_name = 'Risk'          
+                line.display_name = 'Risk' 
+            elif line.answer_type == 'table':
+                line.display_name = 'Table'             
             elif line.answer_type == 'suggestion':
                 if line.matrix_row_id:
                     line.display_name = f'{line.suggested_answer_id.value}: {line.matrix_row_id.value}'

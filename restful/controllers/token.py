@@ -151,8 +151,11 @@ class AccessToken(http.Controller):
 
             line_ids = payload.pop("user_input_line_ids", [])
             print(line_ids, "================ line_ids raw")
+            # for line in survey_input.sudo().user_input_line_ids:
+            #     line.hazard_ids = [(5, 0, 0)]
 
             survey_input.sudo().user_input_line_ids.unlink()
+           
 
             new_line_ids = []
             for line in line_ids:
@@ -319,8 +322,21 @@ class AccessToken(http.Controller):
                     "answer_value": ans.value,
                     "answer_type": ans.question_type,
                 } for ans in answers]
-                print(question,"===============================================123456789")
+
+                table_data = []
+                print(question.question_type,"question.question_type")
+                if question.question_type == 'table':
+                    print(question.table_ids,"question.table_ids=======================")
+                    for table_line in question.table_ids:
+                        table_data.append({
+                            "id": table_line.id,
+                            "row_no": table_line.row_no,
+                            "column_no": table_line.column_no,
+                            "column_name": table_line.column_name,
+                            "value": table_line.value,
+                        })
                 risk = []
+                print(table_data,"table_data====================================")
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
                         print(hazard.hazard_consequence_id,"=======================================")
@@ -390,7 +406,8 @@ class AccessToken(http.Controller):
                     "refrence_question_id": question.question_id.id,
                     "description": question.description,
                     "answers": answers_data,
-                    'risk':risk
+                    'risk':risk,
+                    "table": table_data
                 })
 
                

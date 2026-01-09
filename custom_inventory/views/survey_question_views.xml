@@ -97,27 +97,19 @@
 
                         </field>
 
+                    <group string="Table" invisible="question_type != 'table'">
+                    
+                   </group>
+                    <field  nolabel="1" name="table_ids"  invisible="question_type != 'table'" context="{'default_question_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="column_no" width="150"/>
+                            <field name="column_name" width="200"/>
+                            <field name="row_no" width="150"/>
+                            <field name="value" width="200"/>
+                        </tree>
+                    </field>
                    
-                    <group>
-                        <field name="table_row_ids" string="Table Rows" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
-                            <tree editable="bottom">
-                                <field name="name"/>
-                                <field name="sequence"/>
-                            </tree>
-                        </field>
-                    </group>
 
-                    <!-- Add Table Columns field -->
-                    <group>
-                        <field name="table_column_ids" string="Table Columns" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
-                            <tree editable="bottom">
-                                <field name="name"/>
-                                <field name="input_type"/>
-                                <field name="dropdown_options"/>
-                                <field name="sequence"/>
-                            </tree>
-                        </field>
-                    </group>
             </xpath>
         </field>
     </record>
@@ -149,6 +141,16 @@
                       <notebook>
 
                     <!-- 🟠 RISK ASSESSMENT TAB -->
+                    <page string="Table" invisible="answer_type != 'table'">
+                        <field  nolabel="1" name="table_ids"  invisible="answer_type != 'table'" context="{'default_question_id': active_id}">
+                            <tree editable="bottom">
+                                <field name="column_no" width="150"/>
+                                <field name="column_name" width="200"/>
+                                <field name="row_no" width="150"/>
+                                <field name="value" width="200"/>
+                            </tree>
+                        </field>
+                    </page>
                     <page string="Risk Assessment" invisible="answer_type != 'risk'">
 
                         <field name="hazard_ids" nolabel="1">
@@ -167,6 +169,7 @@
                                 <field name="control_ids"
                                        widget="many2many_tags"
                                        width="260"/>
+                                  
 
                                 <field name="post_control_hazard_consequence_id"
                                        width="240"/>
@@ -485,9 +488,92 @@
             action="action_post_control_likelihood"
             name="Post Control Likelihood"/>
 
+    <record id="view_survey_potential_hazard_tree" model="ir.ui.view">
+        <field name="name">survey.potential.hazard.tree</field>
+        <field name="model">survey.potential_hazard</field>
+        <field name="arch" type="xml">
+            <tree string="Potential Hazards / Risks" default_order="sequence">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="question_id"/>
+                <field name="initial_risk_score"/>
+                <field name="initial_risk_level"/>
+                <field name="post_control_risk_score"/>
+                <field name="post_control_risk_level"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>        
 
+    <record id="view_survey_potential_hazard_form" model="ir.ui.view">
+        <field name="name">survey.potential.hazard.form</field>
+        <field name="model">survey.potential_hazard</field>
+        <field name="arch" type="xml">
+            <form string="Potential Hazard / Risk">
+                <sheet>
 
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="question_id"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
 
+                    <notebook>
 
+                        <!-- Initial Risk -->
+                        <page string="Initial Risk">
+                            <group>
+                                <field name="hazard_consequence_id"/>
+                                <field name="likelihood_id"/>
+                            </group>
+                            <group>
+                                <field name="initial_risk_score" readonly="1"/>
+                                <field name="initial_risk_level" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <!-- Controls -->
+                        <page string="Control Measures">
+                            <field name="control_ids" widget="many2many_tags"/>
+                        </page>
+
+                        <!-- Post Control Risk -->
+                        <page string="Post-Control Risk">
+                            <group>
+                                <field name="post_control_hazard_consequence_id"/>
+                                <field name="post_control_likelihood_id"/>
+                            </group>
+                            <group>
+                                <field name="post_control_risk_score" readonly="1"/>
+                                <field name="post_control_risk_level" readonly="1"/>
+                            </group>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_survey_potential_hazard" model="ir.actions.act_window">
+        <field name="name">Potential Hazards / Risks</field>
+        <field name="res_model">survey.potential_hazard</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Potential Hazards and assess risks.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_survey_potential_hazard"
+          name="Potential Hazards / Risks"
+          parent="menu_survey_configuration"
+          action="action_survey_potential_hazard"
+          sequence="30"/>
 
 </odoo>
