@@ -1613,6 +1613,733 @@
 </template>
 
 
+<template id="report_employment_certificate">
+    <t t-call="web.html_container">
+
+        <t t-foreach="docs" t-as="o">
+
+            <!-- ================= COMPANY ================= -->
+            <t t-set="company" t-value="o.project_id.company_id or env.company"/>
+
+            <!-- ================================================= -->
+            <!-- COVER PAGE -->
+            <!-- ================================================= -->
+            <div class="page" style="text-align:center; padding-top:30px;">
+
+                <div style="margin-bottom:20px;">
+                    <img t-if="company.logo"
+                         t-att-src="image_data_uri(company.logo)"
+                         style="max-height:260px; max-width:260px;"/>
+                </div>
+
+                <div style="font-size:38px; font-weight:700; color:#9c9c9c;">
+                    <t t-esc="company.name"/>
+                </div>
+
+                <div style="height:35px;"></div>
+
+                <div style="font-size:36px; font-weight:700;">
+                    <t t-esc="o.survey_id.display_name"/>
+                </div>
+
+                <div style="margin-top:8px; font-size:26px;">
+                    Installation / Removal of Shrinkwrap
+                </div>
+
+                <div style="height:40px;"></div>
+
+                <table style="width:75%; margin:0 auto; font-size:18px; text-align:left;">
+                    <tr>
+                        <td style="width:40%; font-weight:700;">Job / Site Name &amp; Location:</td>
+                        <td><t t-esc="o.project_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:700;">PCBU-1 Details:</td>
+                        <td>Geeves Scaffolding - University of Otago</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:700;">PCBU-2 Details:</td>
+                        <td>
+                            <t t-esc="company.name"/><br/>
+                            Manager - <t t-esc="company.partner_id.name"/><br/>
+                            M: <t t-esc="company.phone"/><br/>
+                            E: <t t-esc="company.email"/>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+
+            <!-- COVER → GROUPS -->
+            <div style="page-break-before: always;"></div>
+
+            <!-- ================================================= -->
+            <!-- GROUPS -->
+            <!-- ================================================= -->
+
+            <t t-set="section_no" t-value="1"/>
+
+            <t t-foreach="grouped_data" t-as="grp" t-index="grp_index">
+
+                <!-- EACH GROUP STARTS ON NEW PAGE -->
+                <div class="page" style="font-family:Arial, sans-serif;">
+
+                    <!-- GROUP TITLE -->
+                    <div style="margin-top:20px;">
+                        <div style="
+                            font-size:26px;
+                            font-weight:700;
+                            color:#1c1c5a;
+                        ">
+                            <t t-esc="section_no"/>. <t t-esc="grp['group_name']"/>
+                        </div>
+
+                        <div style="
+                            width:100%;
+                            height:2px;
+                            background:#1c1c5a;
+                            margin-top:6px;
+                        "></div>
+                    </div>
+
+                    <t t-set="section_no" t-value="section_no + 1"/>
+
+                    <!-- HEADING LOOP -->
+                    <t t-foreach="grp['headings']" t-as="head">
+
+                        <div style="
+                            margin-top:26px;
+                            font-size:20px;
+                            font-weight:600;
+                            color:#333;
+                            border-bottom:1px solid #ccc;
+                            padding-bottom:6px;
+                            page-break-inside: avoid;
+                        ">
+                            <t t-esc="head['heading_name']"/>
+                        </div>
+
+                        <!-- QUESTION LOOP -->
+                        <t t-foreach="head['questions']" t-as="q">
+
+                            <div style="
+                                margin-top:18px;
+                                padding:14px;
+                                border:1px solid #ddd;
+                                border-radius:6px;
+                                background:#ffffff;
+                                page-break-inside: avoid;
+                                break-inside: avoid;
+                            ">
+
+                                <!-- QUESTION TITLE -->
+                                <div style="font-size:15px; font-weight:600;">
+                                    <t t-esc="q['question_title']"/>
+                                </div>
+
+                                <!-- SUBTITLE -->
+                                <t t-if="q['subtitle']">
+                                    <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                        <t t-esc="q['subtitle']"/>
+                                    </div>
+                                </t>
+
+                                <!-- DESCRIPTION -->
+                                <t t-if="q['description']">
+                                    <div style="font-size:12px; color:#666; margin-top:4px;">
+                                        <t t-esc="q['description']"/>
+                                    </div>
+                                </t>
+
+                                <!-- ANSWER BOX -->
+                                <div style="
+                                    margin-top:10px;
+                                    padding:12px;
+                                    background:#f4f6f8;
+                                    border:1px solid #1c1c5a;
+                                    border-radius:5px;
+                                ">
+
+                                <!-- TABLE QUESTION (PDF SAFE) -->
+                                <t t-if="q['question_type'] == 'table'">
+
+                                    <div style="
+                                        border:2px solid #2b2f77;
+                                        border-radius:6px;
+                                        padding:12px;
+                                        background:#f9fafc;
+                                        margin-top:10px;
+                                        overflow-x:auto;
+                                    ">
+
+                                        <table style="
+                                            width:100%;
+                                            border-collapse:collapse;
+                                            font-size:14px;
+                                            text-align:center;
+                                        ">
+
+                                            <!-- HEADER -->
+                                            <tr>
+                                                <th style="
+                                                    border:1px solid #1c1c5a;
+                                                    padding:8px;
+                                                    background:#e8ebf8;
+                                                    text-align:left;
+                                                ">
+                                                    
+                                                </th>
+
+                                                <t t-foreach="q['answers']['table_columns']" t-as="col">
+                                                    <th style="
+                                                        border:1px solid #1c1c5a;
+                                                        padding:8px;
+                                                        background:#e8ebf8;
+                                                    ">
+                                                        <t t-esc="col['column_name']"/>
+                                                    </th>
+                                                </t>
+                                            </tr>
+
+                                            <!-- ROWS -->
+                                            <t t-foreach="q['answers']['table_rows']" t-as="row">
+                                                <tr>
+                                                    <!-- Row Label -->
+                                                    <td style="
+                                                        border:1px solid #ccc;
+                                                        padding:8px;
+                                                        text-align:left;
+                                                        font-weight:600;
+                                                        background:#f4f6f8;
+                                                    ">
+                                                        Row <t t-esc="row['row_no']"/>
+                                                    </td>
+
+                                                    <!-- Cells -->
+                                                    <t t-foreach="q['answers']['table_columns']" t-as="col">
+                                                        <td style="
+                                                            border:1px solid #ccc;
+                                                            padding:8px;
+                                                        ">
+                                                            <t t-esc="row['cells'].get(col['column_no'], '')"/>
+                                                        </td>
+                                                    </t>
+                                                </tr>
+                                            </t>
+
+                                        </table>
+
+                                    </div>
+                                </t>
+
+
+                                <!-- MATRIX QUESTION (PDF SAFE) -->
+                                <t t-if="q['question_type'] == 'matrix'">
+
+                                    <div style="
+                                        border:2px solid #2b2f77;
+                                        border-radius:6px;
+                                        padding:14px;
+                                        background:#f9fafc;
+                                        margin-top:8px;
+                                    ">
+
+                                        <table style="
+                                            width:100%;
+                                            border-collapse:collapse;
+                                            font-size:14px;
+                                        ">
+
+                                            <!-- HEADER -->
+                                            <tr>
+                                                <th style="
+                                                    text-align:left;
+                                                    padding:8px;
+                                                    border-bottom:2px solid #1c1c5a;
+                                                ">
+                                                    <!-- Empty corner -->
+                                                </th>
+
+                                                <t t-foreach="q['answers']['matrix_columns']" t-as="col">
+                                                    <th style="
+                                                        text-align:center;
+                                                        padding:8px;
+                                                        border-bottom:2px solid #1c1c5a;
+                                                        font-weight:600;
+                                                        color:#1c1c5a;
+                                                    ">
+                                                        <t t-esc="col['label']"/>
+                                                    </th>
+                                                </t>
+                                            </tr>
+
+                                            <!-- ROWS -->
+                                            <t t-foreach="q['answers']['matrix_rows']" t-as="row">
+
+                                                <tr>
+
+                                                    <!-- ROW LABEL -->
+                                                    <td style="
+                                                        padding:8px;
+                                                        border-bottom:1px solid #ddd;
+                                                        font-weight:500;
+                                                        color:#333;
+                                                        width:30%;
+                                                    ">
+                                                        <t t-esc="row['label']"/>
+                                                    </td>
+
+                                                    <!-- CELLS -->
+                                                    <t t-foreach="row['columns']" t-as="cell">
+                                                        <td style="
+                                                            padding:8px;
+                                                            border-bottom:1px solid #ddd;
+                                                            text-align:center;
+                                                        ">
+
+                                                            <!-- RADIO BOX -->
+                                                            <table style="
+                                                                width:16px;
+                                                                height:16px;
+                                                                margin:auto;
+                                                                border:2px solid #1c1c5a;
+                                                                border-radius:50%;
+                                                                background:#fff;
+                                                            ">
+                                                                <tr>
+                                                                    <td style="text-align:center; vertical-align:middle;">
+                                                                        <t t-if="cell['selected']">
+                                                                            <div style="
+                                                                                width:8px;
+                                                                                height:8px;
+                                                                                background:#1c1c5a;
+                                                                                border-radius:50%;
+                                                                                margin:auto;
+                                                                            "></div>
+                                                                        </t>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+
+                                                        </td>
+                                                    </t>
+
+                                                </tr>
+
+                                            </t>
+
+                                        </table>
+
+                                    </div>
+                                </t>
+
+
+                              <!-- MULTIPLE CHOICE (PDF SAFE - FIXED UI) -->
+                                <t t-if="q['question_type'] == 'multiple_choice'">
+
+                                    <!-- OUTER BOX -->
+                                    <div style="
+                                        border:2px solid #2b2f77;
+                                        border-radius:6px;
+                                        padding:14px;
+                                        background:#f9fafc;
+                                        margin-top:8px;
+                                    ">
+
+                                        <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
+
+                                            <!-- OPTION ROW -->
+                                            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                                                <tr>
+
+                                                    <!-- CHECKBOX CELL -->
+                                                    <td style="width:22px; vertical-align:middle;">
+                                                        <table style="
+                                                            width:18px;
+                                                            height:18px;
+                                                            border:2px solid #1c1c5a;
+                                                            background:#fff;
+                                                        ">
+                                                            <tr>
+                                                                <td style="text-align:center; vertical-align:middle;">
+                                                                    <t t-if="opt['selected']">
+                                                                        <!-- FILLED SQUARE -->
+                                                                        <div style="
+                                                                            width:10px;
+                                                                            height:10px;
+                                                                            background:#1c1c5a;
+                                                                            margin:auto;
+                                                                        "></div>
+                                                                    </t>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+
+                                                    <!-- LABEL CELL -->
+                                                    <td style="
+                                                        font-size:15px;
+                                                        line-height:1.3;
+                                                        color:#222;
+                                                        vertical-align:middle;
+                                                        padding-left:8px;
+                                                    ">
+                                                        <t t-esc="opt['label']"/>
+                                                    </td>
+
+                                                </tr>
+                                            </table>
+
+                                        </t>
+
+                                    </div>
+                                </t>
+
+
+                                <!-- SIMPLE CHOICE (PDF SAFE) -->
+                                <t t-if="q['question_type'] == 'simple_choice'">
+
+                                    <!-- OUTER BOX -->
+                                    <div style="
+                                        border:2px solid #2b2f77;
+                                        border-radius:6px;
+                                        padding:14px;
+                                        background:#f9fafc;
+                                        margin-top:8px;
+                                    ">
+
+                                        <t t-foreach="q['answers']['simple_choice_options']" t-as="opt">
+
+                                            <!-- OPTION ROW -->
+                                            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                                                <tr>
+
+                                                    <!-- RADIO CELL -->
+                                                    <td style="width:22px; vertical-align:middle;">
+                                                        <table style="
+                                                            width:18px;
+                                                            height:18px;
+                                                            border:2px solid #1c1c5a;
+                                                            border-radius:50%;
+                                                            background:#fff;
+                                                        ">
+                                                            <tr>
+                                                                <td style="text-align:center; vertical-align:middle;">
+                                                                    <t t-if="opt['selected']">
+                                                                        <div style="
+                                                                            width:8px;
+                                                                            height:8px;
+                                                                            background:#1c1c5a;
+                                                                            border-radius:50%;
+                                                                            margin:auto;
+                                                                        "></div>
+                                                                    </t>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+
+                                                    <!-- LABEL CELL -->
+                                                    <td style="
+                                                        font-size:15px;
+                                                        line-height:1.2;
+                                                        color:#222;
+                                                        vertical-align:middle;
+                                                        padding-left:8px;
+                                                    ">
+                                                        <t t-esc="opt['label']"/>
+                                                    </td>
+
+                                                </tr>
+                                            </table>
+
+                                        </t>
+
+                                    </div>
+                                </t>
+
+
+
+
+                                    <!-- TEXT -->
+                                    <t t-elif="q['question_type'] == 'text_box'">
+                                        <t t-esc="q['answers']['text_box']"/>
+                                    </t>
+
+                                    <!-- CHAR -->
+                                    <t t-elif="q['question_type'] == 'char_box'">
+                                        <t t-esc="q['answers']['char_box']"/>
+                                    </t>
+
+                                    <!-- NUMBER -->
+                                    <t t-elif="q['question_type'] == 'numerical_box'">
+                                        <t t-esc="q['answers']['numerical_box']"/>
+                                    </t>
+
+                                    <!-- DATE -->
+                                    <t t-elif="q['question_type'] == 'date'">
+                                        <t t-esc="q['answers']['date']"/>
+                                    </t>
+
+                                    <!-- DATETIME -->
+                                    <t t-elif="q['question_type'] == 'datetime'">
+                                        <t t-esc="q['answers']['datetime']"/>
+                                    </t>
+
+                                    <!-- SIGNATURE -->
+                                    <t t-elif="q['question_type'] == 'digital_signature'">
+                                       <div style="text-align:center;">
+                                            <img t-att-src="image_data_uri(q['answers']['digital_signature'])"
+                                                 style="max-height:120px; max-width:100%;"/>
+                                        </div>
+                                    </t>
+
+                                    <!-- STATIC CONTENT -->
+                                    <t t-elif="q['question_type'] == 'static_content'">
+                                        <div style="
+                                            background:#fff4e6;
+                                            border-left:6px solid #f58220;
+                                            padding:12px;
+                                            border-radius:4px;
+                                        ">
+                                            <div t-raw="q['answers']['static_content']"/>
+                                        </div>
+                                    </t>
+
+                                    <t t-else="">-</t>
+
+                                </div>
+                            </div>
+
+                        </t>
+                    </t>
+                </div>
+
+                <!-- PAGE BREAK AFTER EACH GROUP (EXCEPT LAST) -->
+                <t t-if="grp_index != len(grouped_data) - 1">
+                    <div style="page-break-after: always;"></div>
+                </t>
+
+            </t>
+             <div style="page-break-after: always;"></div>
+            <!-- ===================== RISK REGISTER ===================== -->
+            <t t-if="risk_register">
+            <div class="page" style="font-family:Arial, sans-serif;">
+
+                <div style="font-size:22px; font-weight:700; margin-bottom:12px;">
+                RISK REGISTER
+                </div>
+
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <tr style="background:#bfbfbf; font-weight:700;">
+                    <td style="border:1px solid #000; padding:6px;">STEPS / ACTIVITY</td>
+                    <td style="border:1px solid #000; padding:6px;">POTENTIAL HAZARD</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center;">CONSEQUENCE</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center;">LIKELIHOOD</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center;">INITIAL RISK</td>
+                    <td style="border:1px solid #000; padding:6px;">CONTROLS TO BE IMPLEMENTED</td>
+                    <td style="border:1px solid #000; padding:6px; text-align:center;">POST RISK</td>
+                </tr>
+
+                <t t-foreach="risk_register" t-as="r">
+
+                    <!-- ACTIVITY -->
+                    <tr style="background:#d9e1f2; font-weight:700;">
+                    <td colspan="7" style="border:1px solid #000; padding:6px;">
+                        <t t-esc="r.get('activity','')"/>
+                    </td>
+                    </tr>
+
+                    <!-- SUBTITLE e.g. PARK -->
+                    <t t-if="r.get('subtitle')">
+                    <tr style="background:#f2f2f2;">
+                        <td colspan="7" style="border:1px solid #000; padding:6px; font-weight:700;">
+                        <t t-esc="r.get('subtitle','')"/>
+                        </td>
+                    </tr>
+                    </t>
+
+                    <!-- HAZARDS -->
+                    <t t-foreach="r.get('hazards', [])" t-as="h">
+                    <tr>
+                        <td style="border:1px solid #000; padding:6px;"></td>
+
+                        <td style="border:1px solid #000; padding:6px;">
+                        <t t-esc="h.get('hazard','')"/>
+                        </td>
+
+                        <td style="border:1px solid #000; padding:6px; text-align:center;">
+                        <t t-esc="h.get('consequence',0)"/>
+                        </td>
+
+                        <td style="border:1px solid #000; padding:6px; text-align:center;">
+                        <t t-esc="h.get('likelihood',0)"/>
+                        </td>
+
+                        <!-- INITIAL RISK (NO <t> INSIDE style) -->
+                        <td t-att-style="
+                            'border:1px solid #000; padding:6px; text-align:center; font-weight:700; background:' +
+                            ('#ff0000' if (h.get('initial_level','').lower() == 'high')
+                            else '#ffa500' if (h.get('initial_level','').lower() == 'medium')
+                            else '#00ff00')
+                        ">
+                        <t t-esc="h.get('initial_score',0)"/> -
+                        <t t-esc="(h.get('initial_level','') or '').upper()"/>
+                        </td>
+
+                        <!-- CONTROLS -->
+                        <td style="border:1px solid #000; padding:6px;">
+                        <t t-if="h.get('controls')">
+                            <t t-foreach="h.get('controls')" t-as="c">
+                            • <t t-esc="c"/><br/>
+                            </t>
+                        </t>
+                        <t t-else="">-</t>
+                        </td>
+
+                        <!-- POST RISK -->
+                        <td t-att-style="
+                            'border:1px solid #000; padding:6px; text-align:center; font-weight:700; background:' +
+                            ('#ff0000' if (h.get('post_level','').lower() == 'high')
+                            else '#ffa500' if (h.get('post_level','').lower() == 'medium')
+                            else '#00ff00')
+                        ">
+                        <t t-esc="h.get('post_score',0)"/> -
+                        <t t-esc="(h.get('post_level','') or '').upper()"/>
+                        </td>
+
+                    </tr>
+                    </t>
+
+                </t>
+                </table>
+            </div>
+
+            <!-- ================= RISK SCORE MATRIX ================= -->
+            <div style="margin-top:40px; font-family:Arial, sans-serif;">
+
+            <div style="font-size:18px; font-weight:700; margin-bottom:10px;">
+                RISK SCORE MATRIX
+            </div>
+
+            <!-- TOP LEGEND TABLE -->
+            <table style="border-collapse:collapse; font-size:12px; margin-bottom:18px;">
+                <tr>
+                <th style="border:1px solid #000; padding:6px; background:#e6e6e6;">
+                    HAZARD CONSEQUENCE RATING
+                </th>
+                <th style="border:1px solid #000; padding:6px; background:#e6e6e6;">
+                    LIKELIHOOD
+                </th>
+                </tr>
+
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#b6d7a8;">1 - Minor</td>
+                <td style="border:1px solid #000; padding:6px; background:#b6d7a8;">1 - Very Unlikely</td>
+                </tr>
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#ffe599;">2 - Significant</td>
+                <td style="border:1px solid #000; padding:6px; background:#ffe599;">2 - Unlikely</td>
+                </tr>
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#f9cb9c;">3 - Serious</td>
+                <td style="border:1px solid #000; padding:6px; background:#f9cb9c;">3 - Possible</td>
+                </tr>
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#f4b183;">4 - Critical</td>
+                <td style="border:1px solid #000; padding:6px; background:#f4b183;">4 - Likely</td>
+                </tr>
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#e06666; color:#fff;">
+                    5 - Disastrous
+                </td>
+                <td style="border:1px solid #000; padding:6px; background:#e06666; color:#fff;">
+                    5 - Very Likely
+                </td>
+                </tr>
+            </table>
+
+            <!-- MAIN MATRIX -->
+            <table style="border-collapse:collapse; font-size:12px; text-align:center;">
+
+                <!-- HEADER -->
+                <tr>
+                <th style="border:1px solid #000; padding:8px; background:#9fc5e8;">
+                    RISK SCORE
+                </th>
+                <th style="border:1px solid #000; padding:8px; background:#b6d7a8;">1 - Very Unlikely</th>
+                <th style="border:1px solid #000; padding:8px; background:#ffe599;">2 - Unlikely</th>
+                <th style="border:1px solid #000; padding:8px; background:#f9cb9c;">3 - Possible</th>
+                <th style="border:1px solid #000; padding:8px; background:#f4b183;">4 - Likely</th>
+                <th style="border:1px solid #000; padding:8px; background:#e06666; color:#fff;">
+                    5 - Very Likely
+                </th>
+                </tr>
+
+                <!-- ROW 1 -->
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#b6d7a8;">1 - Minor</td>
+                <td style="background:#00ff00; border:1px solid #000;">1 - LOW</td>
+                <td style="background:#00ff00; border:1px solid #000;">2 - LOW</td>
+                <td style="background:#00ff00; border:1px solid #000;">3 - LOW</td>
+                <td style="background:#00ff00; border:1px solid #000;">4 - LOW</td>
+                <td style="background:#00ff00; border:1px solid #000;">5 - LOW</td>
+                </tr>
+
+                <!-- ROW 2 -->
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#ffe599;">2 - Significant</td>
+                <td style="background:#00ff00; border:1px solid #000;">2 - LOW</td>
+                <td style="background:#00ff00; border:1px solid #000;">4 - LOW</td>
+                <td style="background:#ffa500; border:1px solid #000;">6 - MEDIUM</td>
+                <td style="background:#ffa500; border:1px solid #000;">8 - MEDIUM</td>
+                <td style="background:#ffa500; border:1px solid #000;">10 - MEDIUM</td>
+                </tr>
+
+                <!-- ROW 3 -->
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#f9cb9c;">3 - Serious</td>
+                <td style="background:#00ff00; border:1px solid #000;">3 - LOW</td>
+                <td style="background:#ffa500; border:1px solid #000;">6 - MEDIUM</td>
+                <td style="background:#ffa500; border:1px solid #000;">9 - MEDIUM</td>
+                <td style="background:#ffa500; border:1px solid #000;">12 - MEDIUM</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">15 - HIGH</td>
+                </tr>
+
+                <!-- ROW 4 -->
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#f4b183;">4 - Critical</td>
+                <td style="background:#00ff00; border:1px solid #000;">4 - LOW</td>
+                <td style="background:#ffa500; border:1px solid #000;">8 - MEDIUM</td>
+                <td style="background:#ffa500; border:1px solid #000;">12 - MEDIUM</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">16 - HIGH</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">20 - HIGH</td>
+                </tr>
+
+                <!-- ROW 5 -->
+                <tr>
+                <td style="border:1px solid #000; padding:6px; background:#e06666; color:#fff;">
+                    5 - Disastrous
+                </td>
+                <td style="background:#00ff00; border:1px solid #000;">5 - LOW</td>
+                <td style="background:#ffa500; border:1px solid #000;">10 - MEDIUM</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">15 - HIGH</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">20 - HIGH</td>
+                <td style="background:#ff0000; color:#fff; border:1px solid #000;">25 - HIGH</td>
+                </tr>
+
+            </table>
+
+            <div style="margin-top:8px; font-size:11px; font-weight:700;">
+                ↑ HAZARD CONSEQUENCE RATING
+            </div>
+
+            </div>
+            
+            </t>
+        </t>
+    </t>
+</template>
 
 
     </data>

@@ -271,43 +271,55 @@ class AccessToken(http.Controller):
         })
 
 
-    @http.route('/api/survey_question_data/<int:survey_id>', type="http", auth="public", methods=["GET"], csrf=False)
+    @http.route('/api/survey_question_data/<int:survey_id>',
+                type="http", auth="public", methods=["GET"], csrf=False)
     def get_survey_questions(self, survey_id, **kwargs):
+
         try:
             survey = request.env['survey.survey'].sudo().browse(survey_id)
             if not survey.exists():
                 return {"error": "Survey not found"}
 
-            questions = request.env['survey.question'].sudo().search([
-                ('id', 'in', survey.question_ids.ids)
-            ])
+            # 🔹 Get questions ordered by GROUP → HEADING → QUESTION sequence
+            questions = request.env['survey.question'].sudo().search(
+                [('id', 'in', survey.question_ids.ids)],
+                order="""
+                    group_id.sequence ASC,
+                    heading_id.sequence ASC,
+                    sequence ASC,
+                    id ASC
+                """
+            )
 
             grouped_data = {}
 
             for question in questions:
 
                 group = question.group_id
-                group_id = group.id if group else 0
-                group_name = group.name if group else ""
+                heading = question.heading_id
 
+                group_id = group.id if group else 0
+                heading_id = heading.id if heading else 0
+
+                # ---------------- GROUP ----------------
                 if group_id not in grouped_data:
                     grouped_data[group_id] = {
                         "group_id": group_id,
-                        "group_name": group_name,
+                        "group_name": group.name if group else "",
+                        "sequence": group.sequence if group else 0,
                         "heading": {}
                     }
 
-                heading = question.heading_id
-                heading_id = heading.id if heading else 0
-                heading_name = heading.name if heading else ""
-
+                # ---------------- HEADING ----------------
                 if heading_id not in grouped_data[group_id]["heading"]:
                     grouped_data[group_id]["heading"][heading_id] = {
                         "heading_id": heading_id,
-                        "heading_name": heading_name,
+                        "heading_name": heading.name if heading else "",
+                        "sequence": heading.sequence if heading else 0,
                         "questions": []
                     }
 
+                # ---------------- ANSWERS ----------------
                 answer_ids = (
                     question.suggested_answer_ids.ids +
                     question.matrix_row_ids.ids
@@ -323,25 +335,26 @@ class AccessToken(http.Controller):
                     "answer_type": ans.question_type,
                 } for ans in answers]
 
+                # ---------------- TABLE ----------------
                 table_data = []
-                print(question.question_type,"question.question_type")
                 if question.question_type == 'table':
-                    print(question.table_ids,"question.table_ids=======================")
-                    for table_line in question.table_ids:
+                    for tl in question.table_ids.sorted(
+                        key=lambda r: (r.row_no, r.column_no)
+                    ):
                         table_data.append({
-                            "id": table_line.id,
-                            "row_no": table_line.row_no,
-                            "column_no": table_line.column_no,
-                            "column_name": table_line.column_name,
-                            "value": table_line.value,
+                            "id": tl.id,
+                            "row_no": tl.row_no,
+                            "column_no": tl.column_no,
+                            "column_name": tl.column_name,
+                            "value": tl.value,
                         })
+
+                # ---------------- RISK ----------------
                 risk = []
-                print(table_data,"table_data====================================")
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
-                        print(hazard.hazard_consequence_id,"=======================================")
                         risk.append({
-                            "question_id":question.id,
+                            "question_id": question.id,
                             "hazard_id": hazard.id,
                             "hazard_name": hazard.name,
 
@@ -363,10 +376,8 @@ class AccessToken(http.Controller):
                             },
 
                             "controls": [
-                                {
-                                    "id": control.id,
-                                    "name": control.name,
-                                } for control in hazard.control_ids
+                                {"id": c.id, "name": c.name}
+                                for c in hazard.control_ids
                             ],
 
                             "post_control_hazard_consequence": {
@@ -387,43 +398,37 @@ class AccessToken(http.Controller):
                             },
                         })
 
+                # ---------------- APPEND QUESTION ----------------
                 grouped_data[group_id]["heading"][heading_id]["questions"].append({
                     "question_id": question.id,
                     "question_name": question.display_name,
                     "question_type": question.question_type,
+                    "sequence": question.sequence,
                     "subtitle": question.subtitle,
+                    "description": question.description,
                     "auto_filled": question.auto_filled,
                     "pre_filled": question.pre_filled,
-                    "prefill_value": (
-                        question.prefill_text if question.pre_filled and question.question_type == 'text_box' else
-                        question.prefill_char if question.pre_filled and question.question_type == 'char_box' else
-                        question.prefill_number if question.pre_filled and question.question_type == 'numerical_box' else
-                        question.prefill_date if question.pre_filled and question.question_type == 'date' else
-                        question.prefill_datetime if question.pre_filled and question.question_type == 'datetime' else
-                        question.prefill_signature if question.pre_filled and question.question_type == 'digital_signature' else
-                        None
-                    ),
-                    "refrence_question_id": question.question_id.id,
-                    "description": question.description,
                     "answers": answers_data,
-                    'risk':risk,
+                    "risk": risk,
                     "table": table_data
                 })
 
-               
-
+            # ================= FINAL SORT =================
             result = []
-            for group in grouped_data.values():
-                group["heading"] = list(group["heading"].values())
-                result.append(group)
 
-            response_data = {
+            for grp in sorted(grouped_data.values(), key=lambda g: g["sequence"]):
+                headings = sorted(
+                    grp["heading"].values(),
+                    key=lambda h: h["sequence"]
+                )
+                grp["heading"] = headings
+                result.append(grp)
+
+            return valid_response({
                 "survey_id": survey.id,
                 "survey_title": survey.title,
                 "questions_by_heading": result
-            }
-
-            return valid_response(response_data)
+            })
 
         except AccessError as e:
             return {"error": "Access error", "message": str(e)}
