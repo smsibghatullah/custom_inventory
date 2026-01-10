@@ -271,55 +271,57 @@ class AccessToken(http.Controller):
         })
 
 
-    @http.route('/api/survey_question_data/<int:survey_id>',
-                type="http", auth="public", methods=["GET"], csrf=False)
+    @http.route('/api/survey_question_data/<int:survey_id>', type="http", auth="public", methods=["GET"], csrf=False)
     def get_survey_questions(self, survey_id, **kwargs):
-
         try:
             survey = request.env['survey.survey'].sudo().browse(survey_id)
             if not survey.exists():
                 return {"error": "Survey not found"}
 
-            # 🔹 Get questions ordered by GROUP → HEADING → QUESTION sequence
-            questions = request.env['survey.question'].sudo().search(
-                [('id', 'in', survey.question_ids.ids)],
-                order="""
-                    group_id.sequence ASC,
-                    heading_id.sequence ASC,
-                    sequence ASC,
-                    id ASC
-                """
+            # ✅ IMPORTANT: keep original source, only sort
+            questions = survey.question_ids.sorted(
+                key=lambda q: (
+                    q.group_id.sequence if q.group_id else 0,
+                    q.heading_id.sequence if q.heading_id else 0,
+                    q.sequence,
+                    q.id
+                )
             )
 
             grouped_data = {}
 
             for question in questions:
 
-                group = question.group_id
-                heading = question.heading_id
-
-                group_id = group.id if group else 0
-                heading_id = heading.id if heading else 0
-
                 # ---------------- GROUP ----------------
+                group = question.group_id
+                group_id = group.id if group else 0
+
                 if group_id not in grouped_data:
                     grouped_data[group_id] = {
                         "group_id": group_id,
                         "group_name": group.name if group else "",
-                        "sequence": group.sequence if group else 0,
+                        "group_sequence": group.sequence if group else 0,
                         "heading": {}
                     }
 
                 # ---------------- HEADING ----------------
+                heading = question.heading_id
+                heading_id = heading.id if heading else 0
+
                 if heading_id not in grouped_data[group_id]["heading"]:
                     grouped_data[group_id]["heading"][heading_id] = {
                         "heading_id": heading_id,
                         "heading_name": heading.name if heading else "",
-                        "sequence": heading.sequence if heading else 0,
+                        "heading_sequence": heading.sequence if heading else 0,
                         "questions": []
                     }
 
                 # ---------------- ANSWERS ----------------
+                answers_data = []
+                table_data = []
+                risk_data = []
+
+                # ---------- SUGGESTED ANSWERS ----------
                 answer_ids = (
                     question.suggested_answer_ids.ids +
                     question.matrix_row_ids.ids
@@ -329,31 +331,28 @@ class AccessToken(http.Controller):
                     ('id', 'in', answer_ids)
                 ])
 
-                answers_data = [{
-                    "answer_id": ans.id,
-                    "answer_value": ans.value,
-                    "answer_type": ans.question_type,
-                } for ans in answers]
+                for ans in answers:
+                    answers_data.append({
+                        "answer_id": ans.id,
+                        "answer_value": ans.value,
+                        "answer_type": ans.question_type,
+                    })
 
-                # ---------------- TABLE ----------------
-                table_data = []
+                # ---------- TABLE ----------
                 if question.question_type == 'table':
-                    for tl in question.table_ids.sorted(
-                        key=lambda r: (r.row_no, r.column_no)
-                    ):
+                    for line in question.table_ids.sorted(key=lambda l: (l.row_no, l.column_no)):
                         table_data.append({
-                            "id": tl.id,
-                            "row_no": tl.row_no,
-                            "column_no": tl.column_no,
-                            "column_name": tl.column_name,
-                            "value": tl.value,
+                            "id": line.id,
+                            "row_no": line.row_no,
+                            "column_no": line.column_no,
+                            "column_name": line.column_name,
+                            "value": line.value,
                         })
 
-                # ---------------- RISK ----------------
-                risk = []
+                # ---------- RISK ----------
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
-                        risk.append({
+                        risk_data.append({
                             "question_id": question.id,
                             "hazard_id": hazard.id,
                             "hazard_name": hazard.name,
@@ -398,31 +397,43 @@ class AccessToken(http.Controller):
                             },
                         })
 
-                # ---------------- APPEND QUESTION ----------------
+                # ---------------- QUESTION ----------------
                 grouped_data[group_id]["heading"][heading_id]["questions"].append({
                     "question_id": question.id,
                     "question_name": question.display_name,
                     "question_type": question.question_type,
-                    "sequence": question.sequence,
+                    "question_sequence": question.sequence,
                     "subtitle": question.subtitle,
                     "description": question.description,
                     "auto_filled": question.auto_filled,
                     "pre_filled": question.pre_filled,
+                    "prefill_value": (
+                        question.prefill_text if question.pre_filled and question.question_type == 'text_box' else
+                        question.prefill_char if question.pre_filled and question.question_type == 'char_box' else
+                        question.prefill_number if question.pre_filled and question.question_type == 'numerical_box' else
+                        question.prefill_date if question.pre_filled and question.question_type == 'date' else
+                        question.prefill_datetime if question.pre_filled and question.question_type == 'datetime' else
+                        question.prefill_signature if question.pre_filled and question.question_type == 'digital_signature' else
+                        None
+                    ),
                     "answers": answers_data,
-                    "risk": risk,
-                    "table": table_data
+                    "table": table_data,
+                    "risk": risk_data,
                 })
 
-            # ================= FINAL SORT =================
+            # ---------------- FINAL SORT ----------------
             result = []
-
-            for grp in sorted(grouped_data.values(), key=lambda g: g["sequence"]):
-                headings = sorted(
-                    grp["heading"].values(),
-                    key=lambda h: h["sequence"]
+            for group in sorted(grouped_data.values(), key=lambda g: g["group_sequence"]):
+                group["heading"] = sorted(
+                    group["heading"].values(),
+                    key=lambda h: h["heading_sequence"]
                 )
-                grp["heading"] = headings
-                result.append(grp)
+                for h in group["heading"]:
+                    h["questions"] = sorted(
+                        h["questions"],
+                        key=lambda q: q["question_sequence"]
+                    )
+                result.append(group)
 
             return valid_response({
                 "survey_id": survey.id,
@@ -430,11 +441,9 @@ class AccessToken(http.Controller):
                 "questions_by_heading": result
             })
 
-        except AccessError as e:
-            return {"error": "Access error", "message": str(e)}
-
         except Exception as e:
             return {"error": "Unexpected error", "message": str(e)}
+
 
 
     @http.route('/api/list_databases', type="http", auth="public", methods=["GET"], csrf=False)
