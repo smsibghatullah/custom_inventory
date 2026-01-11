@@ -24,83 +24,65 @@ class AccessToken(http.Controller):
         
     @http.route('/api/send_survey_via_email', type='json', auth='user', methods=['POST'], csrf=False)
     def send_survey_via_email(self, **kwargs):
-        # Decode & parse JSON
-        payload_str = request.httprequest.data.decode()
-        print(payload_str, "=========================")
 
+        payload_str = request.httprequest.data.decode()
         try:
             payload = json.loads(payload_str or "{}")
         except Exception as e:
             return {"success": False, "error": f"Invalid JSON: {str(e)}"}
 
         user_input_ids = payload.get("user_input_ids", [])
-        user_id = payload.get("user_id")
-        recipient_ids = payload.get('recipients', [])
-        cc_emails = payload.get('cc', []) or payload.get('ccEmail', [])
+        recipient_ids = payload.get("recipients", [])
+        cc_emails = payload.get("cc", []) or payload.get("ccEmail", [])
 
         if not user_input_ids:
             return {"success": False, "error": "No survey inputs provided"}
 
+        # 🔑 SAME REPORT AS WIZARD
+        report_action = request.env.ref('custom_inventory.action_report_employment_certificate')
+
         attachments = []
+        company = None
 
         for u_input_id in user_input_ids:
-            answer = request.env['survey.user_input'].sudo().browse(u_input_id)
-            if not answer.exists():
+            user_input = request.env['survey.user_input'].sudo().browse(u_input_id)
+            if not user_input.exists():
                 continue
 
-            survey = answer.survey_id
+            # ---- Generate PDF (ODOO 17 CORRECT WAY) ----
+            pdf_content, _ = report_action._render_qweb_pdf(
+                report_action.report_name,
+                res_ids=[user_input.id]
+            )
 
-            # Determine company
-            company = None
-            if user_id:
-                user = request.env['res.users'].sudo().browse(int(user_id))
-                if user.exists():
-                    company = user.company_id
-            if not company:
-                company = answer.company_id or request.env.user.company_id
-
-            company_logo = company.logo or False
-
-            # Render HTML
-            html = request.env['ir.qweb']._render('survey.survey_page_print', {
-                'is_html_empty': False,
-                'review': False,
-                'survey': survey,
-                'answer': answer,
-                'questions_to_display': answer._get_print_questions(),
-                'scoring_display_correction': survey.scoring_type in [
-                    'scoring_with_answers', 'scoring_with_answers_after_page'
-                ] and answer,
-                'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
-                'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
-                'graph_data': json.dumps(answer._prepare_statistics()[answer]) if answer and survey.scoring_type in [
-                    'scoring_with_answers', 'scoring_with_answers_after_page'
-                ] else False,
-                'company_logo': company_logo,
-                'company_name': company.name,
-                'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
-                'user': request.env.user
-            })
-
-            pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
             attachment = request.env['ir.attachment'].sudo().create({
-                'name': f"{survey.title or 'Survey'}_{answer.id}.pdf",
+                'name': f"{user_input.survey_id.title or 'Survey'}_{user_input.id}.pdf",
                 'type': 'binary',
                 'datas': base64.b64encode(pdf_content),
                 'res_model': 'survey.user_input',
-                'res_id': answer.id,
+                'res_id': user_input.id,
                 'mimetype': 'application/pdf',
             })
+
             attachments.append(attachment.id)
 
-        if not attachments:
-            return {"success": False, "error": "No valid survey PDFs generated"}
+            # ----- Get company from first valid user_input -----
+            if not company:
+                if user_input.project_id:
+                    company = user_input.project_id.company_id
+                elif user_input.task_id and user_input.task_id.project_id:
+                    company = user_input.task_id.project_id.company_id
 
+        # fallback to logged in user's company
+        if not company:
+            company = request.env.user.company_id
+
+        # -------- Send Email --------
         mail_values = {
-            'subject': f"Survey Results",
+            'subject': "Survey Results",
             'body_html': f"""
                 <p>Dear User,</p>
-                <p>Please find attached your survey result reports.</p>
+                <p>Please find attached your survey result report(s).</p>
                 <p>Best regards,<br/>{company.name}</p>
             """,
             'email_to': ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids,
@@ -112,7 +94,11 @@ class AccessToken(http.Controller):
         mail = request.env['mail.mail'].sudo().create(mail_values)
         mail.send()
 
-        return {"success": True, "message": "Survey PDFs sent successfully"}
+        return {
+            "success": True,
+            "message": "Survey PDFs sent successfully"
+        }
+
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
@@ -278,50 +264,36 @@ class AccessToken(http.Controller):
             if not survey.exists():
                 return {"error": "Survey not found"}
 
-            # ✅ IMPORTANT: keep original source, only sort
-            questions = survey.question_ids.sorted(
-                key=lambda q: (
-                    q.group_id.sequence if q.group_id else 0,
-                    q.heading_id.sequence if q.heading_id else 0,
-                    q.sequence,
-                    q.id
-                )
-            )
+            questions = request.env['survey.question'].sudo().search([
+                ('id', 'in', survey.question_ids.ids)
+            ])
 
             grouped_data = {}
 
             for question in questions:
 
-                # ---------------- GROUP ----------------
                 group = question.group_id
                 group_id = group.id if group else 0
+                group_name = group.name if group else ""
 
                 if group_id not in grouped_data:
                     grouped_data[group_id] = {
                         "group_id": group_id,
-                        "group_name": group.name if group else "",
-                        "group_sequence": group.sequence if group else 0,
+                        "group_name": group_name,
                         "heading": {}
                     }
 
-                # ---------------- HEADING ----------------
                 heading = question.heading_id
                 heading_id = heading.id if heading else 0
+                heading_name = heading.name if heading else ""
 
                 if heading_id not in grouped_data[group_id]["heading"]:
                     grouped_data[group_id]["heading"][heading_id] = {
                         "heading_id": heading_id,
-                        "heading_name": heading.name if heading else "",
-                        "heading_sequence": heading.sequence if heading else 0,
+                        "heading_name": heading_name,
                         "questions": []
                     }
 
-                # ---------------- ANSWERS ----------------
-                answers_data = []
-                table_data = []
-                risk_data = []
-
-                # ---------- SUGGESTED ANSWERS ----------
                 answer_ids = (
                     question.suggested_answer_ids.ids +
                     question.matrix_row_ids.ids
@@ -331,29 +303,31 @@ class AccessToken(http.Controller):
                     ('id', 'in', answer_ids)
                 ])
 
-                for ans in answers:
-                    answers_data.append({
-                        "answer_id": ans.id,
-                        "answer_value": ans.value,
-                        "answer_type": ans.question_type,
-                    })
+                answers_data = [{
+                    "answer_id": ans.id,
+                    "answer_value": ans.value,
+                    "answer_type": ans.question_type,
+                } for ans in answers]
 
-                # ---------- TABLE ----------
+                table_data = []
+                print(question.question_type,"question.question_type")
                 if question.question_type == 'table':
-                    for line in question.table_ids.sorted(key=lambda l: (l.row_no, l.column_no)):
+                    print(question.table_ids,"question.table_ids=======================")
+                    for table_line in question.table_ids:
                         table_data.append({
-                            "id": line.id,
-                            "row_no": line.row_no,
-                            "column_no": line.column_no,
-                            "column_name": line.column_name,
-                            "value": line.value,
+                            "id": table_line.id,
+                            "row_no": table_line.row_no,
+                            "column_no": table_line.column_no,
+                            "column_name": table_line.column_name,
+                            "value": table_line.value,
                         })
-
-                # ---------- RISK ----------
+                risk = []
+                print(table_data,"table_data====================================")
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
-                        risk_data.append({
-                            "question_id": question.id,
+                        print(hazard.hazard_consequence_id,"=======================================")
+                        risk.append({
+                            "question_id":question.id,
                             "hazard_id": hazard.id,
                             "hazard_name": hazard.name,
 
@@ -375,8 +349,10 @@ class AccessToken(http.Controller):
                             },
 
                             "controls": [
-                                {"id": c.id, "name": c.name}
-                                for c in hazard.control_ids
+                                {
+                                    "id": control.id,
+                                    "name": control.name,
+                                } for control in hazard.control_ids
                             ],
 
                             "post_control_hazard_consequence": {
@@ -397,14 +373,11 @@ class AccessToken(http.Controller):
                             },
                         })
 
-                # ---------------- QUESTION ----------------
                 grouped_data[group_id]["heading"][heading_id]["questions"].append({
                     "question_id": question.id,
                     "question_name": question.display_name,
                     "question_type": question.question_type,
-                    "question_sequence": question.sequence,
                     "subtitle": question.subtitle,
-                    "description": question.description,
                     "auto_filled": question.auto_filled,
                     "pre_filled": question.pre_filled,
                     "prefill_value": (
@@ -416,34 +389,33 @@ class AccessToken(http.Controller):
                         question.prefill_signature if question.pre_filled and question.question_type == 'digital_signature' else
                         None
                     ),
+                    "refrence_question_id": question.question_id.id,
+                    "description": question.description,
                     "answers": answers_data,
-                    "table": table_data,
-                    "risk": risk_data,
+                    'risk':risk,
+                    "table": table_data
                 })
 
-            # ---------------- FINAL SORT ----------------
+               
+
             result = []
-            for group in sorted(grouped_data.values(), key=lambda g: g["group_sequence"]):
-                group["heading"] = sorted(
-                    group["heading"].values(),
-                    key=lambda h: h["heading_sequence"]
-                )
-                for h in group["heading"]:
-                    h["questions"] = sorted(
-                        h["questions"],
-                        key=lambda q: q["question_sequence"]
-                    )
+            for group in grouped_data.values():
+                group["heading"] = list(group["heading"].values())
                 result.append(group)
 
-            return valid_response({
+            response_data = {
                 "survey_id": survey.id,
                 "survey_title": survey.title,
                 "questions_by_heading": result
-            })
+            }
+
+            return valid_response(response_data)
+
+        except AccessError as e:
+            return {"error": "Access error", "message": str(e)}
 
         except Exception as e:
             return {"error": "Unexpected error", "message": str(e)}
-
 
 
     @http.route('/api/list_databases', type="http", auth="public", methods=["GET"], csrf=False)

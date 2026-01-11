@@ -228,6 +228,8 @@
                     <group col="2">
                         <group>
                             <field name="survey_id"/>
+                            <field name="project_id" readonly="1" invisible="project_id == False"/>
+                            <field name="task_id" readonly="1"  invisible="task_id == False"/>
                             <field name="create_date"/>
                             <field name="deadline" invisible="state == 'done' and not deadline"/>
                             <field name="is_attempts_limited" invisible="1"/>

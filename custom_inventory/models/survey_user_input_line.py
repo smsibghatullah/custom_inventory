@@ -86,6 +86,35 @@ class SurveyUserInput(models.Model):
         self.ensure_one()
         return self.env.ref('custom_inventory.action_report_employment_certificate').report_action(self)
 
+    def action_open_send_pdf_wizard(self):
+        first = self[0]  # first selected user_input
+        # project or task object
+        project = first.project_id
+        task = first.task_id
+        print(project.company_id.id,"===================")
+
+        # company_id logic
+        company_id = (
+            project.company_id.id
+            if project
+            else task.project_id.company_id.id
+            if task and task.project_id
+            else False
+        )
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Send Survey PDF',
+            'res_model': 'survey.send.pdf.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_user_input_ids': self.ids,
+                'default_company_id': company_id,
+            }
+        }
+
+
     def _save_lines(self, question, answer, comment=None, overwrite_existing=True):
         """ Save answers to questions, depending on question type.
 

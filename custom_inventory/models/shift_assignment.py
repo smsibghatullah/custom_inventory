@@ -648,6 +648,12 @@ class Project(models.Model):
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
     survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
+    pcbu_1_details = fields.Char(
+        string="PCBU-1 Details",
+    )
+    pcbu_2_details = fields.Char(
+        string="PCBU-2 Details"
+    )
 
     def _compute_survey_form_count(self):
         for project in self:
