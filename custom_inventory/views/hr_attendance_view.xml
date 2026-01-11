@@ -23,6 +23,7 @@
       </xpath>
       <xpath expr="//field[@name='check_out']" position="after">
         <field name="comment" />
+        <field name="notes" />
       </xpath>
       <xpath expr="//field[@name='worked_hours']" position="after">
         <field name="approved_hours" widget="float_time"/>
@@ -41,6 +42,17 @@
     <field name="model">hr.attendance</field>
     <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
     <field name="arch" type="xml">
+
+      <xpath expr="//tree" position="inside">
+            <header>
+                <button
+                    name="action_export_attendance_csv"
+                    type="object"
+                    string="Export CSV"
+                    class="btn-primary"
+                />
+            </header>
+        </xpath>
 
       <xpath expr="//field[@name='worked_hours']" position="attributes">
         <attribute name="string">Submit Hours</attribute>
