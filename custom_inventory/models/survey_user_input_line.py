@@ -224,11 +224,11 @@ class ReportEmploymentCertificate(models.AbstractModel):
         user_inputs = self.env['survey.user_input'].browse(docids)
 
         grouped_data = {}
-        risk_register = []   # ✅ master risk table at end
+        risk_register = []
 
+        # ================= BUILD RAW DATA =================
         for user_input in user_inputs:
 
-            # all questions answered in this survey
             questions = user_input.user_input_line_ids.mapped('question_id')
 
             for question in questions:
@@ -239,7 +239,6 @@ class ReportEmploymentCertificate(models.AbstractModel):
                 group_id = group.id if group else 0
                 heading_id = heading.id if heading else 0
 
-                # ---------------- GROUP ----------------
                 if group_id not in grouped_data:
                     grouped_data[group_id] = {
                         'group_id': group_id,
@@ -248,7 +247,6 @@ class ReportEmploymentCertificate(models.AbstractModel):
                         'headings': {}
                     }
 
-                # ---------------- HEADING ----------------
                 if heading_id not in grouped_data[group_id]['headings']:
                     grouped_data[group_id]['headings'][heading_id] = {
                         'heading_id': heading_id,
@@ -257,7 +255,6 @@ class ReportEmploymentCertificate(models.AbstractModel):
                         'questions': []
                     }
 
-                # ❌ avoid duplicate question (multiple user_input_line exist)
                 already_added = any(
                     q['question_id'] == question.id
                     for q in grouped_data[group_id]['headings'][heading_id]['questions']
@@ -265,12 +262,10 @@ class ReportEmploymentCertificate(models.AbstractModel):
                 if already_added:
                     continue
 
-                # ---------------- QUESTION LINES ----------------
                 question_lines = user_input.user_input_line_ids.filtered(
                     lambda l: l.question_id.id == question.id
                 )
 
-                # ---------------- ANSWERS ----------------
                 answers = {
                     'char_box': '',
                     'text_box': '',
@@ -279,91 +274,65 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     'datetime': '',
                     'digital_signature': False,
                     'static_content': '',
-
                     'simple_choice_options': [],
                     'multiple_choice_options': [],
-
                     'matrix_columns': [],
                     'matrix_rows': [],
-
                     'table_columns': [],
                     'table_rows': [],
-
                     'risk': [],
                 }
 
                 # ---------- SIMPLE CHOICE ----------
                 if question.question_type == 'simple_choice':
-                    selected_line = question_lines[:1]
-                    selected_answer = selected_line.suggested_answer_id if selected_line else False
-
+                    selected = question_lines[:1].suggested_answer_id
                     for opt in question.suggested_answer_ids:
                         answers['simple_choice_options'].append({
                             'answer_id': opt.id,
                             'label': opt.value,
-                            'selected': bool(selected_answer and opt.id == selected_answer.id)
+                            'selected': bool(selected and opt.id == selected.id)
                         })
 
                 # ---------- MULTIPLE CHOICE ----------
                 elif question.question_type == 'multiple_choice':
-                    selected_answer_ids = set(question_lines.mapped('suggested_answer_id').ids)
-
+                    selected_ids = set(question_lines.mapped('suggested_answer_id').ids)
                     for opt in question.suggested_answer_ids:
                         answers['multiple_choice_options'].append({
                             'answer_id': opt.id,
                             'label': opt.value,
-                            'selected': opt.id in selected_answer_ids
+                            'selected': opt.id in selected_ids
                         })
 
                 # ---------- TABLE ----------
                 elif question.question_type == 'table':
-                    table_columns = {}
-                    table_rows = {}
-
+                    cols, rows = {}, {}
                     for tl in question.table_ids:
-                        if tl.column_no not in table_columns:
-                            table_columns[tl.column_no] = {
-                                'column_no': tl.column_no,
-                                'column_name': tl.column_name
-                            }
+                        cols.setdefault(tl.column_no, {
+                            'column_no': tl.column_no,
+                            'column_name': tl.column_name
+                        })
+                        rows.setdefault(tl.row_no, {
+                            'row_no': tl.row_no,
+                            'cells': {}
+                        })
+                        rows[tl.row_no]['cells'][tl.column_no] = tl.value
 
-                        if tl.row_no not in table_rows:
-                            table_rows[tl.row_no] = {
-                                'row_no': tl.row_no,
-                                'cells': {}
-                            }
-
-                        table_rows[tl.row_no]['cells'][tl.column_no] = tl.value
-
-                    answers['table_columns'] = sorted(
-                        table_columns.values(),
-                        key=lambda c: c['column_no']
-                    )
-                    answers['table_rows'] = sorted(
-                        table_rows.values(),
-                        key=lambda r: r['row_no']
-                    )
+                    answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
+                    answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])
 
                 # ---------- MATRIX ----------
                 elif question.question_type == 'matrix':
-
                     for col in question.suggested_answer_ids:
-                        answers['matrix_columns'].append({
-                            'id': col.id,
-                            'label': col.value,
-                        })
+                        answers['matrix_columns'].append({'id': col.id, 'label': col.value})
 
-                    row_map = {}
-                    for row in question.matrix_row_ids:
-                        row_map[row.id] = {
-                            'id': row.id,
-                            'label': row.value,
-                            'selected_cols': set()
-                        }
+                    row_map = {
+                        r.id: {'id': r.id, 'label': r.value, 'selected': set()}
+                        for r in question.matrix_row_ids
+                    }
 
                     for ln in question_lines:
                         if ln.matrix_row_id and ln.suggested_answer_id:
-                            row_map[ln.matrix_row_id.id]['selected_cols'].add(
+                            row_map[ln.matrix_row_id.id]['selected'].add(
                                 ln.suggested_answer_id.id
                             )
 
@@ -372,57 +341,38 @@ class ReportEmploymentCertificate(models.AbstractModel):
                             'id': row['id'],
                             'label': row['label'],
                             'columns': [
-                                {
-                                    'column_id': col['id'],
-                                    'selected': col['id'] in row['selected_cols']
-                                }
-                                for col in answers['matrix_columns']
+                                {'column_id': c['id'], 'selected': c['id'] in row['selected']}
+                                for c in answers['matrix_columns']
                             ]
                         })
 
                 # ---------- RISK ----------
                 elif question.question_type == 'risk':
-
                     key = (question.title or '', question.subtitle or '')
-
                     risk_block = next(
-                        (r for r in risk_register
-                         if r['activity'] == key[0] and r['subtitle'] == key[1]),
+                        (r for r in risk_register if r['activity'] == key[0] and r['subtitle'] == key[1]),
                         None
                     )
-
                     if not risk_block:
-                        risk_block = {
-                            'activity': key[0],
-                            'subtitle': key[1],
-                            'hazards': []
-                        }
+                        risk_block = {'activity': key[0], 'subtitle': key[1], 'hazards': []}
                         risk_register.append(risk_block)
 
-                    for hazard in question.potential_hazard_ids:
+                    for hz in question.potential_hazard_ids:
                         row = {
-                            'hazard': hazard.name or '',
-                            'consequence': (
-                                f"{hazard.hazard_consequence_id.rating} - "
-                                f"{hazard.hazard_consequence_id.name}"
-                                if hazard.hazard_consequence_id else ''
-                            ),
-                            'likelihood': (
-                                f"{hazard.likelihood_id.rating} - "
-                                f"{hazard.likelihood_id.name}"
-                                if hazard.likelihood_id else ''
-                            ),
-                            'initial_score': hazard.initial_risk_score,
-                            'initial_level': hazard.initial_risk_level,
-                            'controls': hazard.control_ids.mapped('name'),
-                            'post_score': hazard.post_control_risk_score,
-                            'post_level': hazard.post_control_risk_level,
+                            'hazard': hz.name,
+                            'consequence': f"{hz.hazard_consequence_id.rating} - {hz.hazard_consequence_id.name}"
+                            if hz.hazard_consequence_id else '',
+                            'likelihood': f"{hz.likelihood_id.rating} - {hz.likelihood_id.name}"
+                            if hz.likelihood_id else '',
+                            'initial_score': hz.initial_risk_score,
+                            'initial_level': hz.initial_risk_level,
+                            'controls': hz.control_ids.mapped('name'),
+                            'post_score': hz.post_control_risk_score,
+                            'post_level': hz.post_control_risk_level,
                         }
-
                         risk_block['hazards'].append(row)
                         answers['risk'].append(row)
 
-                # ---------- OTHER TYPES ----------
                 for ln in question_lines:
                     answers['char_box'] = ln.value_char_box or answers['char_box']
                     answers['text_box'] = ln.value_text_box or answers['text_box']
@@ -430,12 +380,10 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     answers['date'] = ln.value_date or answers['date']
                     answers['datetime'] = ln.value_datetime or answers['datetime']
                     answers['digital_signature'] = ln.digital_signature or answers['digital_signature']
-                    answers['static_content'] = (
-                        self._clean_html_unicode(ln.static_content)
-                        or answers['static_content']
-                    )
+                    answers['static_content'] = self._clean_html_unicode(
+                        ln.static_content
+                    ) or answers['static_content']
 
-                # ---------------- STORE QUESTION ----------------
                 grouped_data[group_id]['headings'][heading_id]['questions'].append({
                     'question_id': question.id,
                     'question_title': question.title,
@@ -446,30 +394,73 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     'answers': answers,
                 })
 
-        # ================= SORT EVERYTHING =================
+        # ================= QUESTION SEQUENCE DRIVEN SORT =================
+        visited_groups = set()
+        final_groups = []
 
-        grouped_list = []
+        flat = []
+        for g in grouped_data.values():
+            for h in g['headings'].values():
+                for q in h['questions']:
+                    flat.append({'group': g, 'heading': h, 'question': q})
 
-        for grp in sorted(grouped_data.values(), key=lambda g: g['sequence']):
+        flat = sorted(flat, key=lambda x: x['question']['sequence'])
 
-            headings_list = []
+        def get_group(g):
+            grp = next((x for x in final_groups if x['group_id'] == g['group_id']), None)
+            if not grp:
+                grp = {
+                    'group_id': g['group_id'],
+                    'group_name': g['group_name'],
+                    'sequence': g['sequence'],
+                    'headings': []
+                }
+                final_groups.append(grp)
+            return grp
 
-            for head in sorted(grp['headings'].values(), key=lambda h: h['sequence']):
+        def get_heading(grp, h):
+            head = next((x for x in grp['headings'] if x['heading_id'] == h['heading_id']), None)
+            if not head:
+                head = {
+                    'heading_id': h['heading_id'],
+                    'heading_name': h['heading_name'],
+                    'sequence': h['sequence'],
+                    'questions': []
+                }
+                grp['headings'].append(head)
+            return head
 
-                head['questions'] = sorted(
-                    head['questions'],
-                    key=lambda q: q['sequence']
-                )
+        for item in flat:
+            g = item['group']
+            h = item['heading']
+            q = item['question']
 
-                headings_list.append(head)
+            if g['group_id'] in visited_groups:
+                continue
 
-            grp['headings'] = headings_list
-            grouped_list.append(grp)
+            grp = get_group(g)
+
+            if g['group_id'] == 0:
+                head = get_heading(grp, h)
+                head['questions'].append(q)
+                continue
+
+            visited_groups.add(g['group_id'])
+
+            for hh in sorted(g['headings'].values(), key=lambda x: x['sequence']):
+                head = get_heading(grp, hh)
+                for qq in sorted(hh['questions'], key=lambda x: x['sequence']):
+                    head['questions'].append(qq)
+
+        for g in final_groups:
+            g['headings'] = sorted(g['headings'], key=lambda x: x['sequence'])
+            for h in g['headings']:
+                h['questions'] = sorted(h['questions'], key=lambda x: x['sequence'])
 
         return {
             'doc_ids': docids,
             'doc_model': 'survey.user_input',
             'docs': user_inputs,
-            'grouped_data': grouped_list,
+            'grouped_data': final_groups,
             'risk_register': risk_register,
         }
