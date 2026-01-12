@@ -11,5 +11,13 @@
         <field name="domain">[('company_id', 'in', context.get('allowed_company_ids'))]</field>
     </record>
 
+    <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
+        <field name="domain">[('company_id', 'in', context.get('allowed_company_ids'))]</field>
+    </record>
+    
+    <record id="account.action_account_payments_payable" model="ir.actions.act_window">
+        <field name="domain">[('company_id', 'in', context.get('allowed_company_ids'))]</field>
+    </record>
+
 
 </odoo>
