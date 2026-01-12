@@ -1,5 +1,6 @@
-from odoo import models, fields,_
+from odoo import models, fields,_,api
 import textwrap
+import re
 
 class SurveyUserInputLine(models.Model):
     _inherit = 'survey.user_input.line'
@@ -18,6 +19,35 @@ class SurveyUserInputLine(models.Model):
         string="Risk Assessment"
     )
     table_ids = fields.Many2many('survey.table', relation='survey_input_assessment_table_rel', string="Table")
+    heading_id = fields.Many2one(
+        'survey.heading',
+        string="Heading",
+        related='question_id.heading_id',
+        store=True,
+        readonly=True
+    )
+
+    group_id = fields.Many2one(
+        'survey.group',
+        string="Group",
+        related='question_id.group_id',
+        store=True,
+        readonly=True
+    )
+
+    subtitle = fields.Char(
+        string="Subtitle",
+        related='question_id.subtitle',
+        store=True,
+        readonly=True
+    )
+
+    description = fields.Char(
+        string="Description / Helper Text",
+        related='question_id.description',
+        store=True,
+        readonly=True
+    )
 
     def _compute_display_name(self):
         for line in self:
@@ -51,6 +81,39 @@ class SurveyUserInputLine(models.Model):
 
 class SurveyUserInput(models.Model):
     _inherit = 'survey.user_input'
+
+    def action_download_employment_certificate(self):
+        self.ensure_one()
+        return self.env.ref('custom_inventory.action_report_employment_certificate').report_action(self)
+
+    def action_open_send_pdf_wizard(self):
+        first = self[0]  # first selected user_input
+        # project or task object
+        project = first.project_id
+        task = first.task_id
+        print(project.company_id.id,"===================")
+
+        # company_id logic
+        company_id = (
+            project.company_id.id
+            if project
+            else task.project_id.company_id.id
+            if task and task.project_id
+            else False
+        )
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Send Survey PDF',
+            'res_model': 'survey.send.pdf.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_user_input_ids': self.ids,
+                'default_company_id': company_id,
+            }
+        }
+
 
     def _save_lines(self, question, answer, comment=None, overwrite_existing=True):
         """ Save answers to questions, depending on question type.
@@ -138,3 +201,275 @@ class SurveyUserInput(models.Model):
             return self.env['survey.user_input.line'].create(vals)
 
     
+
+class ReportEmploymentCertificate(models.AbstractModel):
+    _name = 'report.custom_inventory.report_employment_certificate'
+    _description = 'Employment Certificate Report'
+
+    def _clean_html_unicode(self, text):
+        if not text:
+            return ""
+        unicode_controls = [
+            u'\u202a', u'\u202b', u'\u202c',
+            u'\u202d', u'\u202e',
+            u'\u200e', u'\u200f'
+        ]
+        for ch in unicode_controls:
+            text = text.replace(ch, '')
+        return text
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+
+        user_inputs = self.env['survey.user_input'].browse(docids)
+
+        grouped_data = {}
+        risk_register = []   # ✅ master risk table at end
+
+        for user_input in user_inputs:
+
+            # all questions answered in this survey
+            questions = user_input.user_input_line_ids.mapped('question_id')
+
+            for question in questions:
+
+                group = question.group_id
+                heading = question.heading_id
+
+                group_id = group.id if group else 0
+                heading_id = heading.id if heading else 0
+
+                # ---------------- GROUP ----------------
+                if group_id not in grouped_data:
+                    grouped_data[group_id] = {
+                        'group_id': group_id,
+                        'group_name': group.name if group else '',
+                        'sequence': group.sequence if group else 0,
+                        'headings': {}
+                    }
+
+                # ---------------- HEADING ----------------
+                if heading_id not in grouped_data[group_id]['headings']:
+                    grouped_data[group_id]['headings'][heading_id] = {
+                        'heading_id': heading_id,
+                        'heading_name': heading.name if heading else '',
+                        'sequence': heading.sequence if heading else 0,
+                        'questions': []
+                    }
+
+                # ❌ avoid duplicate question (multiple user_input_line exist)
+                already_added = any(
+                    q['question_id'] == question.id
+                    for q in grouped_data[group_id]['headings'][heading_id]['questions']
+                )
+                if already_added:
+                    continue
+
+                # ---------------- QUESTION LINES ----------------
+                question_lines = user_input.user_input_line_ids.filtered(
+                    lambda l: l.question_id.id == question.id
+                )
+
+                # ---------------- ANSWERS ----------------
+                answers = {
+                    'char_box': '',
+                    'text_box': '',
+                    'numerical_box': '',
+                    'date': '',
+                    'datetime': '',
+                    'digital_signature': False,
+                    'static_content': '',
+
+                    'simple_choice_options': [],
+                    'multiple_choice_options': [],
+
+                    'matrix_columns': [],
+                    'matrix_rows': [],
+
+                    'table_columns': [],
+                    'table_rows': [],
+
+                    'risk': [],
+                }
+
+                # ---------- SIMPLE CHOICE ----------
+                if question.question_type == 'simple_choice':
+                    selected_line = question_lines[:1]
+                    selected_answer = selected_line.suggested_answer_id if selected_line else False
+
+                    for opt in question.suggested_answer_ids:
+                        answers['simple_choice_options'].append({
+                            'answer_id': opt.id,
+                            'label': opt.value,
+                            'selected': bool(selected_answer and opt.id == selected_answer.id)
+                        })
+
+                # ---------- MULTIPLE CHOICE ----------
+                elif question.question_type == 'multiple_choice':
+                    selected_answer_ids = set(question_lines.mapped('suggested_answer_id').ids)
+
+                    for opt in question.suggested_answer_ids:
+                        answers['multiple_choice_options'].append({
+                            'answer_id': opt.id,
+                            'label': opt.value,
+                            'selected': opt.id in selected_answer_ids
+                        })
+
+                # ---------- TABLE ----------
+                elif question.question_type == 'table':
+                    table_columns = {}
+                    table_rows = {}
+
+                    for tl in question.table_ids:
+                        if tl.column_no not in table_columns:
+                            table_columns[tl.column_no] = {
+                                'column_no': tl.column_no,
+                                'column_name': tl.column_name
+                            }
+
+                        if tl.row_no not in table_rows:
+                            table_rows[tl.row_no] = {
+                                'row_no': tl.row_no,
+                                'cells': {}
+                            }
+
+                        table_rows[tl.row_no]['cells'][tl.column_no] = tl.value
+
+                    answers['table_columns'] = sorted(
+                        table_columns.values(),
+                        key=lambda c: c['column_no']
+                    )
+                    answers['table_rows'] = sorted(
+                        table_rows.values(),
+                        key=lambda r: r['row_no']
+                    )
+
+                # ---------- MATRIX ----------
+                elif question.question_type == 'matrix':
+
+                    for col in question.suggested_answer_ids:
+                        answers['matrix_columns'].append({
+                            'id': col.id,
+                            'label': col.value,
+                        })
+
+                    row_map = {}
+                    for row in question.matrix_row_ids:
+                        row_map[row.id] = {
+                            'id': row.id,
+                            'label': row.value,
+                            'selected_cols': set()
+                        }
+
+                    for ln in question_lines:
+                        if ln.matrix_row_id and ln.suggested_answer_id:
+                            row_map[ln.matrix_row_id.id]['selected_cols'].add(
+                                ln.suggested_answer_id.id
+                            )
+
+                    for row in row_map.values():
+                        answers['matrix_rows'].append({
+                            'id': row['id'],
+                            'label': row['label'],
+                            'columns': [
+                                {
+                                    'column_id': col['id'],
+                                    'selected': col['id'] in row['selected_cols']
+                                }
+                                for col in answers['matrix_columns']
+                            ]
+                        })
+
+                # ---------- RISK ----------
+                elif question.question_type == 'risk':
+
+                    key = (question.title or '', question.subtitle or '')
+
+                    risk_block = next(
+                        (r for r in risk_register
+                         if r['activity'] == key[0] and r['subtitle'] == key[1]),
+                        None
+                    )
+
+                    if not risk_block:
+                        risk_block = {
+                            'activity': key[0],
+                            'subtitle': key[1],
+                            'hazards': []
+                        }
+                        risk_register.append(risk_block)
+
+                    for hazard in question.potential_hazard_ids:
+                        row = {
+                            'hazard': hazard.name or '',
+                            'consequence': (
+                                f"{hazard.hazard_consequence_id.rating} - "
+                                f"{hazard.hazard_consequence_id.name}"
+                                if hazard.hazard_consequence_id else ''
+                            ),
+                            'likelihood': (
+                                f"{hazard.likelihood_id.rating} - "
+                                f"{hazard.likelihood_id.name}"
+                                if hazard.likelihood_id else ''
+                            ),
+                            'initial_score': hazard.initial_risk_score,
+                            'initial_level': hazard.initial_risk_level,
+                            'controls': hazard.control_ids.mapped('name'),
+                            'post_score': hazard.post_control_risk_score,
+                            'post_level': hazard.post_control_risk_level,
+                        }
+
+                        risk_block['hazards'].append(row)
+                        answers['risk'].append(row)
+
+                # ---------- OTHER TYPES ----------
+                for ln in question_lines:
+                    answers['char_box'] = ln.value_char_box or answers['char_box']
+                    answers['text_box'] = ln.value_text_box or answers['text_box']
+                    answers['numerical_box'] = ln.value_numerical_box or answers['numerical_box']
+                    answers['date'] = ln.value_date or answers['date']
+                    answers['datetime'] = ln.value_datetime or answers['datetime']
+                    answers['digital_signature'] = ln.digital_signature or answers['digital_signature']
+                    answers['static_content'] = (
+                        self._clean_html_unicode(ln.static_content)
+                        or answers['static_content']
+                    )
+
+                # ---------------- STORE QUESTION ----------------
+                grouped_data[group_id]['headings'][heading_id]['questions'].append({
+                    'question_id': question.id,
+                    'question_title': question.title,
+                    'question_type': question.question_type,
+                    'sequence': question.sequence,
+                    'subtitle': question.subtitle,
+                    'description': question.description,
+                    'answers': answers,
+                })
+
+        # ================= SORT EVERYTHING =================
+
+        grouped_list = []
+
+        for grp in sorted(grouped_data.values(), key=lambda g: g['sequence']):
+
+            headings_list = []
+
+            for head in sorted(grp['headings'].values(), key=lambda h: h['sequence']):
+
+                head['questions'] = sorted(
+                    head['questions'],
+                    key=lambda q: q['sequence']
+                )
+
+                headings_list.append(head)
+
+            grp['headings'] = headings_list
+            grouped_list.append(grp)
+
+        return {
+            'doc_ids': docids,
+            'doc_model': 'survey.user_input',
+            'docs': user_inputs,
+            'grouped_data': grouped_list,
+            'risk_register': risk_register,
+        }

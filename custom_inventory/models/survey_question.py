@@ -9,6 +9,7 @@ class SurveyQuestion(models.Model):
         ('table', 'Table'),
         ('risk', 'Risk')
     ])
+    sequence = fields.Integer(default=1)
 
     heading_id = fields.Many2one(
         "survey.heading",
@@ -263,5 +264,5 @@ class SurveyGroup(models.Model):
     _order = "sequence, id"
 
     name = fields.Char(string="Name", required=True)
-    sequence = fields.Integer(string="Sequence", default=10)
+    sequence = fields.Integer(string="Sequence", default=1)
     active = fields.Boolean(default=True)

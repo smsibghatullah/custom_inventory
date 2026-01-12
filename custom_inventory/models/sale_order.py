@@ -664,6 +664,7 @@ class SaleOrder(models.Model):
                 print(task_vals, "task===========================================")
                 task = self.env['project.task'].create(task_vals)
                 order.project_id.task_ids = [(4, task.id)]
+                order.project_id.company_id = order.company_id
 
         for order in self:
             if order.opportunity_id:

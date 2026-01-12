@@ -180,6 +180,10 @@
                         <field name="survey_form_count" string="Surveys Forms" widget="statinfo"/>
                     </button>
                 </xpath>
+                <field name="date_start" position="after">
+                    <field name="pcbu_1_details"/>
+                    <field name="pcbu_2_details"/>
+                </field>
             </field>
         </record>
 
@@ -298,6 +302,13 @@
                             string="Send PDF"
                             class="btn-primary"
                             icon="fa-envelope"/>
+
+                     <button
+                        name="action_download_employment_certificate"
+                        type="object"
+                        string="Download PDF"
+                        class="btn-primary"
+                        icon="fa-file-pdf-o"/>        
                 </header>
                 
                 <xpath expr="//page[@name='page_answers']/field[@name='user_input_line_ids']" position="attributes">
@@ -305,6 +316,25 @@
                 </xpath>
 
             </field>
+        </record>
+
+        <record id="action_report_employment_certificate" model="ir.actions.report">
+            <field name="name">Survey</field>
+            <field name="model">survey.user_input</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_inventory.report_employment_certificate</field>
+            <field name="report_file">custom_inventory.report_employment_certificate</field>
+
+            <!-- 🔑 PDF FILE NAME -->
+            <field name="print_report_name">
+                'Survey - %s' % (object.survey_id.title or 'Report')
+            </field>
+
+            <!-- 🔥 APPLY CLEAN FORMAT -->
+            <field name="paperformat_id" ref="custom_inventory.paperformat_survey_clean"/>
+
+            <field name="binding_model_id" ref="survey.model_survey_user_input"/>
+            <field name="binding_type">report</field>
         </record>
 
 
