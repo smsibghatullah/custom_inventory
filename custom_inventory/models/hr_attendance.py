@@ -64,7 +64,6 @@ class HrAttendance(models.Model):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
 
-        # CSV Header
         writer.writerow([
             'Employee',
             'Work Name',
@@ -82,6 +81,11 @@ class HrAttendance(models.Model):
             check_in = fields.Datetime.from_string(att.check_in) if att.check_in else False
             check_out = fields.Datetime.from_string(att.check_out) if att.check_out else False
 
+            worked_hours = att.worked_hours or 0
+            break_hours = self._break_to_float(att.break_time) 
+            total_hours = round(worked_hours + break_hours, 2) 
+            print(total_hours,"===========================",worked_hours,break_hours) 
+
             writer.writerow([
                 att.employee_id.name or '',
                 att.work_name or 'Standard Work',
@@ -90,8 +94,8 @@ class HrAttendance(models.Model):
                 att.notes or '',
                 check_in.strftime('%H:%M') if check_in else '',
                 check_out.strftime('%H:%M') if check_out else '',
-                round(att.worked_hours or 0, 2),
-                self._break_to_float(att.break_time),
+                total_hours,              
+                break_hours,
                 att.unit or 'Hours'
             ])
 
@@ -108,12 +112,12 @@ class HrAttendance(models.Model):
             'mimetype': 'text/csv',
         })
 
-        # ✅ DIRECT DOWNLOAD ACTION
         return {
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
         }
+
 
     @api.onchange('check_in', 'check_out', 'break_time')
     def _compute_worked_hours(self):
