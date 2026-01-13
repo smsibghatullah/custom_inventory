@@ -66,6 +66,28 @@
             </field>
         </record>
 
+        <record id="view_crm_lead_so_profitability_tab" model="ir.ui.view">
+            <field name="name">crm.lead.profitability.tab.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='attached_so_details_tab']" position="after">
+                    
+                    <page string="Profitability" name="crm_lead_profitability">
+                        <field name="order_ids" widget="section_and_note_one2many" options="{'no_create': True}">
+                            <tree string="Sale Orders" delete="false">
+                                <field name="name" string="SO Number"/>
+                                <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
+                                <field name="profitability_amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </tree>
+                        </field>
+                    </page>
+                    
+                </xpath>
+            </field>
+        </record>
+
 
         <record id="sale_order_view_form_inherit_manual_link_fix" model="ir.ui.view">
             <field name="name">sale.order.form.inherit.manual.link.fix</field>

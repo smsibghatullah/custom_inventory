@@ -60,6 +60,11 @@ class CrmLead(models.Model):
     total_cost_amount = fields.Monetary(compute='_compute_cost_data', string="Total Cost", currency_field='company_currency')
     cost_count = fields.Integer(compute='_compute_cost_data', string="Number of Timesheets")
 
+    # total_profitability_amount = fields.Monetary(compute='_compute_profitability_data', string="Profitability", currency_field='company_currency')
+    # profitability_percentage = fields.Float(compute='_compute_profitability_data', string="Profit Percentage", digits=(12,2))
+    # other_cost_amount = fields.Monetary(string="Other Costs", currency_field='company_currency', help="Manual entry for other costs not covered by timesheets.") # Other Costs ke liye manual entry field
+
+
     @api.model
     def create(self, vals):
         if vals.get('expected_revenue', 0) <= 0:
@@ -316,7 +321,13 @@ class SaleOrderLead(models.Model):
     amount_invoiced_so = fields.Monetary(compute='_compute_amounts_so', string="Invoiced Amount", currency_field='currency_id')
     amount_paid_so = fields.Monetary(compute='_compute_amounts_so', string="Paid Amount", currency_field='currency_id')
     amount_cost_so = fields.Monetary(compute='_compute_cost_so', string="Total Cost", currency_field='currency_id')
-
+    profitability_amount_cost_so = fields.Monetary(compute='_compute_cost_so', string="Total Cost", currency_field='currency_id')
+    other_profitability_cost_so = fields.Monetary(
+        string="Other Cost", 
+        currency_field='currency_id', 
+        help="Manual entry for other costs not covered by timesheets."
+    )
+    
     lead_id = fields.Many2one(
         'crm.lead', 
         string='Related Lead', 
@@ -345,13 +356,20 @@ class SaleOrderLead(models.Model):
             order.amount_invoiced_so = total_invoiced
             order.amount_paid_so = total_paid
 
-    @api.depends('project_id.task_ids.timesheet_ids.amount')
+    @api.depends(
+            'project_id.task_ids.timesheet_ids.amount',
+            'order_line.product_id.standard_price',
+        )
     def _compute_cost_so(self):
         for order in self:
             total_cost = 0.0
             currency = order.currency_id or self.env.company.currency_id
 
             timesheets = order.project_id.task_ids.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+            total_product_cost = 0.0
+            for line in order.order_line:
+                cost = line.product_id.standard_price
+                total_product_cost += cost
 
             for sheet in timesheets:
                 if sheet.currency_id and sheet.currency_id != currency:
@@ -360,5 +378,5 @@ class SaleOrderLead(models.Model):
                     )
                 else:
                     total_cost += sheet.unit_amount
-            
+            order.profitability_amount_cost_so = total_cost + total_product_cost
             order.amount_cost_so = total_cost
