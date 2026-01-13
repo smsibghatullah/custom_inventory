@@ -243,11 +243,19 @@ class AkahuTransaction(models.Model):
         else:
             move_types = ['in_invoice', 'out_refund']
 
-        invoices = self.env['account.move'].search([
+        allowed_company_ids = self.env.context.get('allowed_company_ids')
+
+        # Build the base domain
+        domain = [
             ('state', '=', 'posted'),
             ('payment_state', 'in', ['not_paid', 'partial']),
             ('move_type', 'in', move_types),
-        ])
+        ]
+
+        if allowed_company_ids:
+            domain.append(('company_id', 'in', allowed_company_ids))
+
+        invoices = self.env['account.move'].search(domain)
 
         return {
             'type': 'ir.actions.act_window',
