@@ -62,7 +62,7 @@ class HrAttendance(models.Model):
 
     def _excel_text(self, value):
         """Force Excel to treat value as text"""
-        return f'{value}' if value else ''    
+        return f"'{value}"   
 
     def action_export_attendance_csv(self):
         buffer = io.StringIO()
@@ -88,7 +88,10 @@ class HrAttendance(models.Model):
             worked_hours = att.worked_hours or 0
             break_hours = self._break_to_float(att.break_time) 
             total_hours = round(worked_hours + break_hours, 2) 
-            print(total_hours,"===========================",worked_hours,break_hours) 
+            print(att.check_in,att.check_out,"forst date time")
+            print(check_out,"checkout===========================",check_in,"checkin") 
+            print(self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
+                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),"hh:mm==================")
 
             writer.writerow([
                 att.employee_id.name or '',

@@ -1614,7 +1614,10 @@
 
 
 <template id="report_employment_certificate">
-    <t t-call="web.html_container">
+    <t t-call="web.external_layout_standard">
+    <main>
+    
+    
 
         <t t-foreach="docs" t-as="o">
 
@@ -1624,7 +1627,7 @@
             <!-- ================================================= -->
             <!-- COVER PAGE -->
             <!-- ================================================= -->
-          <div class="page" style="width:100%; height:100%;">
+          <div class="page" style="width:100%; height:100%; font-family: DejaVu Sans, Arial, sans-serif;">
 
                 <table style="
                     width:100%;
@@ -1710,7 +1713,7 @@
 
                 <!-- EACH GROUP STARTS ON NEW PAGE -->
                 <div class="page" style="
-                    font-family:Arial, sans-serif;
+                    font-family: DejaVu Sans, Arial, sans-serif;
                     padding-top:0px;
                     padding-bottom:0px;
                     margin-top:0px;
@@ -1754,6 +1757,7 @@
 
                         <!-- QUESTION LOOP -->
                         <t t-foreach="head['questions']" t-as="q">
+                           <t t-if="q['question_type'] != 'risk'">
 
                             <div style="
                                 margin-top:18px;
@@ -1867,227 +1871,147 @@
 
 
                                 <!-- MATRIX QUESTION (PDF SAFE) -->
-                                <t t-if="q['question_type'] == 'matrix'">
+                                    <t t-if="q['question_type'] == 'matrix'">
 
-                                    <div style="
-                                        border:2px solid #2b2f77;
-                                        border-radius:6px;
-                                        padding:14px;
-                                        background:#f9fafc;
-                                        margin-top:8px;
-                                    ">
+                                    <div style="border:2px solid #2b2f77; padding:12px;">
 
-                                        <table style="
-                                            width:100%;
-                                            border-collapse:collapse;
-                                            font-size:14px;
-                                        ">
+                                        <table style="width:100%; border-collapse:collapse;">
 
                                             <!-- HEADER -->
                                             <tr>
-                                                <th style="
-                                                    text-align:left;
-                                                    padding:8px;
-                                                    border-bottom:2px solid #1c1c5a;
-                                                ">
-                                                    <!-- Empty corner -->
-                                                </th>
-
+                                                <td style="width:30%;"></td>
                                                 <t t-foreach="q['answers']['matrix_columns']" t-as="col">
-                                                    <th style="
-                                                        text-align:center;
-                                                        padding:8px;
-                                                        border-bottom:2px solid #1c1c5a;
-                                                        font-weight:600;
-                                                        color:#1c1c5a;
-                                                    ">
+                                                    <td style="text-align:center; font-weight:600;padding:5px">
                                                         <t t-esc="col['label']"/>
-                                                    </th>
+                                                    </td>
                                                 </t>
                                             </tr>
 
                                             <!-- ROWS -->
                                             <t t-foreach="q['answers']['matrix_rows']" t-as="row">
-
                                                 <tr>
 
                                                     <!-- ROW LABEL -->
-                                                    <td style="
-                                                        padding:8px;
-                                                        border-bottom:1px solid #ddd;
-                                                        font-weight:500;
-                                                        color:#333;
-                                                        width:30%;
-                                                    ">
+                                                    <td style="padding:6px;">
                                                         <t t-esc="row['label']"/>
                                                     </td>
 
                                                     <!-- CELLS -->
                                                     <t t-foreach="row['columns']" t-as="cell">
-                                                        <td style="
-                                                            padding:8px;
-                                                            border-bottom:1px solid #ddd;
-                                                            text-align:center;
-                                                        ">
+                                                        <td style="text-align:center;">
 
-                                                            <!-- RADIO BOX -->
-                                                            <table style="
+                                                            <!-- RADIO -->
+                                                            <div style="
                                                                 width:16px;
                                                                 height:16px;
-                                                                margin:auto;
                                                                 border:2px solid #1c1c5a;
-                                                                border-radius:50%;
-                                                                background:#fff;
+                                                                border-radius:8px;
+                                                                margin:0 auto;
+                                                                position:relative;
                                                             ">
-                                                                <tr>
-                                                                    <td style="text-align:center; vertical-align:middle;">
-                                                                        <t t-if="cell['selected']">
-                                                                            <div style="
-                                                                                width:8px;
-                                                                                height:8px;
-                                                                                background:#1c1c5a;
-                                                                                border-radius:50%;
-                                                                                margin:auto;
-                                                                            "></div>
-                                                                        </t>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                                <t t-if="cell['selected']">
+                                                                    <div style="
+                                                                        width:8px;
+                                                                        height:8px;
+                                                                        background:#1c1c5a;
+                                                                        border-radius:4px;
+                                                                        position:absolute;
+                                                                        top:2px;
+                                                                        left:2px;
+                                                                    "></div>
+                                                                </t>
+                                                            </div>
 
                                                         </td>
                                                     </t>
 
                                                 </tr>
-
                                             </t>
 
                                         </table>
-
                                     </div>
                                 </t>
 
 
                               <!-- MULTIPLE CHOICE (PDF SAFE - FIXED UI) -->
-                                <t t-if="q['question_type'] == 'multiple_choice'">
+                                    <t t-if="q['question_type'] == 'multiple_choice'">
 
-                                    <!-- OUTER BOX -->
-                                    <div style="
-                                        border:2px solid #2b2f77;
-                                        border-radius:6px;
-                                        padding:14px;
-                                        background:#f9fafc;
-                                        margin-top:8px;
-                                    ">
+                                            <div style="border:2px solid #2b2f77; padding:12px;">
 
-                                        <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
+                                                <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
 
-                                            <!-- OPTION ROW -->
-                                            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-                                                <tr>
+                                                    <div style="display:flex; align-items:center; margin-bottom:10px;">
 
-                                                    <!-- CHECKBOX CELL -->
-                                                    <td style="width:22px; vertical-align:middle;">
-                                                        <table style="
+                                                        <!-- CHECKBOX -->
+                                                        <div style="
                                                             width:18px;
                                                             height:18px;
                                                             border:2px solid #1c1c5a;
-                                                            background:#fff;
+                                                            margin-right:8px;
+                                                            position:relative;
                                                         ">
-                                                            <tr>
-                                                                <td style="text-align:center; vertical-align:middle;">
-                                                                    <t t-if="opt['selected']">
-                                                                        <!-- FILLED SQUARE -->
-                                                                        <div style="
-                                                                            width:10px;
-                                                                            height:10px;
-                                                                            background:#1c1c5a;
-                                                                            margin:auto;
-                                                                        "></div>
-                                                                    </t>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
+                                                            <t t-if="opt['selected']">
+                                                                <div style="
+                                                                    width:10px;
+                                                                    height:10px;
+                                                                    background:#1c1c5a;
+                                                                    position:absolute;
+                                                                    top:2px;
+                                                                    left:2px;
+                                                                "></div>
+                                                            </t>
+                                                        </div>
 
-                                                    <!-- LABEL CELL -->
-                                                    <td style="
-                                                        font-size:15px;
-                                                        line-height:1.3;
-                                                        color:#222;
-                                                        vertical-align:middle;
-                                                        padding-left:8px;
-                                                    ">
-                                                        <t t-esc="opt['label']"/>
-                                                    </td>
+                                                        <!-- LABEL -->
+                                                        <div style="font-size:14px;">
+                                                            <t t-esc="opt['label']"/>
+                                                        </div>
 
-                                                </tr>
-                                            </table>
+                                                    </div>
 
+                                                </t>
+                                            </div>
                                         </t>
-
-                                    </div>
-                                </t>
-
 
                                 <!-- SIMPLE CHOICE (PDF SAFE) -->
                                 <t t-if="q['question_type'] == 'simple_choice'">
 
-                                    <!-- OUTER BOX -->
-                                    <div style="
-                                        border:2px solid #2b2f77;
-                                        border-radius:6px;
-                                        padding:14px;
-                                        background:#f9fafc;
-                                        margin-top:8px;
-                                    ">
+                                    <div style="border:2px solid #2b2f77; padding:12px;">
 
                                         <t t-foreach="q['answers']['simple_choice_options']" t-as="opt">
 
-                                            <!-- OPTION ROW -->
-                                            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-                                                <tr>
+                                            <div style="display:flex; align-items:center; margin-bottom:10px;">
 
-                                                    <!-- RADIO CELL -->
-                                                    <td style="width:22px; vertical-align:middle;">
-                                                        <table style="
-                                                            width:18px;
-                                                            height:18px;
-                                                            border:2px solid #1c1c5a;
-                                                            border-radius:50%;
-                                                            background:#fff;
-                                                        ">
-                                                            <tr>
-                                                                <td style="text-align:center; vertical-align:middle;">
-                                                                    <t t-if="opt['selected']">
-                                                                        <div style="
-                                                                            width:8px;
-                                                                            height:8px;
-                                                                            background:#1c1c5a;
-                                                                            border-radius:50%;
-                                                                            margin:auto;
-                                                                        "></div>
-                                                                    </t>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
+                                                <!-- RADIO -->
+                                                <div style="
+                                                    width:18px;
+                                                    height:18px;
+                                                    border:2px solid #1c1c5a;
+                                                    border-radius:9px;
+                                                    margin-right:8px;
+                                                    position:relative;
+                                                ">
+                                                    <t t-if="opt['selected']">
+                                                        <div style="
+                                                            width:8px;
+                                                            height:8px;
+                                                            background:#1c1c5a;
+                                                            border-radius:4px;
+                                                            position:absolute;
+                                                            top:3px;
+                                                            left:3px;
+                                                        "></div>
+                                                    </t>
+                                                </div>
 
-                                                    <!-- LABEL CELL -->
-                                                    <td style="
-                                                        font-size:15px;
-                                                        line-height:1.2;
-                                                        color:#222;
-                                                        vertical-align:middle;
-                                                        padding-left:8px;
-                                                    ">
-                                                        <t t-esc="opt['label']"/>
-                                                    </td>
+                                                <!-- LABEL -->
+                                                <div style="font-size:14px;">
+                                                    <t t-esc="opt['label']"/>
+                                                </div>
 
-                                                </tr>
-                                            </table>
+                                            </div>
 
                                         </t>
-
                                     </div>
                                 </t>
 
@@ -2144,6 +2068,8 @@
                                 </div>
                             </div>
 
+                           </t> 
+
                         </t>
                     </t>
                 </div>
@@ -2157,7 +2083,7 @@
              <div style="page-break-after: always;"></div>
             <!-- ===================== RISK REGISTER ===================== -->
             <t t-if="risk_register">
-            <div class="page" style="font-family:Arial, sans-serif;">
+            <div class="page" style="font-family: DejaVu Sans, Arial, sans-serif;">
 
                 <div style="font-size:22px; font-weight:700; margin-bottom:12px;">
                 RISK REGISTER
@@ -2249,7 +2175,7 @@
             </div>
 
             <!-- ================= RISK SCORE MATRIX ================= -->
-            <div style="margin-top:40px; font-family:Arial, sans-serif;">
+            <div style="margin-top:40px; font-family: DejaVu Sans, Arial, sans-serif;">
 
             <div style="font-size:18px; font-weight:700; margin-bottom:10px;">
                 RISK SCORE MATRIX
@@ -2371,6 +2297,7 @@
             
             </t>
         </t>
+        </main>
     </t>
 </template>
 
