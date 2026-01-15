@@ -1,9 +1,11 @@
 
 
+from ..utils import crm_leads 
 from odoo import models, fields, api, tools, Command, _
 from odoo.exceptions import UserError,ValidationError
 import re
 import base64
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -328,12 +330,46 @@ class SaleOrderLead(models.Model):
         help="Manual entry for other costs not covered by timesheets."
     )
     
+    #Deprecated: need to be removed
     lead_id = fields.Many2one(
         'crm.lead', 
         string='Related Lead', 
         domain="[('company_id', '=', company_id)]",
         help="Link this sales order to a specific lead from the same company."
     )    
+
+    total_profitability_so = fields.Monetary(
+        string='Profitability',
+        compute='_compute_profitability_so',
+        currency_field='currency_id',
+        store=True,
+    )
+
+    profitability_percentage_so = fields.Float(
+        string='Profit %',
+        compute='_compute_profitability_percentage_so',
+        digits=(12, 2),
+        store=True,
+    )
+
+
+    @api.depends('amount_total', 'profitability_amount_cost_so', 'other_profitability_cost_so')
+    def _compute_profitability_so(self):
+        for order in self:
+            revenue = order.amount_total or 0.0
+            cost = order.profitability_amount_cost_so or 0.0
+            other_cost = order.other_profitability_cost_so or 0.0
+            order.total_profitability_so = revenue - cost - other_cost
+    
+    @api.depends('amount_total', 'profitability_amount_cost_so', 'other_profitability_cost_so', 'total_profitability_so')
+    def _compute_profitability_percentage_so(self):
+        for order in self:
+            revenue = order.amount_total or 0.0
+            profitability = order.total_profitability_so or 0.0
+            if revenue:
+                order.profitability_percentage_so = (profitability / revenue) * 100
+            else:
+                order.profitability_percentage_so = 0.0
     
     @api.depends('invoice_ids.payment_state', 'invoice_ids.amount_total', 'invoice_ids.amount_residual')
     def _compute_amounts_so(self):
@@ -380,3 +416,107 @@ class SaleOrderLead(models.Model):
                     total_cost += sheet.unit_amount
             order.profitability_amount_cost_so = total_cost + total_product_cost
             order.amount_cost_so = total_cost
+
+    def write(self, vals):
+        result = super(SaleOrderLead, self).write(vals)
+
+        for order in self:
+            if order.opportunity_id:
+                if 'state' in vals:
+                    subject = f"Sale Order Status Update: {order.name}"
+                    body = _("Sale Order: <a href='#id=%(so_id)s&model=sale.order'>%(so_name)s</a> state changed to: <b>%(state)s</b>.") % {'so_id': order.id, 'so_name': order.name, 'state': dict(order._fields['state'].selection).get(order.state)}
+                    crm_leads.log_to_crm_history(subject, body, order)
+
+                if 'project_id' in vals:
+                    if order.project_id:
+                        subject = f"Project Linked to SO: {order.name}"
+                        body = _("Project <a href='#id=%(project_id)s&model=project.project'>%(project_name)s</a> was linked to this Sale Order %(so_name)s") % {'project_id': order.project_id.id, 'project_name': order.project_id.name, 'so_name': order.name}
+                        crm_leads.log_to_crm_history(subject, body, order)
+
+                if 'opportunity_id' in vals:
+                    subject = f"CRM Lead Linked to SO: {order.name}"
+                    body = _(f"This Sale Order {order.name} was linked to the CRM Lead.")
+                    crm_leads.log_to_crm_history(subject, body, order)
+
+        return result
+    
+
+class ProjectTaskLead(models.Model):
+    _inherit = 'project.task'
+
+    def write(self, vals):
+        result = super(ProjectTaskLead, self).write(vals)
+        _logger.info(f"555555 {vals}")
+        _logger.info(f"444444444 {self.project_id}")
+        sale_order = self.env['sale.order'].search([('project_id', '=', self.project_id.id)], limit=1)
+        _logger.info(f"66666666666 {sale_order}")
+        if self.project_id and sale_order:
+            if 'name' in vals:
+                subject = f"Task {self.name}"
+                # sale_order = self.project_id.sale_order_id
+                body = _(
+                    "A task <a href='#id=%(task_id)s&model=project.task'>%(task_name)s</a> is linked with project %(project_name)s for SO: %(so_ref)s."
+                ) % {
+                    'task_id': self.id,
+                    'task_name': self.name,
+                    'project_name': self.project_id.name,
+                    'so_ref': sale_order.name
+                }
+
+            # Call your helper function, passing the Sale Order object
+                crm_leads.log_to_crm_history(subject, body, sale_order)
+            
+            if 'state' in vals:
+                subject = f"Task {self.name}"
+                body = _(
+                    "A status %(task_status)s of a task <a href='#id=%(task_id)s&model=project.task'>%(task_name)s</a> is updated with project %(project_name)s for SO: %(so_ref)s."
+                ) % {
+                    'task_status': self.state,
+                    'task_id': self.id,
+                    'task_name': self.name,
+                    'project_name': self.project_id.name,
+                    'so_ref': sale_order.name
+                }
+
+            # Call your helper function, passing the Sale Order object
+                crm_leads.log_to_crm_history(subject, body, sale_order)
+
+
+    # @api.model
+    # def create(self, vals):
+    #     record = super(ProjectTaskLead, self).create(vals)
+
+    #     if record.project_id and record.project_id.sale_order_id:
+    #         subject = f"Task Created: {record.name}"
+    #         body = _("A new task <a href='#id=%(task_id)s&model=project.task'>%(task_name)s</a> was created for SO: %(so_ref)s.") % {'task_id': record.id, 'task_name': record.name, 'so_ref': record.project_id.sale_order_id.name}
+            
+    #         crm_leads.log_to_crm_history(subject, body, record)
+
+    #     return record
+    
+
+class AccountPaymentRegisterInherit(models.TransientModel):
+    _inherit = ['account.payment.register']
+
+    def action_create_payments(self):
+
+        invoices = self.mapped('line_ids.move_id')
+        
+        result = super(AccountPaymentRegisterInherit, self).action_create_payments()
+
+        for invoice in invoices:
+            if invoice.invoice_origin:
+                sale_order = self.env['sale.order'].search([('name', '=', invoice.invoice_origin)], limit=1)
+                
+                if sale_order and sale_order.opportunity_id:
+                    subject = f"Payment Registered for Invoice: {invoice.name}"
+                    
+                    body = _("Payment Done to invoice <a href='#id=%(inv_id)s&model=account.move'>%(inv_name)s</a> linked to SO: %(so_ref)s.") % {
+                        'inv_id': invoice.id,
+                        'inv_name': invoice.name,
+                        'so_ref': sale_order.name
+                    }
+                    
+                    crm_leads.log_to_crm_history(subject, body, sale_order)
+
+        return result

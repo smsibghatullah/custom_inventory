@@ -75,11 +75,27 @@
                     
                     <page string="Profitability" name="crm_lead_profitability">
                         <field name="order_ids" widget="section_and_note_one2many" options="{'no_create': True}">
-                            <tree string="Sale Orders" delete="false">
+                            <tree string="Sale Orders" delete="false" editable="bottom">
                                 <field name="name" string="SO Number"/>
-                                <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
-                                <field name="profitability_amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_total" string="Revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
+                                <field name="profitability_amount_cost_so" string="Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field 
+                                    name="total_profitability_so" 
+                                    string="Profitability" 
+                                    widget="monetary" 
+                                    options="{'currency_field': 'currency_id'}" 
+                                    decoration-danger="total_profitability_so &lt; 0" 
+                                    decoration-success="total_profitability_so &gt;= 0"
+                                    decoration-bf="1"/>
+                                <field 
+                                    name="profitability_percentage_so" 
+                                    string="Profit %" 
+                                    widget="float_toggle"
+                                    decoration-danger="profitability_percentage_so &lt; 0" 
+                                    decoration-success="profitability_percentage_so &gt;= 0"
+                                    decoration-bf="1"
+                                    />
                             </tree>
                         </field>
                     </page>
