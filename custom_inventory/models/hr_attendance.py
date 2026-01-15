@@ -60,6 +60,10 @@ class HrAttendance(models.Model):
         }
         return mapping.get(break_time, 0.0)
 
+    def _excel_text(self, value):
+        """Force Excel to treat value as text"""
+        return f'{value}' if value else ''    
+
     def action_export_attendance_csv(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
@@ -89,12 +93,12 @@ class HrAttendance(models.Model):
             writer.writerow([
                 att.employee_id.name or '',
                 att.work_name or 'Standard Work',
-                check_in.strftime('%d/%m/%Y') if check_in else '',
+                self._excel_text(check_in.strftime('%d/%m/%Y') if check_in else ''),
                 att.employee_id.work_email or '',
                 att.notes or '',
-                check_in.strftime('%H:%M') if check_in else '',
-                check_out.strftime('%H:%M') if check_out else '',
-                total_hours,              
+                self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
+                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),
+                total_hours,
                 break_hours,
                 att.unit or 'Hours'
             ])
