@@ -100,7 +100,7 @@ class ShiftRole(models.Model):
                             for question in assigned_form.survey_id.question_ids:
                                 if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                     answer_type = 'suggestion'
-                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk']:
+                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table']:
                                     answer_type = question.question_type
                                 else:
                                     answer_type = 'text_box'
@@ -117,6 +117,14 @@ class ShiftRole(models.Model):
                                     vals["value_text_box"] = (
                                         question.prefill_text if question.pre_filled else ""
                                     )
+                                elif answer_type == 'risk':
+                                        vals["hazard_ids"] = (
+                                            question.potential_hazard_ids if question.potential_hazard_ids else []
+                                        )  
+                                elif answer_type == 'table':
+                                        vals["table_ids"] = (
+                                            question.table_ids if question.table_ids else []
+                                        )              
 
                                 elif answer_type == 'char_box':
                                     vals["value_char_box"] = (
@@ -139,7 +147,7 @@ class ShiftRole(models.Model):
                                     )
 
                                 elif answer_type == 'digital_signature':
-                                    vals["value_binary"] = (
+                                    vals["digital_signature"] = (
                                         question.prefill_signature if question.pre_filled else False
                                     )
                                 elif answer_type == 'suggestion':
@@ -196,7 +204,7 @@ class ShiftRole(models.Model):
                                 for question in assigned_form.survey_id.question_ids:
                                     if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                         answer_type = 'suggestion'
-                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk']:
+                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table']:
                                         answer_type = question.question_type
                                     else:
                                         answer_type = 'text_box'
@@ -218,6 +226,15 @@ class ShiftRole(models.Model):
                                         vals["value_char_box"] = (
                                             question.prefill_char if question.pre_filled else ""
                                         )
+                                    elif answer_type == 'risk':
+                                        vals["hazard_ids"] = (
+                                            question.potential_hazard_ids if question.potential_hazard_ids else []
+                                        )  
+
+                                    elif answer_type == 'table':
+                                        vals["table_ids"] = (
+                                            question.table_ids if question.table_ids else []
+                                        )        
 
                                     elif answer_type == 'numerical_box':
                                         vals["value_numerical_box"] = (
@@ -235,7 +252,7 @@ class ShiftRole(models.Model):
                                         )
 
                                     elif answer_type == 'digital_signature':
-                                        vals["value_binary"] = (
+                                        vals["digital_signature"] = (
                                             question.prefill_signature if question.pre_filled else False
                                         )
                                     elif answer_type == 'suggestion':
@@ -631,6 +648,12 @@ class Project(models.Model):
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
     survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
+    pcbu_1_details = fields.Char(
+        string="PCBU-1 Details",
+    )
+    pcbu_2_details = fields.Char(
+        string="PCBU-2 Details"
+    )
 
     def _compute_survey_form_count(self):
         for project in self:

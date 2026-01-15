@@ -24,83 +24,65 @@ class AccessToken(http.Controller):
         
     @http.route('/api/send_survey_via_email', type='json', auth='user', methods=['POST'], csrf=False)
     def send_survey_via_email(self, **kwargs):
-        # Decode & parse JSON
-        payload_str = request.httprequest.data.decode()
-        print(payload_str, "=========================")
 
+        payload_str = request.httprequest.data.decode()
         try:
             payload = json.loads(payload_str or "{}")
         except Exception as e:
             return {"success": False, "error": f"Invalid JSON: {str(e)}"}
 
         user_input_ids = payload.get("user_input_ids", [])
-        user_id = payload.get("user_id")
-        recipient_ids = payload.get('recipients', [])
-        cc_emails = payload.get('cc', []) or payload.get('ccEmail', [])
+        recipient_ids = payload.get("recipients", [])
+        cc_emails = payload.get("cc", []) or payload.get("ccEmail", [])
 
         if not user_input_ids:
             return {"success": False, "error": "No survey inputs provided"}
 
+        # 🔑 SAME REPORT AS WIZARD
+        report_action = request.env.ref('custom_inventory.action_report_employment_certificate')
+
         attachments = []
+        company = None
 
         for u_input_id in user_input_ids:
-            answer = request.env['survey.user_input'].sudo().browse(u_input_id)
-            if not answer.exists():
+            user_input = request.env['survey.user_input'].sudo().browse(u_input_id)
+            if not user_input.exists():
                 continue
 
-            survey = answer.survey_id
+            # ---- Generate PDF (ODOO 17 CORRECT WAY) ----
+            pdf_content, _ = report_action._render_qweb_pdf(
+                report_action.report_name,
+                res_ids=[user_input.id]
+            )
 
-            # Determine company
-            company = None
-            if user_id:
-                user = request.env['res.users'].sudo().browse(int(user_id))
-                if user.exists():
-                    company = user.company_id
-            if not company:
-                company = answer.company_id or request.env.user.company_id
-
-            company_logo = company.logo or False
-
-            # Render HTML
-            html = request.env['ir.qweb']._render('survey.survey_page_print', {
-                'is_html_empty': False,
-                'review': False,
-                'survey': survey,
-                'answer': answer,
-                'questions_to_display': answer._get_print_questions(),
-                'scoring_display_correction': survey.scoring_type in [
-                    'scoring_with_answers', 'scoring_with_answers_after_page'
-                ] and answer,
-                'format_datetime': lambda dt: request.env['ir.qweb.field.datetime'].value_to_html(dt, {}),
-                'format_date': lambda date: request.env['ir.qweb.field.date'].value_to_html(date, {}),
-                'graph_data': json.dumps(answer._prepare_statistics()[answer]) if answer and survey.scoring_type in [
-                    'scoring_with_answers', 'scoring_with_answers_after_page'
-                ] else False,
-                'company_logo': company_logo,
-                'company_name': company.name,
-                'print_date': datetime.now().strftime('%d %b %Y, %I:%M %p'),
-                'user': request.env.user
-            })
-
-            pdf_content = request.env['ir.actions.report']._run_wkhtmltopdf([html])
             attachment = request.env['ir.attachment'].sudo().create({
-                'name': f"{survey.title or 'Survey'}_{answer.id}.pdf",
+                'name': f"{user_input.survey_id.title or 'Survey'}_{user_input.id}.pdf",
                 'type': 'binary',
                 'datas': base64.b64encode(pdf_content),
                 'res_model': 'survey.user_input',
-                'res_id': answer.id,
+                'res_id': user_input.id,
                 'mimetype': 'application/pdf',
             })
+
             attachments.append(attachment.id)
 
-        if not attachments:
-            return {"success": False, "error": "No valid survey PDFs generated"}
+            # ----- Get company from first valid user_input -----
+            if not company:
+                if user_input.project_id:
+                    company = user_input.project_id.company_id
+                elif user_input.task_id and user_input.task_id.project_id:
+                    company = user_input.task_id.project_id.company_id
 
+        # fallback to logged in user's company
+        if not company:
+            company = request.env.user.company_id
+
+        # -------- Send Email --------
         mail_values = {
-            'subject': f"Survey Results",
+            'subject': "Survey Results",
             'body_html': f"""
                 <p>Dear User,</p>
-                <p>Please find attached your survey result reports.</p>
+                <p>Please find attached your survey result report(s).</p>
                 <p>Best regards,<br/>{company.name}</p>
             """,
             'email_to': ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids,
@@ -112,7 +94,11 @@ class AccessToken(http.Controller):
         mail = request.env['mail.mail'].sudo().create(mail_values)
         mail.send()
 
-        return {"success": True, "message": "Survey PDFs sent successfully"}
+        return {
+            "success": True,
+            "message": "Survey PDFs sent successfully"
+        }
+
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
@@ -151,8 +137,11 @@ class AccessToken(http.Controller):
 
             line_ids = payload.pop("user_input_line_ids", [])
             print(line_ids, "================ line_ids raw")
+            # for line in survey_input.sudo().user_input_line_ids:
+            #     line.hazard_ids = [(5, 0, 0)]
 
             survey_input.sudo().user_input_line_ids.unlink()
+           
 
             new_line_ids = []
             for line in line_ids:
@@ -319,8 +308,21 @@ class AccessToken(http.Controller):
                     "answer_value": ans.value,
                     "answer_type": ans.question_type,
                 } for ans in answers]
-                print(question,"===============================================123456789")
+
+                table_data = []
+                print(question.question_type,"question.question_type")
+                if question.question_type == 'table':
+                    print(question.table_ids,"question.table_ids=======================")
+                    for table_line in question.table_ids:
+                        table_data.append({
+                            "id": table_line.id,
+                            "row_no": table_line.row_no,
+                            "column_no": table_line.column_no,
+                            "column_name": table_line.column_name,
+                            "value": table_line.value,
+                        })
                 risk = []
+                print(table_data,"table_data====================================")
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
                         print(hazard.hazard_consequence_id,"=======================================")
@@ -390,7 +392,8 @@ class AccessToken(http.Controller):
                     "refrence_question_id": question.question_id.id,
                     "description": question.description,
                     "answers": answers_data,
-                    'risk':risk
+                    'risk':risk,
+                    "table": table_data
                 })
 
                

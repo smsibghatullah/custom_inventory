@@ -37,6 +37,7 @@ class SalesInvoiceParameter(models.Model):
     
     brand_ids = fields.Many2many(
         'brand.master',
+        'brand_master_intercompany_rel',
         string='Brands',
         domain="[('company_ids', '=', dest_company_id)]"
     )
@@ -44,17 +45,20 @@ class SalesInvoiceParameter(models.Model):
 
     category_ids = fields.Many2many(
         'sku.type.master', 
+        'sku_category_intercompany_rel',
         string='Categories',
         domain="[('id', 'in', available_sku_category_ids)]" 
     )
 
     available_sku_category_ids = fields.Many2many(
         'sku.type.master',
+        'available_sku_category_intercompany_rel',
         compute="_compute_available_categories",
     )
 
     tag_ids = fields.Many2many(
         'crm.tag',
+        'tag_ids_crm_tag_rel',
         string='Tags',
         domain="[('company_ids', '=', dest_company_id)]"
     )
@@ -121,23 +125,27 @@ class PurchaseBillParameter(models.Model):
     
     brand_ids = fields.Many2many(
         'brand.master',
+        'brand_master_purchase_bill_rel',
         string='Brands',
         domain="[('company_ids', '=', dest_company_id)]"
     )
     
     category_ids = fields.Many2many(
         'sku.type.master', 
+        'sku_master_purchase_bill_rel',
         string='Categories',
         domain="[('id', 'in', available_sku_category_ids)]" 
     )
 
     available_sku_category_ids = fields.Many2many(
         'sku.type.master',
+        'available_sku_master_purchase_bill_rel',
         compute="_compute_available_categories",
     )
 
     tag_ids = fields.Many2many(
         'crm.tag',
+        'crm_tag_purchase_bill_rel',
         string='Tags',
         domain="[('company_ids', '=', dest_company_id)]"
     )

@@ -57,6 +57,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'assets': {
         'web.assets_backend': [
             'custom_inventory/static/src/css/style.css',
+            'custom_inventory/static/src/js/attendance_export.js',
         ],
     },
 

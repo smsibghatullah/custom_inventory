@@ -2,6 +2,11 @@ from odoo import models, fields, api
 from odoo.addons.resource.models.utils import Intervals
 from odoo.tools.float_utils import float_round
 from pytz import timezone
+from odoo.http import content_disposition
+import csv
+import io
+from datetime import datetime
+import base64
 
 class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
@@ -30,8 +35,96 @@ class HrAttendance(models.Model):
         default='submitted'
     )
 
+    work_name = fields.Char(
+        string="Work Name",
+        default="Standard Work",
+        readonly=False
+    )
+
+    unit = fields.Char(
+        string="Units",
+        default="Hours",
+        readonly=False
+    )
+
     approved_hours = fields.Float(string='Approved Hours')
     comment = fields.Text(string="Comments")
+    notes = fields.Text(string="Notes")
+
+    def _break_to_float(self, break_time):
+        mapping = {
+            '15': 0.25,
+            '30': 0.5,
+            '45': 0.75,
+            '60': 1.0,
+        }
+        return mapping.get(break_time, 0.0)
+
+    def _excel_text(self, value):
+        """Force Excel to treat value as text"""
+        return f"'{value}"   
+
+    def action_export_attendance_csv(self):
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+
+        writer.writerow([
+            'Employee',
+            'Work Name',
+            'Date',
+            'Employee Email',
+            'Notes',
+            'Start Time',
+            'End Time',
+            'Duration',
+            'Break Duration',
+            'Units'
+        ])
+
+        for att in self:
+            check_in = fields.Datetime.from_string(att.check_in) if att.check_in else False
+            check_out = fields.Datetime.from_string(att.check_out) if att.check_out else False
+
+            worked_hours = att.worked_hours or 0
+            break_hours = self._break_to_float(att.break_time) 
+            total_hours = round(worked_hours + break_hours, 2) 
+            print(att.check_in,att.check_out,"forst date time")
+            print(check_out,"checkout===========================",check_in,"checkin") 
+            print(self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
+                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),"hh:mm==================")
+
+            writer.writerow([
+                att.employee_id.name or '',
+                att.work_name or 'Standard Work',
+                self._excel_text(check_in.strftime('%d/%m/%Y') if check_in else ''),
+                att.employee_id.work_email or '',
+                att.notes or '',
+                self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
+                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),
+                total_hours,
+                break_hours,
+                att.unit or 'Hours'
+            ])
+
+        csv_content = buffer.getvalue()
+        buffer.close()
+
+        csv_base64 = base64.b64encode(csv_content.encode('utf-8'))
+        filename = f"attendance_export_{fields.Date.today()}.csv"
+
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'datas': csv_base64,
+            'mimetype': 'text/csv',
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }
+
 
     @api.onchange('check_in', 'check_out', 'break_time')
     def _compute_worked_hours(self):

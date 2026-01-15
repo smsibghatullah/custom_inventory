@@ -81,6 +81,7 @@ class IntercompanyDestinationParameter(models.Model):
     
     brand_ids = fields.Many2many(
         'brand.master',
+        'brand_master_destination_parameter_rel',
         string='Brands',
         domain="[('company_ids', '=', destination_company_id)]"
     )
@@ -88,17 +89,20 @@ class IntercompanyDestinationParameter(models.Model):
 
     category_ids = fields.Many2many(
         'sku.type.master', 
+        'sku_master_destination_parameter_rel',
         string='Categories',
         domain="[('id', 'in', available_sku_category_ids)]" 
     )
 
     available_sku_category_ids = fields.Many2many(
         'sku.type.master',
+        'available_sku_master_destination_parameter_rel',
         compute="_compute_available_categories",
     )
 
     tag_ids = fields.Many2many(
         'crm.tag',
+        'crm_tag_destination_parameter_rel',
         string='Tags',
         domain="[('company_ids', '=', destination_company_id)]"
     )
