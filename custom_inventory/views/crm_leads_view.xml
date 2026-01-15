@@ -27,16 +27,20 @@
                         </div>
                     </button>
 
-                    <button class="oe_stat_button" type="object"
+                    <!-- <button class="oe_stat_button" type="object"
                         name="action_view_costs" icon="fa-calculator">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value"><field name="total_cost_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
                             <span class="o_stat_text"> Costs (TBD) </span>
                             <field name="cost_count" invisible="1"/>
                         </div>
-                    </button>
+                    </button> -->
 
                 </xpath>
+                <field name="user_id" position="after">
+                    <field name="additional_salesperson_ids" widget="many2many_tags"/>
+                </field>
+
             </field>
         </record>
 

@@ -62,10 +62,11 @@ class CrmLead(models.Model):
     total_cost_amount = fields.Monetary(compute='_compute_cost_data', string="Total Cost", currency_field='company_currency')
     cost_count = fields.Integer(compute='_compute_cost_data', string="Number of Timesheets")
 
-    # total_profitability_amount = fields.Monetary(compute='_compute_profitability_data', string="Profitability", currency_field='company_currency')
-    # profitability_percentage = fields.Float(compute='_compute_profitability_data', string="Profit Percentage", digits=(12,2))
-    # other_cost_amount = fields.Monetary(string="Other Costs", currency_field='company_currency', help="Manual entry for other costs not covered by timesheets.") # Other Costs ke liye manual entry field
-
+    additional_salesperson_ids = fields.Many2many(
+        'res.users',
+        string='Additional Salespersons',
+        help="Select multiple salespersons who can also view thie crm lead"
+    )
 
     @api.model
     def create(self, vals):
