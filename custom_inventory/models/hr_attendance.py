@@ -88,10 +88,10 @@ class HrAttendance(models.Model):
             worked_hours = att.worked_hours or 0
             break_hours = self._break_to_float(att.break_time) 
             total_hours = round(worked_hours + break_hours, 2) 
-            print(att.check_in,att.check_out,"forst date time")
-            print(check_out,"checkout===========================",check_in,"checkin") 
+            print(att.check_in,att.check_out,"original odoo time -=======================================")
+            print(check_out,"hours and minutes calculation",check_in,"checkin") 
             print(self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
-                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),"hh:mm==================")
+                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),"hh:mm==================text field bana kay liya")
 
             writer.writerow([
                 att.employee_id.name or '',
@@ -136,13 +136,15 @@ class HrAttendance(models.Model):
                 check_out_tz = attendance.check_out.astimezone(tz)
                 lunch_intervals = attendance.employee_id._employee_attendance_intervals(
                     check_in_tz, check_out_tz, lunch=True)
-                attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)]) - lunch_intervals
+                attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)]) 
                 delta = sum((i[1] - i[0]).total_seconds() for i in attendance_intervals)
 
                 worked_hours = delta / 3600.0
+                print(worked_hours,"==============================worked_hours")
 
                 if attendance.break_time:
                     worked_hours -= int(attendance.break_time) / 60.0
+                    print(int(attendance.break_time) / 60.0,"===============",worked_hours)
 
                 worked_hours = float_round(worked_hours, precision_digits=2)
                 attendance.worked_hours = worked_hours
