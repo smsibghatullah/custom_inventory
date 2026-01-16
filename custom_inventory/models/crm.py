@@ -416,7 +416,7 @@ class SaleOrderLead(models.Model):
                 else:
                     total_cost += sheet.unit_amount
             order.profitability_amount_cost_so = total_cost + total_product_cost
-            order.amount_cost_so = total_cost
+            order.amount_cost_so = total_cost + order.other_profitability_cost_so
 
     def write(self, vals):
         result = super(SaleOrderLead, self).write(vals)
