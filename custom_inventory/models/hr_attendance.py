@@ -8,6 +8,7 @@ import io
 from datetime import datetime
 import base64
 
+
 class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
@@ -62,12 +63,13 @@ class HrAttendance(models.Model):
 
     def _excel_text(self, value):
         """Force Excel to treat value as text"""
-        return f"'{value}"   
+        return f"'{value}" if value else ''
 
     def action_export_attendance_csv(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
 
+        # CSV Header
         writer.writerow([
             'Employee',
             'Work Name',
@@ -81,31 +83,42 @@ class HrAttendance(models.Model):
             'Units'
         ])
 
+        user_tz = timezone(self.env.user.tz or 'Asia/Karachi')
+
         for att in self:
             check_in = fields.Datetime.from_string(att.check_in) if att.check_in else False
             check_out = fields.Datetime.from_string(att.check_out) if att.check_out else False
 
-            worked_hours = att.worked_hours or 0
-            break_hours = self._break_to_float(att.break_time) 
-            total_hours = round(worked_hours + break_hours, 2) 
-            print(att.check_in,att.check_out,"original odoo time -=======================================")
-            print(check_out,"hours and minutes calculation",check_in,"checkin") 
-            print(self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
-                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),"hh:mm==================text field bana kay liya")
+            check_in_local = check_in.astimezone(user_tz) if check_in else False
+            check_out_local = check_out.astimezone(user_tz) if check_out else False
 
+            worked_hours = att.worked_hours or 0
+            break_hours = self._break_to_float(att.break_time)
+            total_hours = round(worked_hours + break_hours, 2)
+
+            print(att.check_in, att.check_out, "original UTC datetime")
+            print(check_in_local, check_out_local, "converted to user timezone")
+            print(
+                self._excel_text(check_in_local.strftime('%H:%M') if check_in_local else ''),
+                self._excel_text(check_out_local.strftime('%H:%M') if check_out_local else ''),
+                "HH:MM for Excel text field"
+            )
+
+            # Write row
             writer.writerow([
                 att.employee_id.name or '',
                 att.work_name or 'Standard Work',
-                self._excel_text(check_in.strftime('%d/%m/%Y') if check_in else ''),
+                self._excel_text(check_in_local.strftime('%d/%m/%Y') if check_in_local else ''),
                 att.employee_id.work_email or '',
                 att.notes or '',
-                self._excel_text(check_in.strftime('%H:%M') if check_in else ''),
-                self._excel_text(check_out.strftime('%H:%M') if check_out else ''),
+                self._excel_text(check_in_local.strftime('%H:%M') if check_in_local else ''),
+                self._excel_text(check_out_local.strftime('%H:%M') if check_out_local else ''),
                 total_hours,
                 break_hours,
                 att.unit or 'Hours'
             ])
 
+        # Prepare attachment
         csv_content = buffer.getvalue()
         buffer.close()
 
@@ -157,10 +170,10 @@ class HrAttendance(models.Model):
     def action_approve_attendance_bulk(self):
         for rec in self.filtered(lambda r: r.status == 'submitted'):
             rec.status = 'approved'
-            rec.approved_hours = rec.worked_hours
+            rec.approved_hours = rec.approved_hours
 
     def action_approve_attendance(self):
         for rec in self:
             if rec.status == 'submitted':
                 rec.status = 'approved'
-                rec.approved_hours = rec.worked_hours
+                rec.approved_hours = rec.approved_hours
