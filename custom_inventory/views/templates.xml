@@ -1627,79 +1627,142 @@
             <!-- ================================================= -->
             <!-- COVER PAGE -->
             <!-- ================================================= -->
-          <div class="page" style="width:100%; height:100%; font-family: DejaVu Sans, Arial, sans-serif;">
-
-                <table style="
+            <div class="page"
+                style="
                     width:100%;
                     height:100%;
-                    border-collapse:collapse;
+                    font-family: DejaVu Sans, Arial, sans-serif;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    margin-top:100px
+                ">
+
+                <!-- CENTER COLUMN -->
+                <div style="
+                    width:100%;
+                    max-width:900px;
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
                     text-align:center;
                 ">
-                    <tr>
-                        <td style="vertical-align:middle;">
 
-                            <!-- LOGO -->
-                            <div style="margin-bottom:20px;">
-                                <img t-if="company.logo"
-                                    t-att-src="image_data_uri(company.logo)"
-                                    style="max-height:260px; max-width:260px;"/>
-                            </div>
+                    <!-- LOGO -->
+                    <div style="margin-bottom:25px;">
+                        <img t-if="company.logo"
+                            t-att-src="image_data_uri(company.logo)"
+                            style="max-height:240px; max-width:240px;"/>
+                    </div>
 
-                            <!-- COMPANY NAME -->
-                            <div style="font-size:38px; font-weight:700; color:#9c9c9c;">
-                                <t t-esc="company.name"/>
-                            </div>
+                    <!-- COMPANY NAME -->
+                    <div style="
+                        font-size:38px;
+                        font-weight:700;
+                        color:#9c9c9c;
+                        margin-bottom:35px;
+                    ">
+                        <t t-esc="company.name"/>
+                    </div>
 
-                            <div style="height:35px;"></div>
+                    <!-- MAIN TITLE -->
+                    <div style="font-size:36px; font-weight:800;">
+                        <t t-esc="o.survey_id.display_name"/>
+                    </div>
 
-                            <!-- SURVEY TITLE -->
-                            <div style="font-size:36px; font-weight:700;">
-                                <t t-esc="o.survey_id.display_name"/>
-                            </div>
+                    <div style="
+                        margin-top:10px;
+                        font-size:26px;
+                        font-weight:600;
+                        text-decoration:underline;
+                        margin-bottom:10px
+                    ">
+                        Installation / Removal of Shrinkwrap
+                    </div>
 
-                            <div style="margin-top:8px; font-size:26px;">
-                                Installation / Removal of Shrinkwrap
-                            </div>
+                    <div style="height:60px;"></div>
 
-                            <div style="height:40px;"></div>
-
-                            <!-- INFO TABLE -->
-                            <table style="
-                                width:50%;
+                    <!-- ================= INFO BLOCK ================= -->
+                    <div style="
+                                width:100%;
+                                max-width:760px;
                                 margin:0 auto;
-                                font-size:18px;
-                                text-align:center;
+                                font-size:20px;
+                                display:table;
                             ">
-                                <tr style="text-align:center;">
-                                    <td style="width:40%; font-weight:700;">
+
+                                <!-- ROW -->
+                                <div style="display:table-row;">
+                                    <div style="
+                                        display:table-cell;
+                                        width:45%;
+                                        font-weight:700;
+                                        padding-bottom:28px;
+                                        vertical-align:top;
+                                    ">
                                         Job / Site Name &amp; Location:
-                                    </td>
-                                    <td style="text-align:left;">
+                                    </div>
+                                    <div style="
+                                        display:table-cell;
+                                        width:55%;
+                                        padding-bottom:28px;
+                                        vertical-align:top;
+                                        text-align:left;
+                                        margin-left:20px
+                                    ">
                                         <t t-esc="o.project_id.name"/>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
 
-                                <tr>
-                                    <td style="font-weight:700;text-align:center;">PCBU-1 Details:</td>
-                                    <td style="text-align:left;">Geeves Scaffolding - University of Otago</td>
-                                </tr>
+                                <!-- ROW -->
+                                <div style="display:table-row;">
+                                    <div style="
+                                        display:table-cell;
+                                        font-weight:700;
+                                        padding-bottom:28px;
+                                        vertical-align:top;
+                                    ">
+                                        PCBU-1 Details:
+                                    </div>
+                                    <div style="
+                                        display:table-cell;
+                                        padding-bottom:28px;
+                                        vertical-align:top;
+                                        text-align:left;
+                                        margin-left:20px
+                                    ">
+                                        Geeves Scaffolding - University of Otago
+                                    </div>
+                                </div>
 
-                                <tr>
-                                    <td style="font-weight:700;text-align:center;">PCBU-2 Details:</td>
-                                    <td style="text-align:left;">
-                                        <t t-esc="company.name"/><br/>
+                                <!-- ROW -->
+                                <div style="display:table-row;">
+                                    <div style="
+                                        display:table-cell;
+                                        font-weight:700;
+                                        vertical-align:top;
+                                    ">
+                                        PCBU-2 Details:
+                                    </div>
+                                    <div style="
+                                        display:table-cell;
+                                        vertical-align:top;
+                                        text-align:left;
+                                        margin-left:20px
+                                    ">
+                                        <strong><t t-esc="company.name"/></strong><br/>
                                         Manager - <t t-esc="company.partner_id.name"/><br/>
                                         M: <t t-esc="company.phone"/><br/>
                                         E: <t t-esc="company.email"/>
-                                    </td>
-                                </tr>
-                            </table>
+                                    </div>
+                                </div>
 
-                        </td>
-                    </tr>
-                </table>
+                            </div>
+                    <!-- ================= END INFO ================= -->
 
+                </div>
             </div>
+
             <!-- COVER → GROUPS -->
             <div style="page-break-before: always;"></div>
 
@@ -1933,79 +1996,106 @@
                                 </t>
 
 
-                              <!-- MULTIPLE CHOICE (PDF SAFE - FIXED UI) -->
-                                    <t t-if="q['question_type'] == 'multiple_choice'">
+                             <!-- MULTIPLE CHOICE (PDF SAFE - NO FLEX) -->
+                                <t t-if="q['question_type'] == 'multiple_choice'">
 
-                                            <div style="border:2px solid #2b2f77; padding:12px;">
+                                    <div style="border:2px solid #2b2f77; padding:12px; display:table; width:100%;">
 
-                                                <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
+                                        <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
 
-                                                    <div style="display:flex; align-items:center; margin-bottom:10px;">
+                                            <!-- ROW -->
+                                            <div style="display:table-row;">
 
-                                                        <!-- CHECKBOX -->
-                                                        <div style="
-                                                            width:18px;
-                                                            height:18px;
-                                                            border:2px solid #1c1c5a;
-                                                            margin-right:8px;
-                                                            position:relative;
-                                                        ">
-                                                            <t t-if="opt['selected']">
-                                                                <div style="
-                                                                    width:10px;
-                                                                    height:10px;
-                                                                    background:#1c1c5a;
-                                                                    position:absolute;
-                                                                    top:2px;
-                                                                    left:2px;
-                                                                "></div>
-                                                            </t>
-                                                        </div>
-
-                                                        <!-- LABEL -->
-                                                        <div style="font-size:14px;">
-                                                            <t t-esc="opt['label']"/>
-                                                        </div>
-
+                                                <!-- CHECKBOX CELL -->
+                                                <div style="
+                                                    display:table-cell;
+                                                    width:24px;
+                                                    padding-bottom:10px;
+                                                    vertical-align:top;
+                                                ">
+                                                    <div style="
+                                                        width:18px;
+                                                        height:18px;
+                                                        border:2px solid #1c1c5a;
+                                                        position:relative;
+                                                    ">
+                                                        <t t-if="opt['selected']">
+                                                            <div style="
+                                                                width:10px;
+                                                                height:10px;
+                                                                background:#1c1c5a;
+                                                                position:absolute;
+                                                                top:2px;
+                                                                left:2px;
+                                                            "></div>
+                                                        </t>
                                                     </div>
+                                                </div>
 
-                                                </t>
+                                                <!-- LABEL CELL -->
+                                                <div style="
+                                                    display:table-cell;
+                                                    padding-left:8px;
+                                                    padding-bottom:10px;
+                                                    font-size:14px;
+                                                    vertical-align:top;
+                                                ">
+                                                    <t t-esc="opt['label']"/>
+                                                </div>
+
                                             </div>
-                                        </t>
 
-                                <!-- SIMPLE CHOICE (PDF SAFE) -->
+                                        </t>
+                                    </div>
+                                </t>
+
+
+                              <!-- SIMPLE CHOICE (PDF SAFE - NO FLEX) -->
                                 <t t-if="q['question_type'] == 'simple_choice'">
 
-                                    <div style="border:2px solid #2b2f77; padding:12px;">
+                                    <div style="border:2px solid #2b2f77; padding:12px; display:table; width:100%;">
 
                                         <t t-foreach="q['answers']['simple_choice_options']" t-as="opt">
 
-                                            <div style="display:flex; align-items:center; margin-bottom:10px;">
+                                            <!-- ROW -->
+                                            <div style="display:table-row;">
 
-                                                <!-- RADIO -->
+                                                <!-- RADIO CELL -->
                                                 <div style="
-                                                    width:18px;
-                                                    height:18px;
-                                                    border:2px solid #1c1c5a;
-                                                    border-radius:9px;
-                                                    margin-right:8px;
-                                                    position:relative;
+                                                    display:table-cell;
+                                                    width:24px;
+                                                    padding-bottom:10px;
+                                                    vertical-align:top;
                                                 ">
-                                                    <t t-if="opt['selected']">
-                                                        <div style="
-                                                            width:8px;
-                                                            height:8px;
-                                                            background:#1c1c5a;
-                                                            border-radius:4px;
-                                                            position:absolute;
-                                                            top:3px;
-                                                            left:3px;
-                                                        "></div>
-                                                    </t>
+                                                    <div style="
+                                                        width:18px;
+                                                        height:18px;
+                                                        border:2px solid #1c1c5a;
+                                                        border-radius:9px;
+                                                        position:relative;
+                                                    ">
+                                                        <t t-if="opt['selected']">
+                                                            <div style="
+                                                                width:8px;
+                                                                height:8px;
+                                                                background:#1c1c5a;
+                                                                border-radius:4px;
+                                                                position:absolute;
+                                                                top:3px;
+                                                                left:3px;
+                                                            "></div>
+                                                        </t>
+                                                    </div>
                                                 </div>
 
-                                                <!-- LABEL -->
-                                                <div style="font-size:14px;">
+                                                <!-- LABEL CELL -->
+                                                <div style="
+                                                    display:table-cell;
+                                                    padding-left:8px;
+                                                    padding-bottom:10px;
+                                                    font-size:14px;
+                                                    vertical-align:top;
+                                                ">
                                                     <t t-esc="opt['label']"/>
                                                 </div>
 
