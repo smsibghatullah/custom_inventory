@@ -408,6 +408,7 @@ class SaleOrderLead(models.Model):
                 cost = line.product_id.standard_price
                 total_product_cost += cost
 
+            current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
             for sheet in timesheets:
                 if sheet.currency_id and sheet.currency_id != currency:
                      total_cost += sheet.currency_id._convert(
@@ -415,8 +416,11 @@ class SaleOrderLead(models.Model):
                     )
                 else:
                     total_cost += sheet.unit_amount
+                
+                total_cost = total_cost * current_employee.hourly_cost
+
             order.profitability_amount_cost_so = total_cost + total_product_cost
-            order.amount_cost_so = total_cost + order.other_profitability_cost_so
+            order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
 
     @api.model
     def create(self, vals):
