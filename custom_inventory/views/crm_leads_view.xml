@@ -1,0 +1,124 @@
+<odoo>
+    <data>
+        <record id="view_crm_lead_invoice_payment_buttons" model="ir.ui.view">
+            <field name="name">crm.lead.invoice.payment.buttons.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_sale_order']" position="after">
+
+                    <!-- INVOICE Button -->
+                    <button class="oe_stat_button" type="object" invisible="invoice_count == 0 or type == 'lead'"
+                        name="action_view_invoices" icon="fa-pencil-square-o">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="invoice_total_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
+                            <span class="o_stat_text"> Invoiced </span>
+                            <field name="invoice_count" invisible="1"/>
+                        </div>
+                    </button>
+
+                    <!-- PAYMENTS Button -->
+                    <button class="oe_stat_button" type="object" invisible="payment_count == 0 or type == 'lead'"
+                        name="action_view_payments" icon="fa-money">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="total_payment" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
+                            <span class="o_stat_text"> Payments </span>
+                            <field name="payment_count" invisible="1"/>
+                        </div>
+                    </button>
+
+                    <!-- <button class="oe_stat_button" type="object"
+                        name="action_view_costs" icon="fa-calculator">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="total_cost_amount" widget="monetary" options="{'currency_field': 'company_currency'}"/></span>
+                            <span class="o_stat_text"> Costs (TBD) </span>
+                            <field name="cost_count" invisible="1"/>
+                        </div>
+                    </button> -->
+
+                </xpath>
+                <field name="user_id" position="after">
+                    <field name="additional_salesperson_ids" widget="many2many_tags"/>
+                </field>
+
+            </field>
+        </record>
+
+
+        <record id="view_crm_lead_so_details_tab" model="ir.ui.view">
+            <field name="name">crm.lead.so.details.tab.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='internal_notes']" position="before">
+                    
+                    <page string="Attached SO Details" name="attached_so_details_tab">
+                        <field name="order_ids" widget="section_and_note_one2many">
+                            <tree string="Sale Orders" delete="false" create="0">
+                                <field name="name" string="SO Number"/>
+                                <field name="state" string="SO Status"/>
+                                <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                
+                                <field name="amount_invoiced_so" string="Invoiced Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_paid_so" string="Paid Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </tree>
+                        </field>
+                    </page>
+                    
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_crm_lead_so_profitability_tab" model="ir.ui.view">
+            <field name="name">crm.lead.profitability.tab.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='attached_so_details_tab']" position="after">
+                    
+                    <page string="Profitability" name="crm_lead_profitability">
+                        <field name="order_ids" widget="section_and_note_one2many" options="{'no_create': True}">
+                            <tree string="Sale Orders" delete="false" editable="bottom" create="0">
+                                <field name="name" string="SO Number"/>
+                                <field name="amount_total" string="Revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
+                                <field name="profitability_amount_cost_so" string="Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field 
+                                    name="total_profitability_so" 
+                                    string="Profitability" 
+                                    widget="monetary" 
+                                    options="{'currency_field': 'currency_id'}" 
+                                    decoration-danger="total_profitability_so &lt; 0" 
+                                    decoration-success="total_profitability_so &gt;= 0"
+                                    decoration-bf="1"/>
+                                <field 
+                                    name="profitability_percentage_so" 
+                                    string="Profit %" 
+                                    widget="float_toggle"
+                                    decoration-danger="profitability_percentage_so &lt; 0" 
+                                    decoration-success="profitability_percentage_so &gt;= 0"
+                                    decoration-bf="1"
+                                    />
+                            </tree>
+                        </field>
+                    </page>
+                    
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="sale_order_view_form_inherit_manual_link_fix" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.manual.link.fix</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="opportunity_id" domain="[('type', '=', 'opportunity')]"/> 
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
