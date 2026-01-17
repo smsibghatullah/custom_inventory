@@ -418,9 +418,21 @@ class SaleOrderLead(models.Model):
             order.profitability_amount_cost_so = total_cost + total_product_cost
             order.amount_cost_so = total_cost + order.other_profitability_cost_so
 
+    @api.model
+    def create(self, vals):
+        record = super(SaleOrderLead, self).create(vals)
+
+        for order in record:
+            if order.opportunity_id and order.state == 'draft':
+                subject = f"Sale Order {order.name}"
+                body = _("Sale Order: <a href='#id=%(so_id)s&model=sale.order'>%(so_name)s</a> created with state: <b>%(state)s</b>.") % {'so_id': order.id, 'so_name': order.name, 'state': dict(order._fields['state'].selection).get(order.state)}
+                crm_leads.log_to_crm_history(subject, body, order)
+        return record
+    
     def write(self, vals):
         result = super(SaleOrderLead, self).write(vals)
 
+        
         for order in self:
             if order.opportunity_id:
                 if 'state' in vals:
