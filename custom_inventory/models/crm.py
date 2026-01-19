@@ -427,8 +427,7 @@ class SaleOrderLead(models.Model):
                     )
                 else:
                     total_cost += sheet.unit_amount
-                
-                total_cost = total_cost * current_employee.hourly_cost
+            total_cost = total_cost * current_employee.hourly_cost
 
             order.profitability_amount_cost_so = total_cost + total_product_cost
             order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
