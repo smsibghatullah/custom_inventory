@@ -54,7 +54,7 @@
                     
                     <page string="Attached SO Details" name="attached_so_details_tab">
                         <field name="order_ids" widget="section_and_note_one2many">
-                            <tree string="Sale Orders" delete="false" create="0">
+                            <tree string="Sale Orders" delete="false" create="0" editable="bottom">
                                 <field name="name" string="SO Number"/>
                                 <field name="state" string="SO Status"/>
                                 <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
@@ -62,6 +62,11 @@
                                 <field name="amount_invoiced_so" string="Invoiced Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_paid_so" string="Paid Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <button name="action_view_full_so" 
+                                    string="View SO" 
+                                    type="object" 
+                                    icon="fa-external-link" 
+                                    help="Click to open the Sales Order in full page"/>
                             </tree>
                         </field>
                     </page>

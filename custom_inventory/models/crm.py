@@ -354,6 +354,17 @@ class SaleOrderLead(models.Model):
     )
 
 
+    def action_view_full_so(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Sales Order',
+            'res_model': 'sale.order',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'current',  # 'current' target means full page, not popup
+        }
+
     @api.depends('amount_total', 'profitability_amount_cost_so', 'other_profitability_cost_so')
     def _compute_profitability_so(self):
         for order in self:
@@ -406,7 +417,7 @@ class SaleOrderLead(models.Model):
             total_product_cost = 0.0
             for line in order.order_line:
                 cost = line.product_id.standard_price
-                total_product_cost += cost
+                total_product_cost += cost * line.product_uom_qty
 
             current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
             for sheet in timesheets:
