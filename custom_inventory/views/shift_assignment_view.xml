@@ -290,7 +290,7 @@
 
         
 
-        <!-- <record id="view_survey_user_input_form_inherit_editable" model="ir.ui.view">
+        <record id="view_survey_user_input_form_inherit_editable" model="ir.ui.view">
             <field name="name">survey.user_input.form.inherit.editable</field>
             <field name="model">survey.user_input</field>
             <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
@@ -316,7 +316,7 @@
                 </xpath>
 
             </field>
-        </record> -->
+        </record>
 
         <record id="action_report_employment_certificate" model="ir.actions.report">
             <field name="name">Survey</field>
