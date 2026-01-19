@@ -410,26 +410,34 @@ class SaleOrderLead(models.Model):
         )
     def _compute_cost_so(self):
         for order in self:
-            total_cost = 0.0
+            total_timesheet_cost = 0.0
             currency = order.currency_id or self.env.company.currency_id
 
             timesheets = order.project_id.task_ids.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+
+            ######### Calculate timesheet cost ######
+            for task in order.project_id.task_ids:
+                task_total_cost = 0.0
+                user_id = task.user_ids[0].id if task.user_ids else None
+                if user_id:
+                    current_employee = self.env['hr.employee'].search([('user_id', '=', user_id)], limit=1)
+                    timesheets = task.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+                    for sheet in timesheets:
+                        if sheet.currency_id and sheet.currency_id != currency:
+                            task_total_cost += sheet.currency_id._convert(
+                                sheet.unit_amount, currency, order.company_id, sheet.date or fields.Date.today()
+                            )
+                        else:
+                            task_total_cost += sheet.unit_amount
+                    total_timesheet_cost = total_timesheet_cost + (task_total_cost * current_employee.hourly_cost)
+                
+            ########## Calculate product cost ######
             total_product_cost = 0.0
             for line in order.order_line:
                 cost = line.product_id.standard_price
                 total_product_cost += cost * line.product_uom_qty
 
-            current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-            for sheet in timesheets:
-                if sheet.currency_id and sheet.currency_id != currency:
-                     total_cost += sheet.currency_id._convert(
-                        sheet.unit_amount, currency, order.company_id, sheet.date or fields.Date.today()
-                    )
-                else:
-                    total_cost += sheet.unit_amount
-            total_cost = total_cost * current_employee.hourly_cost
-
-            order.profitability_amount_cost_so = total_cost + total_product_cost
+            order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost
             order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
 
     @api.model
