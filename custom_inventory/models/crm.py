@@ -103,6 +103,19 @@ class CrmLead(models.Model):
             record.available_sku_category_ids = self.env.user.sku_category_ids
             print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
+    @api.depends('order_ids.state', 'order_ids.currency_id', 'order_ids.amount_untaxed', 'order_ids.date_order', 'order_ids.company_id')
+    def _compute_sale_data(self):
+        for lead in self:
+            company_currency = lead.company_currency or self.env.company.currency_id
+            sale_orders = lead.order_ids.filtered_domain(self._get_lead_sale_order_domain())
+            lead.sale_amount_total = sum(
+                order.currency_id._convert(
+                    order.amount_total, company_currency, order.company_id, order.date_order or fields.Date.today()
+                )
+                for order in sale_orders
+            )
+            lead.quotation_count = len(lead.order_ids.filtered_domain(self._get_lead_quotation_domain()))
+            lead.sale_order_count = len(sale_orders)
     
     @api.depends('order_ids.state', 'order_ids.invoice_ids.payment_state', 'order_ids.invoice_ids.amount_total')
     def _compute_invoice_payment_data(self):
