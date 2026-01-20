@@ -217,7 +217,6 @@ class AccountMove(models.Model):
                         crm_leads.log_to_crm_history(subject, body, sale_order)
             
         for order in self:
-            print(order.invoice_date,order.invoice_date.strftime('%d/%m/%Y'),"================================")
             self.env.cr.execute("""
                 UPDATE account_move 
                 SET formatted_invoice_date = %s,
