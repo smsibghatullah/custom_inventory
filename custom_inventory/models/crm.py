@@ -440,6 +440,9 @@ class SaleOrderLead(models.Model):
             order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost
             order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
 
+            revenue = order.amount_total or 0.0
+            order.total_profitability_so = revenue - order.profitability_amount_cost_so - order.other_profitability_cost_so
+
     @api.model
     def create(self, vals):
         record = super(SaleOrderLead, self).create(vals)
