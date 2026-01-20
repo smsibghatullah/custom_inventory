@@ -99,6 +99,24 @@ class AccountMove(models.Model):
             rec.formatted_invoice_date = rec.invoice_date.strftime('%d/%m/%Y') if rec.invoice_date else ''
             rec.formatted_due_date = rec.invoice_date_due.strftime('%d/%m/%Y') if rec.invoice_date_due else ''
 
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        res = super().fields_view_get(view_id, view_type, toolbar=toolbar, submenu=submenu)
+
+        if view_type == 'form':
+            records = self.browse(self._context.get('active_ids', []))
+            for rec in records:
+                rec.formatted_invoice_date = (
+                    rec.invoice_date.strftime('%d/%m/%Y')
+                    if rec.invoice_date else ''
+                )
+                rec.formatted_due_date = (
+                    rec.invoice_date_due.strftime('%d/%m/%Y')
+                    if rec.invoice_date_due else ''
+                )
+
+        return res        
+
     def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
                                                    force_email_company=False, force_email_lang=False):
         render_context = super()._notify_by_email_prepare_rendering_context(
