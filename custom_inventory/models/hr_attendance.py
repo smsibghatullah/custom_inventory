@@ -108,11 +108,11 @@ class HrAttendance(models.Model):
             writer.writerow([
                 att.employee_id.name or '',
                 att.work_name or 'Standard Work',
-                self._excel_text(check_in_local.strftime('%d/%m/%Y') if check_in_local else ''),
+                check_in_local.strftime('%d/%m/%Y') if check_in_local else '',
                 att.employee_id.work_email or '',
                 att.notes or '',
-                self._excel_text(check_in_local.strftime('%H:%M') if check_in_local else ''),
-                self._excel_text(check_out_local.strftime('%H:%M') if check_out_local else ''),
+                check_in_local.strftime('%H:%M') if check_in_local else '',
+                check_out_local.strftime('%H:%M') if check_out_local else '',
                 total_hours,
                 break_hours,
                 att.unit or 'Hours'
