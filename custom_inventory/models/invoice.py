@@ -204,8 +204,20 @@ class AccountMove(models.Model):
     def write(self, vals):
         user = self.env.user
         result = super(AccountMove, self).write(vals)
+
+        for move in self:
+            if move.move_type in ['out_invoice', 'in_invoice'] and move.invoice_origin:
+                sale_order = self.env['sale.order'].search([('name', '=', move.invoice_origin)], limit=1)
+                if sale_order:
+                    if 'state' in vals:
+                        subject = f"Invoice Updated: {move.name}"
+                        
+                        body = _("Invoice: <a href='#id=%(inv_id)s&model=account.move'>%(inv_name)s</a> has been updated to state %(inv_state)s  (linked to SO: %(so_ref)s).") % {'inv_id': move.id, 'inv_name': move.name, 'so_ref': move.invoice_origin, 'inv_state': move.state}
+
+                        crm_leads.log_to_crm_history(subject, body, sale_order)
             
         for order in self:
+            print(order.invoice_date,order.invoice_date.strftime('%d/%m/%Y'),"================================")
             self.env.cr.execute("""
                 UPDATE account_move 
                 SET formatted_invoice_date = %s,
@@ -291,21 +303,7 @@ class AccountMove(models.Model):
                 },
             }
     
-    def write(self, vals):
-        result = super(AccountMove, self).write(vals)
-
-        for move in self:
-            if move.move_type in ['out_invoice', 'in_invoice'] and move.invoice_origin:
-                sale_order = self.env['sale.order'].search([('name', '=', move.invoice_origin)], limit=1)
-                if sale_order:
-                    if 'state' in vals:
-                        subject = f"Invoice Updated: {move.name}"
-                        
-                        body = _("Invoice: <a href='#id=%(inv_id)s&model=account.move'>%(inv_name)s</a> has been updated to state %(inv_state)s  (linked to SO: %(so_ref)s).") % {'inv_id': move.id, 'inv_name': move.name, 'so_ref': move.invoice_origin, 'inv_state': move.state}
-
-                        crm_leads.log_to_crm_history(subject, body, sale_order)
-                    
-        return result
+  
 class InvoiceOrderEmailWizard(models.TransientModel):
     _name = 'invoice.order.email.wizard'
     _description = 'Invoice Order Email Wizard'
