@@ -27,6 +27,22 @@
                         </div>
                     </button>
 
+                    <button class="oe_stat_button" type="object" invisible="project_count == 0 or type == 'lead'"
+                        name="action_view_projects" icon="fa-list">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="project_count"/></span>
+                            <span class="o_stat_text"> Projects </span>
+                        </div>
+                    </button>
+                    
+                    <button class="oe_stat_button" type="object" invisible="task_count == 0 or type == 'lead'"
+                        name="action_view_tasks" icon="fa-list">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="task_count"/></span>
+                            <span class="o_stat_text"> Tasks </span>
+                        </div>
+                    </button>
+
                     <!-- <button class="oe_stat_button" type="object"
                         name="action_view_costs" icon="fa-calculator">
                         <div class="o_field_widget o_stat_info">

@@ -68,6 +68,10 @@ class CrmLead(models.Model):
         help="Select multiple salespersons who can also view thie crm lead"
     )
 
+    project_count = fields.Integer(string='Project Count', compute='_compute_project_data')
+    task_count = fields.Integer(string='Task Count', compute='_compute_task_data')
+
+
     @api.model
     def create(self, vals):
         if vals.get('expected_revenue', 0) <= 0:
@@ -160,6 +164,41 @@ class CrmLead(models.Model):
             lead.total_cost_amount = total_cost
             lead.cost_count = len(timesheets)
 
+    def _compute_project_data(self):
+        for record in self:
+            all_related_projects = record.order_ids.mapped('project_id')
+            record.project_count = len(all_related_projects)
+
+    def _compute_task_data(self):
+        for record in self:
+            all_related_projects = record.order_ids.mapped('project_id')            
+            all_related_tasks = all_related_projects.mapped('task_ids')
+            
+            record.task_count = len(all_related_tasks)
+
+    def action_view_projects(self):
+        project_ids = self.order_ids.mapped('project_id').ids
+        return {
+            'name': 'Projects',
+            'res_model': 'project.project',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('id', 'in', project_ids)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
+    
+    def action_view_tasks(self):
+        all_related_projects = self.order_ids.mapped('project_id')
+        task_ids = all_related_projects.mapped('task_ids').ids
+        
+        return {
+            'name': 'Tasks',
+            'res_model': 'project.task',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('id', 'in', task_ids)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
 
     def action_view_invoices(self):
         invoices = self.order_ids.mapped('invoice_ids').filtered(lambda inv: inv.move_type == 'out_invoice')
