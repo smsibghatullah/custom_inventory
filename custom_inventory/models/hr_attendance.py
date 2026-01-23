@@ -52,30 +52,30 @@ class HrAttendance(models.Model):
     comment = fields.Text(string="Comments")
     notes = fields.Text(string="Notes")
 
+
     def _break_to_float(self, break_time):
+        """
+        Convert break minutes to hours (PayHero compatible)
+        """
         mapping = {
             '15': 0.25,
             '30': 0.5,
             '45': 0.75,
             '60': 1.0,
         }
-        return mapping.get(break_time, 0.0)
+        return mapping.get(str(break_time), 0.0)
 
-    def _excel_text(self, value):
-        """Force Excel to treat value as text"""
-        return f"'{value}" if value else ''
 
     def action_export_attendance_csv(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
 
-        # CSV Header
         writer.writerow([
             'Employee',
-            'Work Name',
-            'Date',
             'Employee Email',
+            'Work Name',
             'Notes',
+            'Date',
             'Start Time',
             'End Time',
             'Duration',
@@ -92,38 +92,31 @@ class HrAttendance(models.Model):
             check_in_local = check_in.astimezone(user_tz) if check_in else False
             check_out_local = check_out.astimezone(user_tz) if check_out else False
 
-            worked_hours = att.worked_hours or 0
+            worked_hours = att.worked_hours or 0.0
             break_hours = self._break_to_float(att.break_time)
-            total_hours = round(worked_hours + break_hours, 2)
 
-            print(att.check_in, att.check_out, "original UTC datetime")
-            print(check_in_local, check_out_local, "converted to user timezone")
-            print(
-                self._excel_text(check_in_local.strftime('%H:%M') if check_in_local else ''),
-                self._excel_text(check_out_local.strftime('%H:%M') if check_out_local else ''),
-                "HH:MM for Excel text field"
-            )
+            end_time = check_out_local.strftime('%H:%M') if check_out_local else ''
 
-            # Write row
+            duration = round(worked_hours + break_hours, 2)
+
             writer.writerow([
                 att.employee_id.name or '',
-                att.work_name or 'Standard Work',
-                check_in_local.strftime('%d/%m/%Y') if check_in_local else '',
                 att.employee_id.work_email or '',
+                att.work_name or 'Standard Work',
                 att.notes or '',
+                check_in_local.strftime('%d/%m/%Y') if check_in_local else '',
                 check_in_local.strftime('%H:%M') if check_in_local else '',
-                check_out_local.strftime('%H:%M') if check_out_local else '',
-                total_hours,
+                end_time,
+                duration,
                 break_hours,
-                att.unit or 'Hours'
+                
             ])
 
-        # Prepare attachment
         csv_content = buffer.getvalue()
         buffer.close()
 
         csv_base64 = base64.b64encode(csv_content.encode('utf-8'))
-        filename = f"attendance_export_{fields.Date.today()}.csv"
+        filename = f"payhero_timesheet_{fields.Date.today()}.csv"
 
         attachment = self.env['ir.attachment'].create({
             'name': filename,
