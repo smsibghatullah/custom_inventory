@@ -526,7 +526,7 @@ class SaleOrderLead(models.Model):
                 if 'opportunity_id' in vals:
                     subject = f"CRM Lead Linked to SO: {order.name}"
                     body = _(f"This Sale Order {order.name} was linked to the CRM Lead.")
-                    crm_leads.log_to_crm_history(subject, body, order)
+                    crm_leads.log_to_crm_history(subject, body, order, copy_history_records=True)
 
         return result
     
