@@ -131,6 +131,7 @@ class APIController(http.Controller):
             else:
                 data = resource.read()
                 if resource:
+                    print(data,"================================data")
                     return valid_response(data)
                 else:
                     return valid_response(data)

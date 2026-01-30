@@ -4,7 +4,8 @@ import logging
 import werkzeug.wrappers
 from odoo import http, models, fields
 from odoo import http
-from odoo.addons.restful.common import invalid_response, valid_response
+from odoo.addons.restful.common import (extract_arguments, invalid_response,
+                                        valid_response, extract_arguments_sibghat)
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.http import request
 import base64
@@ -21,6 +22,202 @@ class AccessToken(http.Controller):
     def __init__(self):
 
         self._token = request.env["api.access_token"]
+
+    @http.route(
+        '/api/survey/user_input/answers',
+        type="http",
+        auth="none",
+        methods=["GET"],
+        csrf=False
+    )
+    def get_answers(self, **payload):
+        try:
+            model = request.env['ir.model'].sudo().search(
+                [("model", "=", "survey.user_input.line")],
+                limit=1
+            )
+
+            if not model:
+                return invalid_response(
+                    "invalid object model",
+                    "The model is not available in the registry.",
+                )
+
+            domain, fields, offset, limit, order = extract_arguments_sibghat(payload)
+
+            lines = request.env[model.model].sudo().search(
+                domain=domain,
+                offset=offset,
+                limit=limit,
+                order=order
+            )
+
+            answers = []
+
+            for line in lines:
+                ans = line.read(fields or [])  # read returns list
+                ans = ans[0] if ans else {}
+
+                # ================= TABLE =================
+                if ans.get("answer_type") == "table":
+                    table_records = []
+                    for table_line in line.table_ids:
+                        table_records.append({
+                            "id": table_line.id,
+                            "row_no": table_line.row_no,
+                            "column_no": table_line.column_no,
+                            "column_name": table_line.column_name,
+                            "value": table_line.value,
+                        })
+                    ans["table_ids"] = table_records
+
+                # ================= RISK =================
+                elif ans.get("answer_type") == "risk":
+                    risk_records = []
+                    for hazard in line.hazard_ids:  # hazard_ids Many2many
+                        # Fetch the full hazard record
+                        hazard_obj = request.env['survey.potential_hazard'].sudo().browse(hazard.id)
+                        if not hazard_obj:
+                            continue
+
+                        risk_records.append({
+                            "question_id": line.question_id.id,
+                            "hazard_id": hazard_obj.id,
+                            "hazard_name": hazard_obj.name,
+                            "hazard_consequence": {
+                                "id": hazard_obj.hazard_consequence_id.id if hazard_obj.hazard_consequence_id else None,
+                                "name": hazard_obj.hazard_consequence_id.name if hazard_obj.hazard_consequence_id else None,
+                                "rating": hazard_obj.hazard_consequence_id.rating if hazard_obj.hazard_consequence_id else None,
+                            },
+                            "likelihood": {
+                                "id": hazard_obj.likelihood_id.id if hazard_obj.likelihood_id else None,
+                                "name": hazard_obj.likelihood_id.name if hazard_obj.likelihood_id else None,
+                                "rating": hazard_obj.likelihood_id.rating if hazard_obj.likelihood_id else None,
+                            },
+                            "initial_risk": {
+                                "score": hazard_obj.initial_risk_score,
+                                "level": hazard_obj.initial_risk_level,
+                            },
+                            "controls": [
+                                {"id": control.id, "name": control.name} 
+                                for control in hazard_obj.control_ids
+                            ],
+                            "post_control_hazard_consequence": {
+                                "id": hazard_obj.post_control_hazard_consequence_id.id if hazard_obj.post_control_hazard_consequence_id else None,
+                                "name": hazard_obj.post_control_hazard_consequence_id.name if hazard_obj.post_control_hazard_consequence_id else None,
+                                "rating": hazard_obj.post_control_hazard_consequence_id.rating if hazard_obj.post_control_hazard_consequence_id else None,
+                            },
+                            "post_control_likelihood": {
+                                "id": hazard_obj.post_control_likelihood_id.id if hazard_obj.post_control_likelihood_id else None,
+                                "name": hazard_obj.post_control_likelihood_id.name if hazard_obj.post_control_likelihood_id else None,
+                                "rating": hazard_obj.post_control_likelihood_id.rating if hazard_obj.post_control_likelihood_id else None,
+                            },
+                            "post_control_risk": {
+                                "score": hazard_obj.post_control_risk_score,
+                                "level": hazard_obj.post_control_risk_level,
+                            },
+                        })
+
+                    ans["hazard_ids"] = risk_records
+
+                answers.append(ans)
+
+            # user_input header
+            user_input = lines[:1].user_input_id if lines else False
+            response = {
+                "user_input": {
+                    "id": user_input.id if user_input else False,
+                    "survey_id": [
+                        user_input.survey_id.id,
+                        user_input.survey_id.display_name
+                    ] if user_input else False,
+                },
+                "answers": answers,
+            }
+
+            return valid_response(response)
+
+        except AccessError as e:
+            return invalid_response("Access error", "Error: %s" % e.name)
+
+
+    @http.route('/api/survey/potential_hazard/create', type='json', auth='user', methods=['POST'], csrf=False)
+    def create_potential_hazard(self, **kwargs):
+        try:
+            payload = request.httprequest.data.decode()
+            payload = json.loads(payload or "{}")
+
+            if not payload:
+                return {"success": False, "error": "No data provided"}
+
+            required_fields = ['name']
+            for field in required_fields:
+                if field not in payload:
+                    return {"success": False, "error": f"Missing field: {field}"}
+
+            hazard_vals = {
+                'name': payload.get('name'),
+                'hazard_consequence_id': payload.get('hazard_consequence_id') or False,
+                'likelihood_id': payload.get('likelihood_id') or False,
+                'post_control_hazard_consequence_id': payload.get('post_control_hazard_consequence_id') or False,
+                'post_control_likelihood_id': payload.get('post_control_likelihood_id') or False,
+                'control_ids': payload.get('control_ids') or [],
+            }
+
+            hazard_record = request.env['survey.potential_hazard'].sudo().create(hazard_vals)
+
+            _logger.info("Survey potential hazard created with ID %s", hazard_record.id)
+
+            return {"success": True, "message": "Potential hazard created", "hazard_id": hazard_record.id}
+
+        except Exception as e:
+            _logger.exception("Error creating potential hazard")
+            return {"success": False, "error": str(e)}
+
+
+    @http.route('/api/survey/table/create', type='json', auth='user', methods=['POST'], csrf=False)
+    def create_survey_table(self, **kwargs):
+        try:
+            payload = request.httprequest.data.decode()
+            payload = json.loads(payload or "{}")
+
+            if not payload:
+                return {
+                    "success": False,
+                    "error": "No data provided"
+                }
+
+            required_fields = ['row_no', 'column_no', 'value']
+            for field in required_fields:
+                if field not in payload:
+                    return {
+                        "success": False,
+                        "error": "Missing field: %s" % field
+                    }
+
+            table_vals = {
+                'row_no': payload.get('row_no'),
+                'column_no': payload.get('column_no'),
+                'column_name': payload.get('column_name', False),
+                'value': payload.get('value'),
+            }
+
+            table_record = request.env['survey.table'].sudo().create(table_vals)
+
+            _logger.info("Survey table created with ID %s", table_record.id)
+
+            return {
+                "success": True,
+                "message": "Survey table row created",
+                "table_id": table_record.id
+            }
+
+        except Exception as e:
+            _logger.exception("Error creating survey table")
+            return {
+                "success": False,
+                "error": str(e)
+            }    
         
     @http.route('/api/send_survey_via_email', type='json', auth='user', methods=['POST'], csrf=False)
     def send_survey_via_email(self, **kwargs):
@@ -312,7 +509,7 @@ class AccessToken(http.Controller):
                 table_data = []
                 print(question.question_type,"question.question_type")
                 if question.question_type == 'table':
-                    print(question.table_ids,"question.table_ids=======================")
+                    print(question.title,question.id,"question.table_ids=======================",question.table_ids)
                     for table_line in question.table_ids:
                         table_data.append({
                             "id": table_line.id,
@@ -322,7 +519,7 @@ class AccessToken(http.Controller):
                             "value": table_line.value,
                         })
                 risk = []
-                print(table_data,"table_data====================================")
+                # print(table_data,"table_data====================================")
                 if question.question_type == 'risk':
                     for hazard in question.potential_hazard_ids:
                         print(hazard.hazard_consequence_id,"=======================================")
@@ -395,6 +592,7 @@ class AccessToken(http.Controller):
                     'risk':risk,
                     "table": table_data
                 })
+                # print(table_data,"table_datatable_datatable_datatable_datatable_datatable_datatable_datatable_data")
 
                
 
