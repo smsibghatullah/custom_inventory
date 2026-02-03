@@ -117,6 +117,7 @@ class AccessToken(http.Controller):
                                 "level": hazard_obj.post_control_risk_level,
                             },
                         })
+                        print(risk_records,"=====================================12222222222222222222222222222")
 
                     ans["hazard_ids"] = risk_records
 
@@ -590,10 +591,9 @@ class AccessToken(http.Controller):
                     "description": question.description,
                     "answers": answers_data,
                     'risk':risk,
+                    'static_content': question.static_content if question.question_type == 'static_content' else '',
                     "table": table_data
                 })
-                # print(table_data,"table_datatable_datatable_datatable_datatable_datatable_datatable_datatable_data")
-
                
 
             result = []

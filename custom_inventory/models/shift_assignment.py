@@ -110,7 +110,6 @@ class ShiftRole(models.Model):
                                     "question_id": question.id,
                                     "survey_id": assigned_form.survey_id.id,
                                     "answer_type": answer_type,
-                                    "static_content": question.static_content if question.question_type == "static_content" else '',
                                 }
 
                                 if answer_type == 'text_box':
@@ -120,6 +119,10 @@ class ShiftRole(models.Model):
                                 elif answer_type == 'risk':
                                         vals["hazard_ids"] = (
                                             question.potential_hazard_ids if question.potential_hazard_ids else []
+                                        )      
+                                elif answer_type == 'static_content':
+                                        vals["static_content"] = (
+                                            question.static_content if question.static_content else ''
                                         )  
                                 elif answer_type == 'table':
                                         vals["table_ids"] = (
@@ -214,7 +217,6 @@ class ShiftRole(models.Model):
                                         "question_id": question.id,
                                         "survey_id": assigned_form.survey_id.id,
                                         "answer_type": answer_type,
-                                        "static_content": question.static_content if question.question_type == "static_content" else '',
                                     }
 
                                     if answer_type == 'text_box':
@@ -230,6 +232,10 @@ class ShiftRole(models.Model):
                                         vals["hazard_ids"] = (
                                             question.potential_hazard_ids if question.potential_hazard_ids else []
                                         )  
+                                    elif answer_type == 'static_content':
+                                        vals["static_content"] = (
+                                            question.static_content if question.static_content else ''
+                                    )      
 
                                     elif answer_type == 'table':
                                         vals["table_ids"] = (
