@@ -68,6 +68,10 @@ class CrmLead(models.Model):
         help="Select multiple salespersons who can also view thie crm lead"
     )
 
+    project_count = fields.Integer(string='Project Count', compute='_compute_project_data')
+    task_count = fields.Integer(string='Task Count', compute='_compute_task_data')
+
+
     @api.model
     def create(self, vals):
         if vals.get('expected_revenue', 0) <= 0:
@@ -103,6 +107,19 @@ class CrmLead(models.Model):
             record.available_sku_category_ids = self.env.user.sku_category_ids
             print(record.available_tag_ids,"ppppppppppppppppppppppppmubeenpssssssssssssssssssssssssss")
 
+    @api.depends('order_ids.state', 'order_ids.currency_id', 'order_ids.amount_untaxed', 'order_ids.date_order', 'order_ids.company_id')
+    def _compute_sale_data(self):
+        for lead in self:
+            company_currency = lead.company_currency or self.env.company.currency_id
+            sale_orders = lead.order_ids.filtered_domain(self._get_lead_sale_order_domain())
+            lead.sale_amount_total = sum(
+                order.currency_id._convert(
+                    order.amount_total, company_currency, order.company_id, order.date_order or fields.Date.today()
+                )
+                for order in sale_orders
+            )
+            lead.quotation_count = len(lead.order_ids.filtered_domain(self._get_lead_quotation_domain()))
+            lead.sale_order_count = len(sale_orders)
     
     @api.depends('order_ids.state', 'order_ids.invoice_ids.payment_state', 'order_ids.invoice_ids.amount_total')
     def _compute_invoice_payment_data(self):
@@ -147,6 +164,41 @@ class CrmLead(models.Model):
             lead.total_cost_amount = total_cost
             lead.cost_count = len(timesheets)
 
+    def _compute_project_data(self):
+        for record in self:
+            all_related_projects = record.order_ids.mapped('project_id')
+            record.project_count = len(all_related_projects)
+
+    def _compute_task_data(self):
+        for record in self:
+            all_related_projects = record.order_ids.mapped('project_id')            
+            all_related_tasks = all_related_projects.mapped('task_ids')
+            
+            record.task_count = len(all_related_tasks)
+
+    def action_view_projects(self):
+        project_ids = self.order_ids.mapped('project_id').ids
+        return {
+            'name': 'Projects',
+            'res_model': 'project.project',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('id', 'in', project_ids)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
+    
+    def action_view_tasks(self):
+        all_related_projects = self.order_ids.mapped('project_id')
+        task_ids = all_related_projects.mapped('task_ids').ids
+        
+        return {
+            'name': 'Tasks',
+            'res_model': 'project.task',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('id', 'in', task_ids)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
 
     def action_view_invoices(self):
         invoices = self.order_ids.mapped('invoice_ids').filtered(lambda inv: inv.move_type == 'out_invoice')
@@ -354,6 +406,17 @@ class SaleOrderLead(models.Model):
     )
 
 
+    def action_view_full_so(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Sales Order',
+            'res_model': 'sale.order',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'current',  # 'current' target means full page, not popup
+        }
+
     @api.depends('amount_total', 'profitability_amount_cost_so', 'other_profitability_cost_so')
     def _compute_profitability_so(self):
         for order in self:
@@ -399,28 +462,54 @@ class SaleOrderLead(models.Model):
         )
     def _compute_cost_so(self):
         for order in self:
-            total_cost = 0.0
+            total_timesheet_cost = 0.0
             currency = order.currency_id or self.env.company.currency_id
 
             timesheets = order.project_id.task_ids.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+
+            ######### Calculate timesheet cost ######
+            for task in order.project_id.task_ids:
+                task_total_cost = 0.0
+                user_id = task.user_ids[0].id if task.user_ids else None
+                if user_id:
+                    current_employee = self.env['hr.employee'].search([('user_id', '=', user_id)], limit=1)
+                    timesheets = task.timesheet_ids.filtered(lambda t: t.unit_amount != 0)
+                    for sheet in timesheets:
+                        if sheet.currency_id and sheet.currency_id != currency:
+                            task_total_cost += sheet.currency_id._convert(
+                                sheet.unit_amount, currency, order.company_id, sheet.date or fields.Date.today()
+                            )
+                        else:
+                            task_total_cost += sheet.unit_amount
+                    total_timesheet_cost = total_timesheet_cost + (task_total_cost * current_employee.hourly_cost)
+                
+            ########## Calculate product cost ######
             total_product_cost = 0.0
             for line in order.order_line:
                 cost = line.product_id.standard_price
-                total_product_cost += cost
+                total_product_cost += cost * line.product_uom_qty
 
-            for sheet in timesheets:
-                if sheet.currency_id and sheet.currency_id != currency:
-                     total_cost += sheet.currency_id._convert(
-                        sheet.unit_amount, currency, order.company_id, sheet.date or fields.Date.today()
-                    )
-                else:
-                    total_cost += sheet.unit_amount
-            order.profitability_amount_cost_so = total_cost + total_product_cost
-            order.amount_cost_so = total_cost + order.other_profitability_cost_so
+            order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost
+            order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
 
+            revenue = order.amount_total or 0.0
+            order.total_profitability_so = revenue - order.profitability_amount_cost_so - order.other_profitability_cost_so
+
+    @api.model
+    def create(self, vals):
+        record = super(SaleOrderLead, self).create(vals)
+
+        for order in record:
+            if order.opportunity_id and order.state == 'draft':
+                subject = f"Sale Order {order.name}"
+                body = _("Sale Order: <a href='#id=%(so_id)s&model=sale.order'>%(so_name)s</a> created with state: <b>%(state)s</b>.") % {'so_id': order.id, 'so_name': order.name, 'state': dict(order._fields['state'].selection).get(order.state)}
+                crm_leads.log_to_crm_history(subject, body, order)
+        return record
+    
     def write(self, vals):
         result = super(SaleOrderLead, self).write(vals)
 
+        
         for order in self:
             if order.opportunity_id:
                 if 'state' in vals:
@@ -437,7 +526,7 @@ class SaleOrderLead(models.Model):
                 if 'opportunity_id' in vals:
                     subject = f"CRM Lead Linked to SO: {order.name}"
                     body = _(f"This Sale Order {order.name} was linked to the CRM Lead.")
-                    crm_leads.log_to_crm_history(subject, body, order)
+                    crm_leads.log_to_crm_history(subject, body, order, copy_history_records=True)
 
         return result
     

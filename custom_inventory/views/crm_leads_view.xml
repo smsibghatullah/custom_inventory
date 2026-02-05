@@ -27,6 +27,22 @@
                         </div>
                     </button>
 
+                    <button class="oe_stat_button" type="object" invisible="project_count == 0 or type == 'lead'"
+                        name="action_view_projects" icon="fa-list">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="project_count"/></span>
+                            <span class="o_stat_text"> Projects </span>
+                        </div>
+                    </button>
+                    
+                    <button class="oe_stat_button" type="object" invisible="task_count == 0 or type == 'lead'"
+                        name="action_view_tasks" icon="fa-list">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value"><field name="task_count"/></span>
+                            <span class="o_stat_text"> Tasks </span>
+                        </div>
+                    </button>
+
                     <!-- <button class="oe_stat_button" type="object"
                         name="action_view_costs" icon="fa-calculator">
                         <div class="o_field_widget o_stat_info">
@@ -54,14 +70,19 @@
                     
                     <page string="Attached SO Details" name="attached_so_details_tab">
                         <field name="order_ids" widget="section_and_note_one2many">
-                            <tree string="Sale Orders" delete="false" create="0">
-                                <field name="name" string="SO Number"/>
+                            <tree string="Sale Orders" delete="false" create="0" editable="bottom">
+                                <field name="name" string="SO Number" readonly="1"/>
                                 <field name="state" string="SO Status"/>
                                 <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 
                                 <field name="amount_invoiced_so" string="Invoiced Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_paid_so" string="Paid Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <button name="action_view_full_so" 
+                                    string="View SO" 
+                                    type="object" 
+                                    icon="fa-external-link" 
+                                    help="Click to open the Sales Order in full page"/>
                             </tree>
                         </field>
                     </page>
@@ -80,7 +101,7 @@
                     <page string="Profitability" name="crm_lead_profitability">
                         <field name="order_ids" widget="section_and_note_one2many" options="{'no_create': True}">
                             <tree string="Sale Orders" delete="false" editable="bottom" create="0">
-                                <field name="name" string="SO Number"/>
+                                <field name="name" string="SO Number" readonly="1"/>
                                 <field name="amount_total" string="Revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
                                 <field name="profitability_amount_cost_so" string="Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
