@@ -654,10 +654,10 @@ class Project(models.Model):
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
     survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
-    pcbu_1_details = fields.Char(
+    pcbu_1_details = fields.Text(
         string="PCBU-1 Details",
     )
-    pcbu_2_details = fields.Char(
+    pcbu_2_details = fields.Text(
         string="PCBU-2 Details"
     )
 

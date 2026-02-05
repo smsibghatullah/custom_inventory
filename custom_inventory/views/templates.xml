@@ -1731,7 +1731,7 @@
                                         text-align:left;
                                         margin-left:20px
                                     ">
-                                        Geeves Scaffolding - University of Otago
+                                       <span t-field="o.project_id.pcbu_1_details" />
                                     </div>
                                 </div>
 
@@ -1750,10 +1750,7 @@
                                         text-align:left;
                                         margin-left:20px
                                     ">
-                                        <strong><t t-esc="company.name"/></strong><br/>
-                                        Manager - <t t-esc="company.partner_id.name"/><br/>
-                                        M: <t t-esc="company.phone"/><br/>
-                                        E: <t t-esc="company.email"/>
+                                        <span t-field="o.project_id.pcbu_2_details" />
                                     </div>
                                 </div>
 
