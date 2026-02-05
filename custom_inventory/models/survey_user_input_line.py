@@ -306,19 +306,20 @@ class ReportEmploymentCertificate(models.AbstractModel):
                 # ---------- TABLE ----------
                 elif question.question_type == 'table':
                     cols, rows = {}, {}
-                    for tl in question.table_ids:
-                        cols.setdefault(tl.column_no, {
-                            'column_no': tl.column_no,
-                            'column_name': tl.column_name
-                        })
-                        rows.setdefault(tl.row_no, {
-                            'row_no': tl.row_no,
-                            'cells': {}
-                        })
-                        rows[tl.row_no]['cells'][tl.column_no] = tl.value
+                    for ln in question_lines:
+                        for tl in ln.table_ids:
+                            cols.setdefault(tl.column_no, {
+                                'column_no': tl.column_no,
+                                'column_name': tl.column_name
+                            })
+                            rows.setdefault(tl.row_no, {
+                                'row_no': tl.row_no,
+                                'cells': {}
+                            })
+                            rows[tl.row_no]['cells'][tl.column_no] = tl.value
 
-                    answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
-                    answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])
+                        answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
+                        answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])
 
                 # ---------- MATRIX ----------
                 elif question.question_type == 'matrix':
@@ -356,22 +357,22 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     if not risk_block:
                         risk_block = {'activity': key[0], 'subtitle': key[1], 'hazards': []}
                         risk_register.append(risk_block)
-
-                    for hz in question.potential_hazard_ids:
-                        row = {
-                            'hazard': hz.name,
-                            'consequence': f"{hz.hazard_consequence_id.rating} - {hz.hazard_consequence_id.name}"
-                            if hz.hazard_consequence_id else '',
-                            'likelihood': f"{hz.likelihood_id.rating} - {hz.likelihood_id.name}"
-                            if hz.likelihood_id else '',
-                            'initial_score': hz.initial_risk_score,
-                            'initial_level': hz.initial_risk_level,
-                            'controls': hz.control_ids.mapped('name'),
-                            'post_score': hz.post_control_risk_score,
-                            'post_level': hz.post_control_risk_level,
-                        }
-                        risk_block['hazards'].append(row)
-                        answers['risk'].append(row)
+                    for ln in question_lines:
+                        for hz in ln.hazard_ids:
+                            row = {
+                                'hazard': hz.name,
+                                'consequence': f"{hz.hazard_consequence_id.rating} - {hz.hazard_consequence_id.name}"
+                                if hz.hazard_consequence_id else '',
+                                'likelihood': f"{hz.likelihood_id.rating} - {hz.likelihood_id.name}"
+                                if hz.likelihood_id else '',
+                                'initial_score': hz.initial_risk_score,
+                                'initial_level': hz.initial_risk_level,
+                                'controls': hz.control_ids.mapped('name'),
+                                'post_score': hz.post_control_risk_score,
+                                'post_level': hz.post_control_risk_level,
+                            }
+                            risk_block['hazards'].append(row)
+                            answers['risk'].append(row)
 
                 for ln in question_lines:
                     answers['char_box'] = ln.value_char_box or answers['char_box']
