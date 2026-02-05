@@ -321,7 +321,7 @@ class AccountMove(models.Model):
     def action_post(self):
         for move in self:
             if move.auto_created_doc == True:
-                continue
+                return super(AccountMove, move).action_post()
             if not move.intercompany:
                 return super(AccountMove, move).action_post()
             else:
@@ -427,6 +427,8 @@ class AccountMove(models.Model):
                                 subtype_xmlid='mail.mt_note'
                             )
 
+                            return super(AccountMove, move).action_post()
+
                 elif move.move_type == "in_invoice":
                     """
                     Creating auto invoice when Bill is created in source company.
@@ -463,6 +465,8 @@ class AccountMove(models.Model):
                                 message_type='comment',
                                 subtype_xmlid='mail.mt_note'
                             )
+
+                            return super(AccountMove, move).action_post()
                     else:
                          _logger.info("Skipping sales invoice creation: Parameters not found for reverse flow.")
 
