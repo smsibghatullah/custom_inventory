@@ -582,11 +582,13 @@ class AccessToken(http.Controller):
                         question.prefill_text if question.pre_filled and question.question_type == 'text_box' else
                         question.prefill_char if question.pre_filled and question.question_type == 'char_box' else
                         question.prefill_number if question.pre_filled and question.question_type == 'numerical_box' else
-                        question.prefill_date if question.pre_filled and question.question_type == 'date' else
-                        question.prefill_datetime if question.pre_filled and question.question_type == 'datetime' else
+                        question.prefill_date if question.pre_filled and question.question_type == 'date' else 
+                        question.prefill_datetime if question.pre_filled and question.question_type == 'datetime' else 
                         question.prefill_signature if question.pre_filled and question.question_type == 'digital_signature' else
                         None
                     ),
+                    "current_date_time":fields.Datetime.now(),
+                    "current_date":fields.Date.today(),
                     "refrence_question_id": question.question_id.id,
                     "description": question.description,
                     "answers": answers_data,

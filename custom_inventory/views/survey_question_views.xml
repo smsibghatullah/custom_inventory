@@ -57,6 +57,7 @@
                     <field name="prefill_signature"
                         widget="signature"
                         invisible="not pre_filled or question_type != 'digital_signature'"/>
+
    
             </xpath>
 

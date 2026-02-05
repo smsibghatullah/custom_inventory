@@ -44,6 +44,7 @@ class SurveyQuestion(models.Model):
         string="Refrence Field",
         ondelete="set null"
     )
+                     
 
     table_ids = fields.One2many('survey.table', 'question_id', string="Table")
     static_content = fields.Html("Static Content")
