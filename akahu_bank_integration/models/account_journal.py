@@ -22,6 +22,11 @@ class AccountJournal(models.Model):
 
         return fields.Datetime.to_string(dt)
 
+    def parse_datetime_safe(self, date_str):
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
+        except Exception:
+            return False
 
     def action_configure_bank_accounts(self):
         headers = {
