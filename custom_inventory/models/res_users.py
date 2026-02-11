@@ -38,7 +38,7 @@ class ResUsers(models.Model):
             removed_categories = self.env['sku.type.master'].search([('company_ids', 'in', removed_companies)]).ids
             self.tag_ids = [(3, tag_id) for tag_id in removed_tags if tag_id in self.tag_ids.ids]
             self.sku_category_ids = [(2, category.id) for category in self.sku_category_ids if
-                                 category.company_id.id in removed_companies]
+                                 category.company_ids.id in removed_companies]
 
 
 class ResPartner(models.Model):
