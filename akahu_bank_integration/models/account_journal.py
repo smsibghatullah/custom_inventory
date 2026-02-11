@@ -217,94 +217,130 @@ class ResPartnerBank(models.Model):
     _inherit = 'res.partner.bank'
 
     def action_configure_bank_accounts_transactions(self):
-        AkahuAccount = self.env['akahu.bank.account']
-        AkahuTransaction = self.env['akahu.transaction']
-        TransactionLink = self.env['akahu.transaction.link']
-        created_transaction = []
+            print("========================================12345677888996")
+            AkahuAccount = self.env['akahu.bank.account']
+            AkahuTransaction = self.env['akahu.transaction']
+            TransactionLink = self.env['akahu.transaction.link']
+            PendingAkahuTransaction = self.env['akahu.pending.transaction']
+            created_transaction = []
 
-        headers = {
-            'Authorization': 'Bearer user_token_cm9y2t9w2000208l1c7ts2m2i',
-            'X-Akahu-Id': 'app_token_cm9y2t9w2000108l1bdnc7mza'
-        }
-
-        response = requests.get('https://api.akahu.io/v1/transactions', headers=headers)
-
-        if response.status_code == 200:
-            transactions = response.json()
-
-            for trans_data in transactions.get('items', []):
-                account_id = trans_data.get('_account')
-                matched_account = AkahuAccount.search([('formatted_account', '=', self.acc_number)], limit=1)
-
-                if not matched_account or trans_data.get('_account') != matched_account.akahu_account_id:
-                    continue
-
-                transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
-                if not transaction_link:
-                    transaction_link = TransactionLink.create({
-                        'name': f'{matched_account.name}',
-                        'akahu_account_id': matched_account.id,
-                    })
-
-                reference = trans_data.get('_id')
-                transaction = AkahuTransaction.search([
-                    ('reference', '=', reference),
-                    ('akahu_account_id', '=', matched_account.akahu_account_id)
-                ], limit=1)
-                print(matched_account.akahu_account_id,"====================================================================")
-
-                if not transaction:
-                    transaction_type = 'INCOME' if trans_data.get('type') == 'credit' else 'PAYMENT'
-
-                    transaction = AkahuTransaction.create({
-                        'name': trans_data.get('description'),
-                        'amount': trans_data.get('amount'),
-                        'amount_due': trans_data.get('amount'),
-                        'amount_paid': 0.0,
-                        'date': self._parse_datetime_safe(trans_data.get('date')),
-                        'created_at': self._parse_datetime_safe(trans_data.get('created_at')),
-                        'updated_at': self._parse_datetime_safe(trans_data.get('updated_at')),
-                        'balance': trans_data.get('balance'),
-                        'transection_type': transaction_type,
-                        'reference': reference,
-                        'hash': trans_data.get('hash'),
-                        'akahu_account_id': matched_account.akahu_account_id,
-                        'akahu_user_id': trans_data.get('_user'),
-                        'akahu_connection_id': trans_data.get('_connection'),
-                        'description': trans_data.get('description'),
-                        'particulars': trans_data.get('meta', {}).get('particulars'),
-                        'code': trans_data.get('meta', {}).get('code'),
-                        'other_account': trans_data.get('meta', {}).get('other_account'),
-                        'transaction_link_id': transaction_link.id
-                    })
-
-                transaction_link.write({
-                    'invoice_ids': [(5, 0, 0)]
-                })
-
-                created_transaction.append(transaction_link.id)
-
-                if transaction.id not in transaction_link.transaction_ids.ids:
-                    transaction_link.write({
-                        'transaction_ids': [(4, transaction.id)],
-                        'all_transaction_ids': [(4, transaction.id)],
-                    })
-
-            if not created_transaction:
-                raise UserError(f"Account {self.acc_number} has no transactions.")
-
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Transaction Link',
-                'res_model': 'akahu.transaction.link',
-                'view_mode': 'form',
-                'res_id': transaction_link.id,
-                'target': 'current'
+            headers = {
+                'Authorization': 'Bearer user_token_cm9y2t9w2000208l1c7ts2m2i',
+                'X-Akahu-Id': 'app_token_cm9y2t9w2000108l1bdnc7mza'
             }
 
-        else:
-            _logger.error('Failed to fetch transactions: %s', response.text)
-            raise UserError("Failed to fetch transactions from Akahu.")
+            response = requests.get('https://api.akahu.io/v1/accounts', headers=headers)
+
+            if response.status_code == 200:
+                accounts_data = response.json()
+
+                for acc_data in accounts_data.get('items', []):
+                    account_id = acc_data.get('_id')
+                    matched_account = AkahuAccount.search([('formatted_account', '=', self.acc_number)], limit=1)
+                    if not matched_account or acc_data.get('_id') != matched_account.akahu_account_id:
+                        continue 
+                    
+                    transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions?start=2025-09-01:00:00Z", headers=headers)
+                    pending_transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions/pending", headers=headers)
+                    if pending_transection_response.status_code == 200:
+                        pending_transection_data = pending_transection_response.json()
+                        print(pending_transection_data,"====================================qwest")
+                    transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
+                    if not transaction_link:
+                        transaction_link = TransactionLink.create({
+                            'name': f'{matched_account.name}',
+                            'akahu_account_id': matched_account.id,
+                        })
+                    self.env['akahu.pending.transaction'].search([
+                        ('transaction_link_id', '=', transaction_link.id)
+                    ]).unlink()      
+
+                    for trans_data in pending_transection_data.get('items', []):
+                           
+
+                        transaction = PendingAkahuTransaction.create({
+                                'name': trans_data.get('description'),
+                                'amount': trans_data.get('amount'),
+                                'date': self.convert_iso_to_odoo(trans_data.get('date')),
+                                'transection_type': trans_data.get('type'),
+                                'akahu_account_id': matched_account.akahu_account_id,
+                                'akahu_user_id': trans_data.get('_user'),
+                                'akahu_connection_id': trans_data.get('_connection'),
+                                'transaction_link_id':transaction_link.id
+                        })       
+
+                    if transection_response.status_code == 200:
+                        transection_data = transection_response.json()
+                    for trans_data in transection_data.get('items', []):
+
+                        transaction_link = TransactionLink.search([('akahu_account_id', '=', matched_account.id)], limit=1)
+                        if not transaction_link:
+                            transaction_link = TransactionLink.create({
+                                'name': f'{matched_account.name}',
+                                'akahu_account_id': matched_account.id,
+                            })
+                        
+                        reference = trans_data.get('_id')
+                        transaction = AkahuTransaction.search([('reference', '=', reference),('akahu_account_id', '=', matched_account.akahu_account_id)], limit=1)
+                        print(trans_data.get('_id'),"trans_data.get('description')=============================================")
+
+                        if not transaction:
+
+                            transaction = AkahuTransaction.create({
+                                'name': trans_data.get('description'),
+                                'amount': trans_data.get('amount'),
+                                'amount_due': trans_data.get('amount'),  
+                                'amount_paid': 0.0,
+                                'date': self.convert_iso_to_odoo(trans_data.get('date')),
+                                'created_at': self.convert_iso_to_odoo(trans_data.get('created_at')),
+                                'updated_at': self.convert_iso_to_odoo(trans_data.get('updated_at')),
+                                'balance': trans_data.get('balance'),
+                                'transection_type': trans_data.get('type'),
+                                'reference': reference,
+                                'hash': trans_data.get('hash'),
+                                'akahu_account_id': matched_account.akahu_account_id,
+                                'akahu_user_id': trans_data.get('_user'),
+                                'akahu_connection_id': trans_data.get('_connection'),
+                                'description': trans_data.get('description'),
+                                'particulars': trans_data.get('meta', {}).get('particulars'),
+                                'code': trans_data.get('meta', {}).get('code'),
+                                'other_account': trans_data.get('meta', {}).get('other_account'),
+                                'transaction_link_id':transaction_link.id
+                            })
+
+                        transaction_link.write({
+                                'invoice_ids': [(5, 0, 0)]
+                            })  
+                        created_transaction.append(transaction_link.id)
+
+                        if transaction.id not in transaction_link.transaction_ids.ids:
+                            transaction_link.write({
+                                'transaction_ids': [(4, transaction.id)],
+                                'all_transaction_ids': [(4, transaction.id)],
+                            })
+
+                    if created_transaction == []:
+                        raise UserError(f"Account {self.name} has no transactions.")
+
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'name': 'Transaction Link',
+                        'res_model': 'akahu.transaction.link',
+                        'view_mode': 'form',
+                        'res_id': transaction_link.id,  
+                        'target': 'current'
+                    }
+
+                else:
+                    _logger.error('Failed to fetch transactions: %s', response.text)
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'name': 'Error',
+                        'res_model': 'ir.ui.view',
+                        'view_mode': 'form',
+                        'view_id': False,
+                        'target': 'new'
+                    }
 
     def _parse_datetime_safe(self, date_str):
         try:
