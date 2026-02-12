@@ -221,6 +221,17 @@ class AccountJournal(models.Model):
 class ResPartnerBank(models.Model):
     _inherit = 'res.partner.bank'
 
+    @staticmethod
+    def convert_iso_to_odoo(iso_date):
+        if not iso_date:
+            return False
+        if iso_date.endswith("Z"):
+            iso_date = iso_date[:-1]
+        dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%f")
+        print(iso_date,dt,fields.Datetime.to_string(dt),"============================================================")
+
+        return fields.Datetime.to_string(dt)
+
     def action_configure_bank_accounts_transactions(self):
             print("========================================12345677888996")
             AkahuAccount = self.env['akahu.bank.account']
