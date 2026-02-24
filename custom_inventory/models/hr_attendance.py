@@ -14,12 +14,14 @@ class HrAttendance(models.Model):
 
     break_time = fields.Selection(
         selection=[
+            ('0', '0 Minutes'),
             ('15', '15 Minutes'),
             ('30', '30 Minutes'),
             ('45', '45 Minutes'),
             ('60', '60 Minutes'),
         ],
-        string='Break Duration'
+        string='Break Duration',
+        default='0' 
     )
 
     date_time = fields.Datetime(
@@ -58,6 +60,7 @@ class HrAttendance(models.Model):
         Convert break minutes to hours (PayHero compatible)
         """
         mapping = {
+            '0': 0.0,
             '15': 0.25,
             '30': 0.5,
             '45': 0.75,

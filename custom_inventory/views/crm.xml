@@ -169,6 +169,11 @@
                     <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
                 </xpath>
                 <xpath expr="//label[@for='phone']" position="before">
+                    <label for="id"></label>
+                    <div>
+                        <field name="id" readonly="1"  
+                         />
+                    </div>
                     <label for="brand_id"></label>
                     <div>
                         <field name="brand_id" options="{'no_create': True, 'no_create_edit': True}"  
