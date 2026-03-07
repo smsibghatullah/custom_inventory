@@ -232,22 +232,22 @@ class AccessToken(http.Controller):
         user_input_ids = payload.get("user_input_ids", [])
         recipient_ids = payload.get("recipients", [])
         cc_emails = payload.get("cc", []) or payload.get("ccEmail", [])
+        uploaded_files = payload.get("attachments", [])   # ⭐ NEW
 
         if not user_input_ids:
             return {"success": False, "error": "No survey inputs provided"}
 
-        # 🔑 SAME REPORT AS WIZARD
         report_action = request.env.ref('custom_inventory.action_report_employment_certificate')
 
         attachments = []
         company = None
 
+        # ---------------- Survey PDF Attachments ----------------
         for u_input_id in user_input_ids:
             user_input = request.env['survey.user_input'].sudo().browse(u_input_id)
             if not user_input.exists():
                 continue
 
-            # ---- Generate PDF (ODOO 17 CORRECT WAY) ----
             pdf_content, _ = report_action._render_qweb_pdf(
                 report_action.report_name,
                 res_ids=[user_input.id]
@@ -264,18 +264,29 @@ class AccessToken(http.Controller):
 
             attachments.append(attachment.id)
 
-            # ----- Get company from first valid user_input -----
             if not company:
                 if user_input.project_id:
                     company = user_input.project_id.company_id
                 elif user_input.task_id and user_input.task_id.project_id:
                     company = user_input.task_id.project_id.company_id
 
-        # fallback to logged in user's company
+        # ---------------- Mobile Uploaded Attachments ----------------
+        for file in uploaded_files:
+            try:
+                new_attachment = request.env['ir.attachment'].sudo().create({
+                    'name': file.get('name'),
+                    'type': 'binary',
+                    'datas': file.get('data'),   # base64
+                    'mimetype': file.get('type'),
+                })
+                attachments.append(new_attachment.id)
+            except Exception as e:
+                _logger.error(f"Attachment error: {str(e)}")
+
         if not company:
             company = request.env.user.company_id
 
-        # -------- Send Email --------
+        # ---------------- Send Email ----------------
         mail_values = {
             'subject': "Survey Results",
             'body_html': f"""
@@ -294,7 +305,7 @@ class AccessToken(http.Controller):
 
         return {
             "success": True,
-            "message": "Survey PDFs sent successfully"
+            "message": "Survey PDFs and attachments sent successfully"
         }
 
 
