@@ -271,6 +271,7 @@ class AccessToken(http.Controller):
                     company = user_input.task_id.project_id.company_id
 
         # ---------------- Mobile Uploaded Attachments ----------------
+        print(uploaded_files,"uploaded_files===========================")
         for file in uploaded_files:
             try:
                 new_attachment = request.env['ir.attachment'].sudo().create({
@@ -738,8 +739,6 @@ class AccessToken(http.Controller):
             "partner_id": request.env.user.partner_id.id,
             "access_token": access_token,
             "user_email": user_email,
-            "is_in_teacher": is_in_teacher,
-            "is_in_parent": is_in_parent,
             "user_name": user_name,
             "user_image": user.image_1920 , 
             "hr_employee_id": hr_employee_id,
