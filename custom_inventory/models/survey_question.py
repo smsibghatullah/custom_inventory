@@ -68,7 +68,14 @@ class SurveyTable(models.Model):
     row_no = fields.Integer(string="Row No")
     column_no = fields.Integer(string="Column No")
     column_name = fields.Char(string="Column Name")
-    value = fields.Char(string="Value")
+
+    value_type = fields.Selection([
+        ('text', 'Text'),
+        ('signature', 'Digital Signature')
+    ], string="Value Type", default="text")
+
+    value = fields.Char(string="Text Value")
+    signature_value = fields.Binary(string="Digital Signature")
 
     @api.model
     def default_get(self, fields_list):

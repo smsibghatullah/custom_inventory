@@ -102,12 +102,22 @@
                     <group string="Table" invisible="question_type != 'table'">
                     
                    </group>
-                    <field  nolabel="1" name="table_ids"  invisible="question_type != 'table'" context="{'default_question_id': active_id}">
+                   <field nolabel="1" name="table_ids" invisible="question_type != 'table'" context="{'default_question_id': active_id}">
                         <tree editable="bottom">
-                            <field name="column_no" width="150"/>
+                            <field name="column_no" width="120"/>
                             <field name="column_name" width="200"/>
-                            <field name="row_no" width="150"/>
-                            <field name="value" width="200"/>
+                            <field name="row_no" width="120"/>
+
+                            <field name="value_type"/>
+
+                            <field name="value"
+                                invisible="value_type == 'signature'"
+                               />
+
+                            <field name="signature_value"
+                                widget="signature"
+                                invisible="value_type == 'text'"
+                               />
                         </tree>
                     </field>
                    
@@ -148,12 +158,22 @@
 
                     <page string="Table" invisible="answer_type != 'table'">
                         <field  nolabel="1" name="table_ids"  invisible="answer_type != 'table'" context="{'default_question_id': active_id}">
-                            <tree editable="bottom">
-                                <field name="column_no" width="150"/>
-                                <field name="column_name" width="200"/>
-                                <field name="row_no" width="150"/>
-                                <field name="value" width="200"/>
-                            </tree>
+                           <tree editable="bottom">
+                            <field name="column_no" width="120"/>
+                            <field name="column_name" width="200"/>
+                            <field name="row_no" width="120"/>
+
+                            <field name="value_type"/>
+
+                            <field name="value"
+                                invisible="value_type == 'signature'"
+                               />
+
+                            <field name="signature_value"
+                                widget="signature"
+                                invisible="value_type == 'text'"
+                               />
+                        </tree>
                         </field>
                     </page>
                     <page string="Risk Assessment" invisible="answer_type != 'risk'">

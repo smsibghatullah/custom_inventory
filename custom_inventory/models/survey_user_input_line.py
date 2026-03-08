@@ -305,18 +305,26 @@ class ReportEmploymentCertificate(models.AbstractModel):
 
                 # ---------- TABLE ----------
                 elif question.question_type == 'table':
-                    cols, rows = {}, {}
-                    for ln in question_lines:
-                        for tl in ln.table_ids:
-                            cols.setdefault(tl.column_no, {
-                                'column_no': tl.column_no,
-                                'column_name': tl.column_name
-                            })
-                            rows.setdefault(tl.row_no, {
-                                'row_no': tl.row_no,
-                                'cells': {}
-                            })
-                            rows[tl.row_no]['cells'][tl.column_no] = tl.value
+                        cols, rows = {}, {}
+
+                        for ln in question_lines:
+                            for tl in ln.table_ids:
+
+                                cols.setdefault(tl.column_no, {
+                                    'column_no': tl.column_no,
+                                    'column_name': tl.column_name
+                                })
+
+                                rows.setdefault(tl.row_no, {
+                                    'row_no': tl.row_no,
+                                    'cells': {}
+                                })
+
+                                rows[tl.row_no]['cells'][tl.column_no] = {
+                                    'value_type': tl.value_type,
+                                    'value': tl.value,
+                                    'signature_value': tl.signature_value
+                                }
 
                         answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
                         answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])

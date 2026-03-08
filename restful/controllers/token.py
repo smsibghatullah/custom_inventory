@@ -61,15 +61,20 @@ class AccessToken(http.Controller):
                 # ================= TABLE =================
                 if ans.get("answer_type") == "table":
                     table_records = []
+
                     for table_line in line.table_ids:
                         table_records.append({
                             "id": table_line.id,
                             "row_no": table_line.row_no,
                             "column_no": table_line.column_no,
                             "column_name": table_line.column_name,
+                            "value_type": table_line.value_type,
                             "value": table_line.value,
+                            "signature_value": table_line.signature_value,
                         })
+
                     ans["table_ids"] = table_records
+                    print(table_records,"=======================================table_recordstable_records")    
 
                 # ================= RISK =================
                 elif ans.get("answer_type") == "risk":
@@ -179,6 +184,7 @@ class AccessToken(http.Controller):
     @http.route('/api/survey/table/create', type='json', auth='user', methods=['POST'], csrf=False)
     def create_survey_table(self, **kwargs):
         try:
+            # Payload read
             payload = request.httprequest.data.decode()
             payload = json.loads(payload or "{}")
 
@@ -188,7 +194,8 @@ class AccessToken(http.Controller):
                     "error": "No data provided"
                 }
 
-            required_fields = ['row_no', 'column_no', 'value']
+            # Required fields check
+            required_fields = ['row_no', 'column_no', 'value_type']
             for field in required_fields:
                 if field not in payload:
                     return {
@@ -196,13 +203,21 @@ class AccessToken(http.Controller):
                         "error": "Missing field: %s" % field
                     }
 
+            # Prepare values for create
             table_vals = {
                 'row_no': payload.get('row_no'),
                 'column_no': payload.get('column_no'),
                 'column_name': payload.get('column_name', False),
-                'value': payload.get('value'),
+                'value': payload.get('value', False),
+                'value_type':payload.get('value_type', "")
             }
 
+            # Agar signature type hai to signature_value store karo
+            if payload.get('value_type') == "signature":
+                table_vals['signature_value'] = payload.get('signature_value', "")
+
+            # Create record
+            print(table_vals,"===================================,=------")
             table_record = request.env['survey.table'].sudo().create(table_vals)
 
             _logger.info("Survey table created with ID %s", table_record.id)
@@ -218,8 +233,9 @@ class AccessToken(http.Controller):
             return {
                 "success": False,
                 "error": str(e)
-            }    
-        
+            }
+
+
     @http.route('/api/send_survey_via_email', type='json', auth='user', methods=['POST'], csrf=False)
     def send_survey_via_email(self, **kwargs):
 
@@ -525,11 +541,13 @@ class AccessToken(http.Controller):
                     print(question.title,question.id,"question.table_ids=======================",question.table_ids)
                     for table_line in question.table_ids:
                         table_data.append({
-                            "id": table_line.id,
+                           "id": table_line.id,
                             "row_no": table_line.row_no,
                             "column_no": table_line.column_no,
                             "column_name": table_line.column_name,
+                            "value_type": table_line.value_type,
                             "value": table_line.value,
+                            "signature_value": table_line.signature_value,
                         })
                 risk = []
                 # print(table_data,"table_data====================================")

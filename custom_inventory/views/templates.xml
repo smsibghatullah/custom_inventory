@@ -1927,77 +1927,100 @@
                                 ">
 
                                 <!-- TABLE QUESTION (PDF SAFE) -->
-                                <t t-if="q['question_type'] == 'table'">
+                               <!-- TABLE QUESTION (PDF SAFE) -->
+<t t-if="q['question_type'] == 'table'">
 
-                                    <div style="
-                                        border:2px solid #2b2f77;
-                                        border-radius:6px;
-                                        padding:12px;
-                                        background:#f9fafc;
-                                        margin-top:10px;
-                                        overflow-x:auto;
-                                    ">
+    <div style="
+        border:2px solid #2b2f77;
+        border-radius:6px;
+        padding:12px;
+        background:#f9fafc;
+        margin-top:10px;
+        overflow-x:auto;
+    ">
 
-                                        <table style="
-                                            width:100%;
-                                            border-collapse:collapse;
-                                            font-size:14px;
-                                            text-align:center;
-                                        ">
+        <table style="
+            width:100%;
+            border-collapse:collapse;
+            font-size:14px;
+            text-align:center;
+        ">
 
-                                            <!-- HEADER -->
-                                            <tr>
-                                                <th style="
-                                                    border:1px solid #1c1c5a;
-                                                    padding:8px;
-                                                    background:#e8ebf8;
-                                                    text-align:left;
-                                                ">
-                                                    
-                                                </th>
+            <!-- HEADER -->
+            <tr>
+                <th style="
+                    border:1px solid #1c1c5a;
+                    padding:8px;
+                    background:#e8ebf8;
+                    text-align:left;
+                ">
+                </th>
 
-                                                <t t-foreach="q['answers']['table_columns']" t-as="col">
-                                                    <th style="
-                                                        border:1px solid #1c1c5a;
-                                                        padding:8px;
-                                                        background:#e8ebf8;
-                                                    ">
-                                                        <t t-esc="col['column_name']"/>
-                                                    </th>
-                                                </t>
-                                            </tr>
+                <t t-foreach="q['answers']['table_columns']" t-as="col">
+                    <th style="
+                        border:1px solid #1c1c5a;
+                        padding:8px;
+                        background:#e8ebf8;
+                    ">
+                        <t t-esc="col['column_name']"/>
+                    </th>
+                </t>
+            </tr>
 
-                                            <!-- ROWS -->
-                                            <t t-foreach="q['answers']['table_rows']" t-as="row">
-                                                <tr>
-                                                    <!-- Row Label -->
-                                                    <td style="
-                                                        border:1px solid #ccc;
-                                                        padding:8px;
-                                                        text-align:left;
-                                                        font-weight:600;
-                                                        background:#f4f6f8;
-                                                    ">
-                                                        Row <t t-esc="row['row_no']"/>
-                                                    </td>
+            <!-- ROWS -->
+            <t t-foreach="q['answers']['table_rows']" t-as="row">
+                <tr>
 
-                                                    <!-- Cells -->
-                                                    <t t-foreach="q['answers']['table_columns']" t-as="col">
-                                                        <td style="
-                                                            border:1px solid #ccc;
-                                                            padding:8px;
-                                                        ">
-                                                            <t t-esc="row['cells'].get(col['column_no'], '')"/>
-                                                        </td>
-                                                    </t>
-                                                </tr>
-                                            </t>
+                    <!-- Row Label -->
+                    <td style="
+                        border:1px solid #ccc;
+                        padding:8px;
+                        text-align:left;
+                        font-weight:600;
+                        background:#f4f6f8;
+                    ">
+                        Row <t t-esc="row['row_no']"/>
+                    </td>
 
-                                        </table>
+                    <!-- Cells -->
+                   <t t-foreach="q['answers']['table_columns']" t-as="col">
 
-                                    </div>
-                                </t>
+                        <t t-set="qcell" t-value="row['cells'].get(col['column_no'])"/>
 
+                        <td style="
+                            border:1px solid #ccc;
+                            padding:8px;
+                            text-align:center;
+                        ">
+
+                            <!-- Signature -->
+                            <t t-if="qcell and qcell.get('value_type') == 'signature' and qcell.get('signature_value')">
+                                <img t-att-src="image_data_uri(qcell.get('signature_value'))"
+                                    style="max-height:60px; max-width:120px;"/>
+                            </t>
+
+                            <!-- Text -->
+                            <t t-elif="qcell and qcell.get('value_type') == 'text'">
+                                <t t-esc="qcell.get('value','')"/>
+                            </t>
+
+                            <!-- Empty -->
+                            <t t-else="">
+                                -
+                            </t>
+
+                        </td>
+
+                    </t>
+
+                </tr>
+            </t>
+
+        </table>
+
+    </div>
+
+</t>
 
                                 <!-- MATRIX QUESTION (PDF SAFE) -->
                                     <t t-if="q['question_type'] == 'matrix'">
