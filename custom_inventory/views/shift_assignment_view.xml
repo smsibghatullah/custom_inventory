@@ -183,6 +183,7 @@
                 <field name="date_start" position="after">
                     <field name="pcbu_1_details"/>
                     <field name="pcbu_2_details"/>
+                     <field name="id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -207,6 +208,9 @@
                         <field name="survey_form_count" string="Surveys Forms" widget="statinfo"/>
                     </button>
                 </xpath>
+                <field name="tag_ids" position="after">
+                     <field name="id" readonly="1"/>
+                </field>
             </field>
         </record>
 
