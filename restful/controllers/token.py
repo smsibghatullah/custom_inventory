@@ -23,6 +23,28 @@ class AccessToken(http.Controller):
 
         self._token = request.env["api.access_token"]
 
+    @http.route('/api/survey.controls/create', type='json', auth='user', methods=['POST'], csrf=False)
+    def create_survey_control(self, **kwargs):
+            data = request.httprequest.data.decode()
+            data = json.loads(data or "{}")
+            # data = {'name': 'New Control', 'potential_hazard_id': 12}
+            print(data,"============================data")
+
+            control = request.env['survey.controls'].sudo().create({
+                'name': data.get('name'),
+                'potential_hazard_id': data.get('hazardId'),
+            })
+
+            return {
+                'success': True,
+                'data': {
+                    'id': control.id,
+                    'name': control.name,
+                    'potential_hazard_id': control.potential_hazard_id.id
+                }
+            }
+       
+
     @http.route(
         '/api/survey/user_input/answers',
         type="http",
