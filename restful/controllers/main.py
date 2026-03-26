@@ -55,14 +55,15 @@ class APIController(http.Controller):
             model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
             if model:
                 domain, fields, offset, limit, order = extract_arguments_sibghat(payload)
+
                 data = request.env[model.model].sudo().search_read(
-                    domain=domain, fields=fields, offset=offset, limit=limit, order=order,
+                    domain=domain, fields=fields, offset=offset order=order,
                 )
 
                 if id:
                     domain = [("id", "=", int(id))]
                     data = request.env[model.model].sudo().search_read(
-                        domain=domain, fields=fields, offset=offset, limit=limit, order=order,
+                        domain=domain, fields=fields, offset=offset, order=order,
                     )
                 if data:
                     return valid_response(data)
