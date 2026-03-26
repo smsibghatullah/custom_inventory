@@ -57,7 +57,7 @@ class APIController(http.Controller):
                 domain, fields, offset, limit, order = extract_arguments_sibghat(payload)
 
                 data = request.env[model.model].sudo().search_read(
-                    domain=domain, fields=fields, offset=offset order=order,
+                    domain=domain, fields=fields, offset=offset ,order=order,
                 )
 
                 if id:
