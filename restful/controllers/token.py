@@ -23,6 +23,69 @@ class AccessToken(http.Controller):
 
         self._token = request.env["api.access_token"]
 
+    @http.route('/api/user/attendance', type='json', auth='public', methods=['POST'], csrf=False)
+    def get_user_attendance(self, **kwargs):
+            data = request.httprequest.data.decode()
+            data = json.loads(data or "{}")
+            user_id = data.get('user_id')
+
+            if not user_id:
+                return {"status": False, "message": "user_id is required"}
+
+            user = request.env['res.users'].sudo().browse(int(user_id))
+            if not user.exists():
+                return {"status": False, "message": "User not found"}
+
+            employee = request.env['hr.employee'].sudo().search([
+                ('user_id', '=', user.id)
+            ], limit=1)
+
+            if not employee:
+                return {"status": False, "message": "Employee not found"}
+
+            has_group = user.has_group('attendance_immigration.group_show_immigration')
+
+            attendances = request.env['hr.attendance'].sudo().search([
+                ('employee_id', '=', employee.id)
+            ], order='check_in desc')
+
+            data = []
+
+            for att in attendances:
+                record = {
+                    "employee_name": employee.name,
+                    "checkin": att.check_in,
+                    "checkout": att.check_out,
+                    "comment": att.comment or '',
+                    "status": att.status if hasattr(att, 'status') else '',
+                }
+
+                if has_group:
+                    record.update({
+                        "immigration_submitted_hrs": att.immigration_submitted_hrs if hasattr(att, 'immigration_submitted_hrs') else 0,
+                        "immigration_approved_hrs": att.immigration_approved_hrs if hasattr(att, 'immigration_approved_hrs') else 0,
+                    })
+                else:
+                    record.update({
+                        "worked_hours": att.worked_hours,
+                        "approved_hours": att.approved_hours if hasattr(att, 'approved_hours') else 0,
+                        "overtime_hours": att.overtime_hours if hasattr(att, 'overtime_hours') else 0,
+                    })
+
+                data.append(record)
+
+                print(data,"===================")
+
+            return {
+                "status": True,
+                "employee_id": employee.id,
+                "employee_name": employee.name,
+                "total_records": len(data),
+                "data": data
+            }
+
+     
+
     @http.route('/api/survey.controls/create', type='json', auth='user', methods=['POST'], csrf=False)
     def create_survey_control(self, **kwargs):
             data = request.httprequest.data.decode()

@@ -1,0 +1,5 @@
+<odoo>
+    <record id="group_show_immigration" model="res.groups">
+        <field name="name">Show Immigration Fields</field>
+    </record>
+</odoo>

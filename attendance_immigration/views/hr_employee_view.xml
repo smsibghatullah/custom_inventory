@@ -1,0 +1,20 @@
+<odoo>
+    <record id="view_employee_form_inherit_immigration" model="ir.ui.view">
+        <field name="name">hr.employee.form.immigration</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='application_group']" position="after">
+                <group string="Immigration Info">
+                     <label for="immigration_rate"/>
+                    <div name="immigration_rate">
+                        <field name="immigration_rate" class="oe_inline"/>
+                        <field name="currency_id" invisible="1"/>
+                    </div>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,63 @@
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_attendance_tree_inherit_immigration" model="ir.ui.view">
+        <field name="name">hr.attendance.tree.immigration</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='worked_hours']" position="replace">
+
+                <!-- Normal users -->
+                <field name="worked_hours" widget="float_time"
+                    groups="!attendance_immigration.group_show_immigration"/>
+
+                <!-- Immigration users -->
+                <field name="immigration_submitted_hrs" widget="float_time"
+                    groups="attendance_immigration.group_show_immigration"/>
+
+                <field name="immigration_rate"
+                    groups="attendance_immigration.group_show_immigration"/>
+
+            </xpath>
+
+            <xpath expr="//field[@name='approved_hours']" position="replace">
+
+                <!-- Normal -->
+                <field name="approved_hours" widget="float_time"
+                    groups="!attendance_immigration.group_show_immigration"/>
+
+                <!-- Immigration -->
+                <field name="immigration_approved_hrs" widget="float_time"
+                    groups="attendance_immigration.group_show_immigration"/>
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_attendance_form_inherit_immigration" model="ir.ui.view">
+        <field name="name">hr.attendance.form.immigration</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='worked_hours']" position="replace">
+                <field name="worked_hours" widget="float_time"  groups="!attendance_immigration.group_show_immigration"/>
+                <field name="immigration_submitted_hrs" widget="float_time" groups="attendance_immigration.group_show_immigration"/>
+            </xpath>
+            <xpath expr="//field[@name='approved_hours']" position="replace">
+                <field name="approved_hours" widget="float_time"  groups="!attendance_immigration.group_show_immigration"/>
+                <field name="immigration_approved_hrs" widget="float_time" groups="attendance_immigration.group_show_immigration"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <group string="Immigration Info" groups="attendance_immigration.group_show_immigration">
+                    <field name="currency_id" invisible="1"/>
+                    <field name="immigration_rate"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
