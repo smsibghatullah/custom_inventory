@@ -9,28 +9,41 @@
 
             <xpath expr="//field[@name='worked_hours']" position="replace">
 
+                <!-- Admin (sab dekhe) -->
+                <field name="worked_hours" widget="float_time"
+                    groups="base.group_system"/>
+                <field name="immigration_submitted_hrs" widget="float_time"
+                    groups="base.group_system"/>
+                <field name="immigration_rate"
+                    groups="base.group_system"/>
+
                 <!-- Normal users -->
                 <field name="worked_hours" widget="float_time"
-                    groups="!attendance_immigration.group_show_immigration"/>
+                    groups="!attendance_immigration.group_show_immigration,!base.group_system"/>
 
                 <!-- Immigration users -->
                 <field name="immigration_submitted_hrs" widget="float_time"
-                    groups="attendance_immigration.group_show_immigration"/>
-
+                    groups="attendance_immigration.group_show_immigration,!base.group_system"/>
                 <field name="immigration_rate"
-                    groups="attendance_immigration.group_show_immigration"/>
+                    groups="attendance_immigration.group_show_immigration,!base.group_system"/>
 
             </xpath>
 
             <xpath expr="//field[@name='approved_hours']" position="replace">
 
+                <!-- Admin -->
+                <field name="approved_hours" widget="float_time"
+                    groups="base.group_system"/>
+                <field name="immigration_approved_hrs" widget="float_time"
+                    groups="base.group_system"/>
+
                 <!-- Normal -->
                 <field name="approved_hours" widget="float_time"
-                    groups="!attendance_immigration.group_show_immigration"/>
+                    groups="!attendance_immigration.group_show_immigration,!base.group_system"/>
 
                 <!-- Immigration -->
                 <field name="immigration_approved_hrs" widget="float_time"
-                    groups="attendance_immigration.group_show_immigration"/>
+                    groups="attendance_immigration.group_show_immigration,!base.group_system"/>
 
             </xpath>
 
@@ -43,20 +56,50 @@
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
         <field name="arch" type="xml">
+
+            <!-- Worked Hours -->
             <xpath expr="//field[@name='worked_hours']" position="replace">
-                <field name="worked_hours" widget="float_time"  groups="!attendance_immigration.group_show_immigration"/>
-                <field name="immigration_submitted_hrs" widget="float_time" groups="attendance_immigration.group_show_immigration"/>
+
+                <!-- Admin (sab dekhe) -->
+                <field name="worked_hours" widget="float_time" groups="base.group_system"/>
+                <field name="immigration_submitted_hrs" widget="float_time" groups="base.group_system"/>
+
+                <!-- Normal users -->
+                <field name="worked_hours" widget="float_time"
+                    groups="!attendance_immigration.group_show_immigration,!base.group_system"/>
+
+                <!-- Immigration users -->
+                <field name="immigration_submitted_hrs" widget="float_time"
+                    groups="attendance_immigration.group_show_immigration,!base.group_system"/>
+
             </xpath>
+
+            <!-- Approved Hours -->
             <xpath expr="//field[@name='approved_hours']" position="replace">
-                <field name="approved_hours" widget="float_time"  groups="!attendance_immigration.group_show_immigration"/>
-                <field name="immigration_approved_hrs" widget="float_time" groups="attendance_immigration.group_show_immigration"/>
+
+                <!-- Admin -->
+                <field name="approved_hours" widget="float_time" groups="base.group_system"/>
+                <field name="immigration_approved_hrs" widget="float_time" groups="base.group_system"/>
+
+                <!-- Normal -->
+                <field name="approved_hours" widget="float_time"
+                    groups="!attendance_immigration.group_show_immigration,!base.group_system"/>
+
+                <!-- Immigration -->
+                <field name="immigration_approved_hrs" widget="float_time"
+                    groups="attendance_immigration.group_show_immigration,!base.group_system"/>
+
             </xpath>
+
+            <!-- Immigration Info -->
             <xpath expr="//sheet" position="inside">
-                <group string="Immigration Info" groups="attendance_immigration.group_show_immigration">
+                <group string="Immigration Info"
+                    groups="attendance_immigration.group_show_immigration,base.group_system">
                     <field name="currency_id" invisible="1"/>
                     <field name="immigration_rate"/>
                 </group>
             </xpath>
+
         </field>
     </record>
 
