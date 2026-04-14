@@ -143,6 +143,18 @@ class ShiftRole(models.Model):
                                     vals["value_date"] = (
                                         question.prefill_date if question.pre_filled else False
                                     )
+                                elif answer_type == 'pcbu1_detail':
+                                    vals["pcbu_1_details"] = (
+                                        assigned_form.project_id.pcbu_1_details if assigned_form.project_id else False
+                                    )  
+                                elif answer_type == 'pcbu2_detail':
+                                    vals["pcbu_2_details"] = (
+                                        assigned_form.project_id.pcbu_2_details if assigned_form.project_id else False
+                                    )    
+                                elif answer_type == 'site_name':
+                                    vals["site_name"] = (
+                                        assigned_form.project_id.name if assigned_form.project_id else False
+                                    )       
 
                                 elif answer_type == 'datetime':
                                     vals["value_datetime"] = (
@@ -251,6 +263,18 @@ class ShiftRole(models.Model):
                                         vals["value_date"] = (
                                             question.prefill_date if question.pre_filled else False
                                         )
+                                    elif answer_type == 'pcbu1_detail':
+                                        vals["pcbu_1_details"] = (
+                                            assigned_form.project_id.pcbu_1_details if assigned_form.project_id else False
+                                        )  
+                                    elif answer_type == 'pcbu2_detail':
+                                        vals["pcbu_2_details"] = (
+                                            assigned_form.project_id.pcbu_2_details if assigned_form.project_id else False
+                                        )    
+                                    elif answer_type == 'site_name':
+                                        vals["site_name"] = (
+                                            assigned_form.project_id.name if assigned_form.project_id else False
+                                        )      
 
                                     elif answer_type == 'datetime':
                                         vals["value_datetime"] = (

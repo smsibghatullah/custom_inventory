@@ -151,6 +151,10 @@
                         <field name="value_text_box" colspan='2' invisible="answer_type != 'text_box'"/>
                         <field name="digital_signature" colspan='2' widget="signature" invisible="answer_type != 'digital_signature'"/>
                         <field name="static_content" colspan='2' widget="html" invisible="answer_type != 'static_content'"/>
+                         <field name="value_text_box" colspan='2' invisible="answer_type != 'text_box'"/>
+                        <field name="pcbu_1_details" colspan='2'  invisible="answer_type != 'pcbu1_detail'"/>
+                        <field name="pcbu_2_details" colspan='2'  invisible="answer_type != 'pcbu2_detail'"/>
+                         <field name="site_name" colspan='2'  invisible="answer_type != 'site_name'"/>
                         <field name="matrix_row_id" colspan='2' />
                         <field name="suggested_answer_id" colspan='2' invisible="answer_type != 'suggestion'"/>
                     </group>

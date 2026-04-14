@@ -1832,227 +1832,540 @@
             <!-- COVER → GROUPS -->
             <div style="page-break-before: always;"></div>
 
-            <!-- ================================================= -->
-            <!-- GROUPS -->
-            <!-- ================================================= -->
+      <!-- ================================================= -->
+<!-- GROUPS -->
+<!-- ================================================= -->
 
-            <t t-set="section_no" t-value="1"/>
+<!-- ================================================= -->
+<!-- GROUPS -->
+<!-- ================================================= -->
 
-            <t t-foreach="grouped_data" t-as="grp" t-index="grp_index">
+<t t-set="two_col_types" t-value="[
+    'char_box',
+    'text_box',
+    'numerical_box',
+    'date',
+    'datetime',
+    'digital_signature',
+    'pcbu1_detail',
+    'pcbu2_detail',
+    'site_name'
+]"/>
 
-                <!-- EACH GROUP STARTS ON NEW PAGE -->
-                <div class="page" style="
-                    font-family: DejaVu Sans, Arial, sans-serif;
-                    padding-top:0px;
-                    padding-bottom:0px;
-                    margin-top:0px;
-                    margin-bottom:0px;
-                ">
+<!-- EACH GROUP STARTS ON NEW PAGE -->
+<div class="page" style="
+    font-family: DejaVu Sans, Arial, sans-serif;
+    padding-top:0px;
+    padding-bottom:0px;
+    margin-top:0px;
+    margin-bottom:0px;
+">
 
-                    <!-- GROUP TITLE -->
-                    <div >
-                        <div style="
-                            font-size:26px;
-                            font-weight:700;
-                            color:#1c1c5a;
-                        ">
-                            <t t-esc="section_no"/>. <t t-esc="grp['group_name']"/>
-                        </div>
-
-                        <div style="
-                            width:100%;
-                            height:2px;
-                            background:#1c1c5a;
-                            margin-top:6px;
-                        "></div>
-                    </div>
-
-                    <t t-set="section_no" t-value="section_no + 1"/>
-
-                    <!-- HEADING LOOP -->
-                    <t t-foreach="grp['headings']" t-as="head">
-
-                        <div style="
-                            margin-top:26px;
-                            font-size:20px;
-                            font-weight:600;
-                            color:#333;
-                            border-bottom:1px solid #ccc;
-                            padding-bottom:6px;
-                            page-break-inside: avoid;
-                        ">
-                            <t t-esc="head['heading_name']"/>
-                        </div>
-
-                        <!-- QUESTION LOOP -->
-                        <t t-foreach="head['questions']" t-as="q">
-                           <t t-if="q['question_type'] != 'risk'">
-
-                            <div style="
-                                margin-top:18px;
-                                padding:14px;
-                                border:1px solid #ddd;
-                                border-radius:6px;
-                                background:#ffffff;
-                                page-break-inside: avoid;
-                                break-inside: avoid;
-                            ">
-
-                                <!-- QUESTION TITLE -->
-                                <div style="font-size:15px; font-weight:600;">
-                                    <t t-esc="q['question_title']"/>
-                                </div>
-
-                                <!-- SUBTITLE -->
-                                <t t-if="q['subtitle']">
-                                    <div style="font-size:13px; color:#f58220; margin-top:4px;">
-                                        <t t-esc="q['subtitle']"/>
-                                    </div>
-                                </t>
-
-                                <!-- DESCRIPTION -->
-                                <t t-if="q['description']">
-                                    <div style="font-size:12px; color:#666; margin-top:4px;">
-                                        <t t-esc="q['description']"/>
-                                    </div>
-                                </t>
-
-                                <!-- ANSWER BOX -->
-                                <div style="
-                                    margin-top:10px;
-                                    padding:12px;
-                                    background:#f4f6f8;
-                                    border:1px solid #1c1c5a;
-                                    border-radius:5px;
-                                ">
-
-                                <!-- TABLE QUESTION (PDF SAFE) -->
-                               <!-- TABLE QUESTION (PDF SAFE) -->
-<t t-if="q['question_type'] == 'table'">
-
-    <div style="
-        border:2px solid #2b2f77;
-        border-radius:6px;
-        padding:12px;
-        background:#f9fafc;
-        margin-top:10px;
-        overflow-x:auto;
-    ">
-
-        <table style="
-            width:100%;
-            border-collapse:collapse;
-            font-size:14px;
-            text-align:center;
+    <div>
+        <div style="
+            font-size:26px;
+            font-weight:700;
+            color:#1c1c5a;
         ">
+            <t t-esc="o.project_id.name or ''"/>
+        </div>
 
-            <!-- HEADER -->
-            <tr>
-                <th style="
-                    border:1px solid #1c1c5a;
-                    padding:8px;
-                    background:#e8ebf8;
-                    text-align:left;
-                ">
-                </th>
-
-                <t t-foreach="q['answers']['table_columns']" t-as="col">
-                    <th style="
-                        border:1px solid #1c1c5a;
-                        padding:8px;
-                        background:#e8ebf8;
-                    ">
-                        <t t-esc="col['column_name']"/>
-                    </th>
-                </t>
-            </tr>
-
-            <!-- ROWS -->
-            <t t-foreach="q['answers']['table_rows']" t-as="row">
-                <tr>
-
-                    <!-- Row Label -->
-                    <td style="
-                        border:1px solid #ccc;
-                        padding:8px;
-                        text-align:left;
-                        font-weight:600;
-                        background:#f4f6f8;
-                    ">
-                        Row <t t-esc="row['row_no']"/>
-                    </td>
-
-                    <!-- Cells -->
-                   <t t-foreach="q['answers']['table_columns']" t-as="col">
-
-                        <t t-set="qcell" t-value="row['cells'].get(col['column_no'])"/>
-
-                        <td style="
-                            border:1px solid #ccc;
-                            padding:8px;
-                            text-align:center;
-                        ">
-
-                            <!-- Signature -->
-                            <t t-if="qcell and qcell.get('value_type') == 'signature' and qcell.get('signature_value')">
-                                <img t-att-src="image_data_uri(qcell.get('signature_value'))"
-                                    style="max-height:60px; max-width:120px;"/>
-                            </t>
-
-                            <!-- Text -->
-                            <t t-elif="qcell and qcell.get('value_type') == 'text'">
-                                <t t-esc="qcell.get('value','')"/>
-                            </t>
-
-                            <!-- Empty -->
-                            <t t-else="">
-                                -
-                            </t>
-
-                        </td>
-
-                    </t>
-
-                </tr>
-            </t>
-
-        </table>
-
+        <div style="
+            width:100%;
+            height:2px;
+            background:#1c1c5a;
+            margin-top:6px;
+            margin-bottom:12px;
+        "></div>
     </div>
 
-</t>
+    <t t-foreach="grouped_data" t-as="grp" t-index="grp_index">
 
-                                <!-- MATRIX QUESTION (PDF SAFE) -->
-                                    <t t-if="q['question_type'] == 'matrix'">
+        <!-- HEADING LOOP -->
+        <t t-foreach="grp['headings']" t-as="head">
+
+            <div style="
+                margin-top:26px;
+                font-size:20px;
+                font-weight:600;
+                color:#333;
+                border-bottom:1px solid #ccc;
+                padding-bottom:6px;
+                page-break-inside: avoid;
+            ">
+                <t t-esc="head['heading_name']"/>
+            </div>
+
+            <!-- pending simple field for 2-column row -->
+            <t t-set="pending_q" t-value="False"/>
+
+            <!-- QUESTION LOOP -->
+            <t t-foreach="head['questions']" t-as="q">
+
+                <!-- risk is handled separately in risk register section -->
+                <t t-if="q['question_type'] != 'risk'">
+
+                    <!-- ================= TWO COLUMN FIELDS ================= -->
+                    <t t-if="q['question_type'] in two_col_types">
+
+                        <!-- if no pending card, hold current question -->
+                        <t t-if="not pending_q">
+                            <t t-set="pending_q" t-value="q"/>
+                        </t>
+
+                        <!-- if pending exists, render row with 2 columns -->
+                        <t t-else="">
+                            <table style="
+                                width:100%;
+                                table-layout:fixed;
+                                border-collapse:separate;
+                                border-spacing:0;
+                                margin-top:10px;
+                            ">
+                                <tr>
+                                    <!-- LEFT COLUMN -->
+                                    <td style="width:50%; vertical-align:top; padding-right:8px;">
+                                        <t t-set="field_q" t-value="pending_q"/>
+
+                                        <div style="
+                                            margin-top:8px;
+                                            padding:14px;
+                                            border:1px solid #ddd;
+                                            border-radius:6px;
+                                            background:#ffffff;
+                                            page-break-inside: avoid;
+                                            break-inside: avoid;
+                                        ">
+
+                                            <!-- QUESTION TITLE -->
+                                            <div style="font-size:15px; font-weight:600;">
+                                                <t t-esc="field_q['question_title']"/>
+                                            </div>
+
+                                            <!-- SUBTITLE -->
+                                            <t t-if="field_q.get('subtitle')">
+                                                <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                                    <t t-esc="field_q['subtitle']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- DESCRIPTION -->
+                                            <t t-if="field_q.get('description')">
+                                                <div style="font-size:12px; color:#666; margin-top:4px;">
+                                                    <t t-esc="field_q['description']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- ANSWER BOX -->
+                                            <div style="
+                                                margin-top:10px;
+                                                padding:12px;
+                                                background:#f4f6f8;
+                                                border:1px solid #1c1c5a;
+                                                border-radius:5px;
+                                                min-height:58px;
+                                            ">
+
+                                                <t t-if="field_q['question_type'] == 'text_box'">
+                                                    <t t-esc="field_q['answers'].get('text_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'char_box'">
+                                                    <t t-esc="field_q['answers'].get('char_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'numerical_box'">
+                                                    <t t-esc="field_q['answers'].get('numerical_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'date'">
+                                                    <t t-esc="field_q['answers'].get('date', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'datetime'">
+                                                    <t t-esc="field_q['answers'].get('datetime', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu1_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_1_details') or field_q['answers'].get('pcbu1_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu2_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_2_details') or field_q['answers'].get('pcbu2_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'site_name'">
+                                                    <t t-esc="field_q['answers'].get('site_name', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'digital_signature'">
+                                                    <t t-if="field_q['answers'].get('digital_signature')">
+                                                        <div style="text-align:center;">
+                                                            <img t-att-src="image_data_uri(field_q['answers']['digital_signature'])"
+                                                                 style="max-height:120px; max-width:100%;"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">-</t>
+                                                </t>
+
+                                                <t t-else="">-</t>
+
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- RIGHT COLUMN -->
+                                    <td style="width:50%; vertical-align:top; padding-left:8px;">
+                                        <t t-set="field_q" t-value="q"/>
+
+                                        <div style="
+                                            margin-top:8px;
+                                            padding:14px;
+                                            border:1px solid #ddd;
+                                            border-radius:6px;
+                                            background:#ffffff;
+                                            page-break-inside: avoid;
+                                            break-inside: avoid;
+                                        ">
+
+                                            <!-- QUESTION TITLE -->
+                                            <div style="font-size:15px; font-weight:600;">
+                                                <t t-esc="field_q['question_title']"/>
+                                            </div>
+
+                                            <!-- SUBTITLE -->
+                                            <t t-if="field_q.get('subtitle')">
+                                                <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                                    <t t-esc="field_q['subtitle']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- DESCRIPTION -->
+                                            <t t-if="field_q.get('description')">
+                                                <div style="font-size:12px; color:#666; margin-top:4px;">
+                                                    <t t-esc="field_q['description']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- ANSWER BOX -->
+                                            <div style="
+                                                margin-top:10px;
+                                                padding:12px;
+                                                background:#f4f6f8;
+                                                border:1px solid #1c1c5a;
+                                                border-radius:5px;
+                                                min-height:58px;
+                                            ">
+
+                                                <t t-if="field_q['question_type'] == 'text_box'">
+                                                    <t t-esc="field_q['answers'].get('text_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'char_box'">
+                                                    <t t-esc="field_q['answers'].get('char_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'numerical_box'">
+                                                    <t t-esc="field_q['answers'].get('numerical_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'date'">
+                                                    <t t-esc="field_q['answers'].get('date', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'datetime'">
+                                                    <t t-esc="field_q['answers'].get('datetime', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu1_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_1_details') or field_q['answers'].get('pcbu1_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu2_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_2_details') or field_q['answers'].get('pcbu2_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'site_name'">
+                                                    <t t-esc="field_q['answers'].get('site_name', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'digital_signature'">
+                                                    <t t-if="field_q['answers'].get('digital_signature')">
+                                                        <div style="text-align:center;">
+                                                            <img t-att-src="image_data_uri(field_q['answers']['digital_signature'])"
+                                                                 style="max-height:120px; max-width:100%;"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">-</t>
+                                                </t>
+
+                                                <t t-else="">-</t>
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- clear pending -->
+                            <t t-set="pending_q" t-value="False"/>
+                        </t>
+                    </t>
+
+                    <!-- ================= FULL WIDTH FIELDS ================= -->
+                    <t t-else="">
+
+                        <!-- if a half row is pending, flush it first -->
+                        <t t-if="pending_q">
+                            <table style="
+                                width:100%;
+                                table-layout:fixed;
+                                border-collapse:separate;
+                                border-spacing:0;
+                                margin-top:10px;
+                            ">
+                                <tr>
+                                    <!-- LEFT COLUMN -->
+                                    <td style="width:50%; vertical-align:top; padding-right:8px;">
+                                        <t t-set="field_q" t-value="pending_q"/>
+
+                                        <div style="
+                                            margin-top:8px;
+                                            padding:14px;
+                                            border:1px solid #ddd;
+                                            border-radius:6px;
+                                            background:#ffffff;
+                                            page-break-inside: avoid;
+                                            break-inside: avoid;
+                                        ">
+
+                                            <!-- QUESTION TITLE -->
+                                            <div style="font-size:15px; font-weight:600;">
+                                                <t t-esc="field_q['question_title']"/>
+                                            </div>
+
+                                            <!-- SUBTITLE -->
+                                            <t t-if="field_q.get('subtitle')">
+                                                <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                                    <t t-esc="field_q['subtitle']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- DESCRIPTION -->
+                                            <t t-if="field_q.get('description')">
+                                                <div style="font-size:12px; color:#666; margin-top:4px;">
+                                                    <t t-esc="field_q['description']"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- ANSWER BOX -->
+                                            <div style="
+                                                margin-top:10px;
+                                                padding:12px;
+                                                background:#f4f6f8;
+                                                border:1px solid #1c1c5a;
+                                                border-radius:5px;
+                                                min-height:58px;
+                                            ">
+
+                                                <t t-if="field_q['question_type'] == 'text_box'">
+                                                    <t t-esc="field_q['answers'].get('text_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'char_box'">
+                                                    <t t-esc="field_q['answers'].get('char_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'numerical_box'">
+                                                    <t t-esc="field_q['answers'].get('numerical_box', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'date'">
+                                                    <t t-esc="field_q['answers'].get('date', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'datetime'">
+                                                    <t t-esc="field_q['answers'].get('datetime', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu1_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_1_details') or field_q['answers'].get('pcbu1_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'pcbu2_detail'">
+                                                    <t t-esc="field_q['answers'].get('pcbu_2_details') or field_q['answers'].get('pcbu2_detail', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'site_name'">
+                                                    <t t-esc="field_q['answers'].get('site_name', '')"/>
+                                                </t>
+
+                                                <t t-elif="field_q['question_type'] == 'digital_signature'">
+                                                    <t t-if="field_q['answers'].get('digital_signature')">
+                                                        <div style="text-align:center;">
+                                                            <img t-att-src="image_data_uri(field_q['answers']['digital_signature'])"
+                                                                 style="max-height:120px; max-width:100%;"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">-</t>
+                                                </t>
+
+                                                <t t-else="">-</t>
+
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- EMPTY RIGHT COLUMN -->
+                                    <td style="width:50%; vertical-align:top; padding-left:8px;"></td>
+                                </tr>
+                            </table>
+
+                            <t t-set="pending_q" t-value="False"/>
+                        </t>
+
+                        <!-- full width card -->
+                        <div style="
+                            margin-top:18px;
+                            padding:14px;
+                            border:1px solid #ddd;
+                            border-radius:6px;
+                            background:#ffffff;
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        ">
+
+                            <!-- QUESTION TITLE -->
+                            <div style="font-size:15px; font-weight:600;">
+                                <t t-esc="q['question_title']"/>
+                            </div>
+
+                            <!-- SUBTITLE -->
+                            <t t-if="q.get('subtitle')">
+                                <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                    <t t-esc="q['subtitle']"/>
+                                </div>
+                            </t>
+
+                            <!-- DESCRIPTION -->
+                            <t t-if="q.get('description')">
+                                <div style="font-size:12px; color:#666; margin-top:4px;">
+                                    <t t-esc="q['description']"/>
+                                </div>
+                            </t>
+
+                            <!-- ANSWER BOX -->
+                            <div style="
+                                margin-top:10px;
+                                padding:12px;
+                                background:#f4f6f8;
+                                border:1px solid #1c1c5a;
+                                border-radius:5px;
+                            ">
+
+                                <!-- TABLE QUESTION -->
+                                <t t-if="q['question_type'] == 'table'">
+
+                                    <div style="
+                                        border:2px solid #2b2f77;
+                                        border-radius:6px;
+                                        padding:12px;
+                                        background:#f9fafc;
+                                        margin-top:10px;
+                                        overflow-x:auto;
+                                    ">
+
+                                        <table style="
+                                            width:100%;
+                                            border-collapse:collapse;
+                                            font-size:14px;
+                                            text-align:center;
+                                        ">
+
+                                            <!-- HEADER -->
+                                            <tr>
+                                                <th style="
+                                                    border:1px solid #1c1c5a;
+                                                    padding:8px;
+                                                    background:#e8ebf8;
+                                                    text-align:left;
+                                                "></th>
+
+                                                <t t-foreach="q['answers']['table_columns']" t-as="col">
+                                                    <th style="
+                                                        border:1px solid #1c1c5a;
+                                                        padding:8px;
+                                                        background:#e8ebf8;
+                                                    ">
+                                                        <t t-esc="col['column_name']"/>
+                                                    </th>
+                                                </t>
+                                            </tr>
+
+                                            <!-- ROWS -->
+                                            <t t-foreach="q['answers']['table_rows']" t-as="row">
+                                                <tr>
+                                                    <td style="
+                                                        border:1px solid #ccc;
+                                                        padding:8px;
+                                                        text-align:left;
+                                                        font-weight:600;
+                                                        background:#f4f6f8;
+                                                    ">
+                                                        Row <t t-esc="row['row_no']"/>
+                                                    </td>
+
+                                                    <t t-foreach="q['answers']['table_columns']" t-as="col">
+                                                        <t t-set="qcell" t-value="row['cells'].get(col['column_no'])"/>
+
+                                                        <td style="
+                                                            border:1px solid #ccc;
+                                                            padding:8px;
+                                                            text-align:center;
+                                                        ">
+                                                            <t t-if="qcell and qcell.get('value_type') == 'signature' and qcell.get('signature_value')">
+                                                                <img t-att-src="image_data_uri(qcell.get('signature_value'))"
+                                                                     style="max-height:60px; max-width:120px;"/>
+                                                            </t>
+
+                                                            <t t-elif="qcell and qcell.get('value_type') == 'text'">
+                                                                <t t-esc="qcell.get('value', '')"/>
+                                                            </t>
+
+                                                            <t t-else="">-</t>
+                                                        </td>
+                                                    </t>
+                                                </tr>
+                                            </t>
+
+                                        </table>
+                                    </div>
+                                </t>
+
+                                <!-- MATRIX QUESTION -->
+                                <t t-elif="q['question_type'] == 'matrix'">
 
                                     <div style="border:2px solid #2b2f77; padding:12px;">
 
                                         <table style="width:100%; border-collapse:collapse;">
 
-                                            <!-- HEADER -->
                                             <tr>
                                                 <td style="width:30%;"></td>
                                                 <t t-foreach="q['answers']['matrix_columns']" t-as="col">
-                                                    <td style="text-align:center; font-weight:600;padding:5px">
+                                                    <td style="text-align:center; font-weight:600; padding:5px;">
                                                         <t t-esc="col['label']"/>
                                                     </td>
                                                 </t>
                                             </tr>
 
-                                            <!-- ROWS -->
                                             <t t-foreach="q['answers']['matrix_rows']" t-as="row">
                                                 <tr>
-
-                                                    <!-- ROW LABEL -->
                                                     <td style="padding:6px;">
                                                         <t t-esc="row['label']"/>
                                                     </td>
 
-                                                    <!-- CELLS -->
                                                     <t t-foreach="row['columns']" t-as="cell">
                                                         <td style="text-align:center;">
-
-                                                            <!-- RADIO -->
                                                             <div style="
                                                                 width:16px;
                                                                 height:16px;
@@ -2073,10 +2386,8 @@
                                                                     "></div>
                                                                 </t>
                                                             </div>
-
                                                         </td>
                                                     </t>
-
                                                 </tr>
                                             </t>
 
@@ -2084,18 +2395,15 @@
                                     </div>
                                 </t>
 
-
-                             <!-- MULTIPLE CHOICE (PDF SAFE - NO FLEX) -->
-                                <t t-if="q['question_type'] == 'multiple_choice'">
+                                <!-- MULTIPLE CHOICE -->
+                                <t t-elif="q['question_type'] == 'multiple_choice'">
 
                                     <div style="border:2px solid #2b2f77; padding:12px; display:table; width:100%;">
 
                                         <t t-foreach="q['answers']['multiple_choice_options']" t-as="opt">
 
-                                            <!-- ROW -->
                                             <div style="display:table-row;">
 
-                                                <!-- CHECKBOX CELL -->
                                                 <div style="
                                                     display:table-cell;
                                                     width:24px;
@@ -2121,7 +2429,6 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- LABEL CELL -->
                                                 <div style="
                                                     display:table-cell;
                                                     padding-left:8px;
@@ -2138,18 +2445,15 @@
                                     </div>
                                 </t>
 
-
-                              <!-- SIMPLE CHOICE (PDF SAFE - NO FLEX) -->
-                                <t t-if="q['question_type'] == 'simple_choice'">
+                                <!-- SIMPLE CHOICE -->
+                                <t t-elif="q['question_type'] == 'simple_choice'">
 
                                     <div style="border:2px solid #2b2f77; padding:12px; display:table; width:100%;">
 
                                         <t t-foreach="q['answers']['simple_choice_options']" t-as="opt">
 
-                                            <!-- ROW -->
                                             <div style="display:table-row;">
 
-                                                <!-- RADIO CELL -->
                                                 <div style="
                                                     display:table-cell;
                                                     width:24px;
@@ -2177,7 +2481,6 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- LABEL CELL -->
                                                 <div style="
                                                     display:table-cell;
                                                     padding-left:8px;
@@ -2194,71 +2497,187 @@
                                     </div>
                                 </t>
 
+                                <!-- STATIC CONTENT -->
+                                <t t-elif="q['question_type'] == 'static_content'">
+                                    <div style="
+                                        background:#fff4e6;
+                                        border-left:6px solid #f58220;
+                                        padding:12px;
+                                        border-radius:4px;
+                                    ">
+                                        <div t-raw="q['answers']['static_content']"/>
+                                    </div>
+                                </t>
 
+                                <!-- SAFETY FALLBACKS -->
+                                <t t-elif="q['question_type'] == 'text_box'">
+                                    <t t-esc="q['answers'].get('text_box', '')"/>
+                                </t>
 
+                                <t t-elif="q['question_type'] == 'char_box'">
+                                    <t t-esc="q['answers'].get('char_box', '')"/>
+                                </t>
 
-                                    <!-- TEXT -->
-                                    <t t-elif="q['question_type'] == 'text_box'">
-                                        <t t-esc="q['answers']['text_box']"/>
-                                    </t>
+                                <t t-elif="q['question_type'] == 'numerical_box'">
+                                    <t t-esc="q['answers'].get('numerical_box', '')"/>
+                                </t>
 
-                                    <!-- CHAR -->
-                                    <t t-elif="q['question_type'] == 'char_box'">
-                                        <t t-esc="q['answers']['char_box']"/>
-                                    </t>
+                                <t t-elif="q['question_type'] == 'date'">
+                                    <t t-esc="q['answers'].get('date', '')"/>
+                                </t>
 
-                                    <!-- NUMBER -->
-                                    <t t-elif="q['question_type'] == 'numerical_box'">
-                                        <t t-esc="q['answers']['numerical_box']"/>
-                                    </t>
+                                <t t-elif="q['question_type'] == 'datetime'">
+                                    <t t-esc="q['answers'].get('datetime', '')"/>
+                                </t>
 
-                                    <!-- DATE -->
-                                    <t t-elif="q['question_type'] == 'date'">
-                                        <t t-esc="q['answers']['date']"/>
-                                    </t>
+                                <t t-elif="q['question_type'] == 'pcbu1_detail'">
+                                    <t t-esc="q['answers'].get('pcbu_1_details') or q['answers'].get('pcbu1_detail', '')"/>
+                                </t>
 
-                                    <!-- DATETIME -->
-                                    <t t-elif="q['question_type'] == 'datetime'">
-                                        <t t-esc="q['answers']['datetime']"/>
-                                    </t>
+                                <t t-elif="q['question_type'] == 'pcbu2_detail'">
+                                    <t t-esc="q['answers'].get('pcbu_2_details') or q['answers'].get('pcbu2_detail', '')"/>
+                                </t>
 
-                                    <!-- SIGNATURE -->
-                                    <t t-elif="q['question_type'] == 'digital_signature'">
-                                       <div style="text-align:center;">
+                                <t t-elif="q['question_type'] == 'site_name'">
+                                    <t t-esc="q['answers'].get('site_name', '')"/>
+                                </t>
+
+                                <t t-elif="q['question_type'] == 'digital_signature'">
+                                    <t t-if="q['answers'].get('digital_signature')">
+                                        <div style="text-align:center;">
                                             <img t-att-src="image_data_uri(q['answers']['digital_signature'])"
                                                  style="max-height:120px; max-width:100%;"/>
                                         </div>
                                     </t>
+                                    <t t-else="">-</t>
+                                </t>
 
-                                    <!-- STATIC CONTENT -->
-                                    <t t-elif="q['question_type'] == 'static_content'">
-                                        <div style="
-                                            background:#fff4e6;
-                                            border-left:6px solid #f58220;
-                                            padding:12px;
-                                            border-radius:4px;
-                                        ">
-                                            <div t-raw="q['answers']['static_content']"/>
-                                        </div>
+                                <t t-else="">-</t>
+
+                            </div>
+                        </div>
+
+                    </t>
+
+                </t>
+
+            </t>
+
+            <!-- flush last pending 2-column question -->
+            <t t-if="pending_q">
+                <table style="
+                    width:100%;
+                    table-layout:fixed;
+                    border-collapse:separate;
+                    border-spacing:0;
+                    margin-top:10px;
+                ">
+                    <tr>
+                        <td style="width:50%; vertical-align:top; padding-right:8px;">
+                            <t t-set="field_q" t-value="pending_q"/>
+
+                            <div style="
+                                margin-top:8px;
+                                padding:14px;
+                                border:1px solid #ddd;
+                                border-radius:6px;
+                                background:#ffffff;
+                                page-break-inside: avoid;
+                                break-inside: avoid;
+                            ">
+
+                                <div style="font-size:15px; font-weight:600;">
+                                    <t t-esc="field_q['question_title']"/>
+                                </div>
+
+                                <t t-if="field_q.get('subtitle')">
+                                    <div style="font-size:13px; color:#f58220; margin-top:4px;">
+                                        <t t-esc="field_q['subtitle']"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="field_q.get('description')">
+                                    <div style="font-size:12px; color:#666; margin-top:4px;">
+                                        <t t-esc="field_q['description']"/>
+                                    </div>
+                                </t>
+
+                                <div style="
+                                    margin-top:10px;
+                                    padding:12px;
+                                    background:#f4f6f8;
+                                    border:1px solid #1c1c5a;
+                                    border-radius:5px;
+                                    min-height:58px;
+                                ">
+
+                                    <t t-if="field_q['question_type'] == 'text_box'">
+                                        <t t-esc="field_q['answers'].get('text_box', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'char_box'">
+                                        <t t-esc="field_q['answers'].get('char_box', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'numerical_box'">
+                                        <t t-esc="field_q['answers'].get('numerical_box', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'date'">
+                                        <t t-esc="field_q['answers'].get('date', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'datetime'">
+                                        <t t-esc="field_q['answers'].get('datetime', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'pcbu1_detail'">
+                                        <t t-esc="field_q['answers'].get('pcbu_1_details') or field_q['answers'].get('pcbu1_detail', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'pcbu2_detail'">
+                                        <t t-esc="field_q['answers'].get('pcbu_2_details') or field_q['answers'].get('pcbu2_detail', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'site_name'">
+                                        <t t-esc="field_q['answers'].get('site_name', '')"/>
+                                    </t>
+
+                                    <t t-elif="field_q['question_type'] == 'digital_signature'">
+                                        <t t-if="field_q['answers'].get('digital_signature')">
+                                            <div style="text-align:center;">
+                                                <img t-att-src="image_data_uri(field_q['answers']['digital_signature'])"
+                                                     style="max-height:120px; max-width:100%;"/>
+                                            </div>
+                                        </t>
+                                        <t t-else="">-</t>
                                     </t>
 
                                     <t t-else="">-</t>
 
                                 </div>
                             </div>
+                        </td>
 
-                           </t> 
+                        <td style="width:50%; vertical-align:top; padding-left:8px;"></td>
+                    </tr>
+                </table>
 
-                        </t>
-                    </t>
-                </div>
-
-                <!-- PAGE BREAK AFTER EACH GROUP (EXCEPT LAST) -->
-                <!-- <t t-if="grp_index != len(grouped_data) - 1">
-                    <div style="page-break-after: always;"></div>
-                </t> -->
-
+                <t t-set="pending_q" t-value="False"/>
             </t>
+
+        </t>
+    </t>
+
+</div>
+
+    <!-- PAGE BREAK AFTER EACH GROUP (EXCEPT LAST) -->
+    <!--
+    <t t-if="grp_index != len(grouped_data) - 1">
+        <div style="page-break-after: always;"></div>
+    </t>
+    -->
+
              <div style="page-break-after: always;"></div>
             <!-- ===================== RISK REGISTER ===================== -->
             <t t-if="risk_register">

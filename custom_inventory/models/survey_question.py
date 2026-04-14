@@ -7,7 +7,10 @@ class SurveyQuestion(models.Model):
         ('digital_signature', 'Digital Signature'),
         ('static_content', 'Static Content') ,
         ('table', 'Table'),
-        ('risk', 'Risk')
+        ('risk', 'Risk'),
+        ('pcbu1_detail', 'PCBU1 Detail'),
+        ('pcbu2_detail', 'PCBU2 Detail'),
+        ('site_name', 'Site Name'),
     ])
     sequence = fields.Integer(default=1)
 
@@ -55,6 +58,16 @@ class SurveyQuestion(models.Model):
     prefill_date = fields.Date(string='Prefill Date')
     prefill_datetime = fields.Datetime(string='Prefill Datetime')
     prefill_signature = fields.Binary(string='Prefill Signature')
+    pcbu_1_details = fields.Text(
+        string="PCBU-1 Details",
+    )
+    pcbu_2_details = fields.Text(
+        string="PCBU-2 Details"
+    )
+
+    site_name = fields.Text(
+        string="PCBU-2 Details"
+    )
 
     potential_hazard_ids = fields.Many2many(
         'survey.potential_hazard',relation='survey_assessment_hazard_rel', string="Potential Hazards / Risks"

@@ -72,6 +72,8 @@
                         <field name="order_ids" widget="section_and_note_one2many">
                             <tree string="Sale Orders" delete="false" create="0" editable="bottom">
                                 <field name="name" string="SO Number" readonly="1"/>
+                                <field name="partner_id" string="Customer" readonly="1"/>
+                                <field name="category_ids" widget="many2many_tags"  string="Categories" readonly="1"/>
                                 <field name="state" string="SO Status"/>
                                 <field name="amount_total" string="SO Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 

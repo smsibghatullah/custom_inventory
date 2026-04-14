@@ -12,6 +12,16 @@ from odoo.tools import float_is_zero, format_amount, format_date, html_keep_url,
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    state = fields.Selection([
+        ('draft', 'Draft Quotation'),
+        ('sent', 'Quotation Sent'),
+        ('awaiting', 'Awaiting'),
+        ('sale', 'Sale Order'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled'),
+    ], string='Status', readonly=True, copy=False, index=True,
+    track_visibility='onchange', default='draft')
+
     brand_id = fields.Many2one(
         'brand.master', 
         string='Brand *',

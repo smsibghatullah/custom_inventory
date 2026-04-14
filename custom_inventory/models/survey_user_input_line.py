@@ -12,6 +12,9 @@ class SurveyUserInputLine(models.Model):
         ('static_content', 'Static Content') ,
         ('risk', 'Risk'),
         ('table', 'Table'),
+        ('pcbu1_detail', 'PCBU1 Detail'),
+        ('pcbu2_detail', 'PCBU2 Detail'),
+        ('site_name', 'Site Name'),
     ])
     hazard_ids = fields.Many2many(
         'survey.potential_hazard',
@@ -49,6 +52,17 @@ class SurveyUserInputLine(models.Model):
         readonly=True
     )
 
+    pcbu_1_details = fields.Text(
+        string="PCBU-1 Details",
+    )
+    pcbu_2_details = fields.Text(
+        string="PCBU-2 Details"
+    )
+
+    site_name = fields.Text(
+        string="Site Name"
+    )
+
     def _compute_display_name(self):
         for line in self:
             if line.answer_type == 'char_box':
@@ -68,7 +82,13 @@ class SurveyUserInputLine(models.Model):
             elif line.answer_type == 'risk':
                 line.display_name = 'Risk' 
             elif line.answer_type == 'table':
-                line.display_name = 'Table'             
+                line.display_name = 'Table'
+            elif line.answer_type == 'pcbu1_detail':
+                line.display_name = line.pcbu_1_details
+            elif line.answer_type == 'pcbu2_detail':
+                line.display_name = line.pcbu_2_details  
+            elif line.answer_type == 'site_name':
+                line.display_name = line.site_name                         
             elif line.answer_type == 'suggestion':
                 if line.matrix_row_id:
                     line.display_name = f'{line.suggested_answer_id.value}: {line.matrix_row_id.value}'
@@ -226,6 +246,24 @@ class ReportEmploymentCertificate(models.AbstractModel):
         grouped_data = {}
         risk_register = []
 
+        def _format_date_value(value):
+            if not value:
+                return ''
+            try:
+                date_val = fields.Date.to_date(value)
+                return date_val.strftime('%d-%m-%Y') if date_val else ''
+            except Exception:
+                return ''
+
+        def _format_datetime_value(value):
+            if not value:
+                return ''
+            try:
+                dt_val = fields.Datetime.to_datetime(value)
+                return dt_val.strftime('%d-%m-%Y %H:%M') if dt_val else ''
+            except Exception:
+                return ''
+
         # ================= BUILD RAW DATA =================
         for user_input in user_inputs:
 
@@ -281,6 +319,9 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     'table_columns': [],
                     'table_rows': [],
                     'risk': [],
+                    'pcbu1_detail': '',
+                    'pcbu2_detail': '',
+                    'site_name': '',
                 }
 
                 # ---------- SIMPLE CHOICE ----------
@@ -305,29 +346,29 @@ class ReportEmploymentCertificate(models.AbstractModel):
 
                 # ---------- TABLE ----------
                 elif question.question_type == 'table':
-                        cols, rows = {}, {}
+                    cols, rows = {}, {}
 
-                        for ln in question_lines:
-                            for tl in ln.table_ids:
+                    for ln in question_lines:
+                        for tl in ln.table_ids:
 
-                                cols.setdefault(tl.column_no, {
-                                    'column_no': tl.column_no,
-                                    'column_name': tl.column_name
-                                })
+                            cols.setdefault(tl.column_no, {
+                                'column_no': tl.column_no,
+                                'column_name': tl.column_name
+                            })
 
-                                rows.setdefault(tl.row_no, {
-                                    'row_no': tl.row_no,
-                                    'cells': {}
-                                })
+                            rows.setdefault(tl.row_no, {
+                                'row_no': tl.row_no,
+                                'cells': {}
+                            })
 
-                                rows[tl.row_no]['cells'][tl.column_no] = {
-                                    'value_type': tl.value_type,
-                                    'value': tl.value,
-                                    'signature_value': tl.signature_value
-                                }
+                            rows[tl.row_no]['cells'][tl.column_no] = {
+                                'value_type': tl.value_type,
+                                'value': tl.value,
+                                'signature_value': tl.signature_value
+                            }
 
-                        answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
-                        answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])
+                    answers['table_columns'] = sorted(cols.values(), key=lambda c: c['column_no'])
+                    answers['table_rows'] = sorted(rows.values(), key=lambda r: r['row_no'])
 
                 # ---------- MATRIX ----------
                 elif question.question_type == 'matrix':
@@ -386,12 +427,28 @@ class ReportEmploymentCertificate(models.AbstractModel):
                     answers['char_box'] = ln.value_char_box or answers['char_box']
                     answers['text_box'] = ln.value_text_box or answers['text_box']
                     answers['numerical_box'] = ln.value_numerical_box or answers['numerical_box']
-                    answers['date'] = ln.value_date or answers['date']
-                    answers['datetime'] = ln.value_datetime or answers['datetime']
+
+                    # ===== DATE FORMAT: DD-MM-YYYY =====
+                    formatted_date = _format_date_value(ln.value_date)
+                    answers['date'] = formatted_date or answers['date']
+
+                    # ===== DATETIME FORMAT: DD-MM-YYYY HH:MM =====
+                    formatted_datetime = _format_datetime_value(ln.value_datetime)
+                    answers['datetime'] = formatted_datetime or answers['datetime']
+
                     answers['digital_signature'] = ln.digital_signature or answers['digital_signature']
                     answers['static_content'] = self._clean_html_unicode(
                         ln.static_content
                     ) or answers['static_content']
+
+                    if question.question_type == 'pcbu1_detail':
+                        answers['pcbu_1_details'] = ln.pcbu_1_details or ''
+
+                    elif question.question_type == 'pcbu2_detail':
+                        answers['pcbu_2_details'] = ln.pcbu_2_details or ''
+
+                    elif question.question_type == 'site_name':
+                        answers['site_name'] = ln.site_name or ''
 
                 grouped_data[group_id]['headings'][heading_id]['questions'].append({
                     'question_id': question.id,
