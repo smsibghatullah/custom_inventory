@@ -1691,7 +1691,7 @@
         <t t-foreach="docs" t-as="o">
 
             <!-- ================= COMPANY ================= -->
-            <t t-set="company" t-value="o.project_id.company_id or env.company"/>
+            <t t-set="company" t-value="o.project_id.company_id or o.task_id.project_id.company_id "/>
 
             <!-- ================================================= -->
             <!-- COVER PAGE -->
