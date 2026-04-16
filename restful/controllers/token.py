@@ -373,6 +373,7 @@ class AccessToken(http.Controller):
 
         # ---------------- Mobile Uploaded Attachments ----------------
         print(company,"uploaded_files===========================")
+        
         for file in uploaded_files:
             try:
                 new_attachment = request.env['ir.attachment'].sudo().create({
