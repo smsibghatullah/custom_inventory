@@ -1800,7 +1800,7 @@
                                         text-align:left;
                                         margin-left:20px
                                     ">
-                                       <span t-field="o.project_id.pcbu_1_details or o.task_id.project_id.pcbu_1_details" />
+                                        <t t-esc="o.project_id.pcbu_1_details or o.task_id.project_id.pcbu_1_details"/>
                                     </div>
                                 </div>
 
@@ -1819,7 +1819,7 @@
                                         text-align:left;
                                         margin-left:20px
                                     ">
-                                        <span t-field="o.project_id.pcbu_2_details or o.task_id.project_id.pcbu_2_details" />
+                                         <t t-esc="o.project_id.pcbu_2_details or o.task_id.project_id.pcbu_2_details"/>
                                     </div>
                                 </div>
 
