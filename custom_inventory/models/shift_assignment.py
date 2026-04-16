@@ -481,6 +481,20 @@ class ShiftSurveyAssignedForms(models.Model):
         store=False
     )
 
+    @api.onchange('survey_type')
+    def _onchange_survey_type(self):
+        for rec in self:
+            if rec.survey_type == 'project':
+                # auto select first available project
+                if rec.available_project_ids:
+                    rec.project_id = rec.available_project_ids[0]
+                rec.task_id = False  # clear task
+
+            elif rec.survey_type == 'task':
+                # auto select first available task
+                if rec.available_task_ids:
+                    rec.task_id = rec.available_task_ids[0]
+                rec.project_id = False  # clear project
 
     @api.depends('shift_main_id')
     def _compute_available_projects(self):
