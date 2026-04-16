@@ -1779,7 +1779,7 @@
                                         text-align:left;
                                         margin-left:20px
                                     ">
-                                        <t t-esc="o.project_id.name"/>
+                                        <t t-esc="o.project_id.name or o.task_id.project_id.name"/>
                                     </div>
                                 </div>
 
