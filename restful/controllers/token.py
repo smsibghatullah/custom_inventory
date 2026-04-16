@@ -372,7 +372,7 @@ class AccessToken(http.Controller):
                     company = user_input.task_id.project_id.company_id
 
         # ---------------- Mobile Uploaded Attachments ----------------
-        print(uploaded_files,"uploaded_files===========================")
+        print(company,"uploaded_files===========================")
         for file in uploaded_files:
             try:
                 new_attachment = request.env['ir.attachment'].sudo().create({
@@ -384,9 +384,6 @@ class AccessToken(http.Controller):
                 attachments.append(new_attachment.id)
             except Exception as e:
                 _logger.error(f"Attachment error: {str(e)}")
-
-        if not company:
-            company = request.env.user.company_id
 
         # ---------------- Send Email ----------------
         mail_values = {

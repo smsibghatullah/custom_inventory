@@ -1725,21 +1725,21 @@
                     </div>
 
                     <!-- COMPANY NAME -->
-                    <div style="
+                    <!-- <div style="
                         font-size:38px;
                         font-weight:700;
                         color:#9c9c9c;
                         margin-bottom:35px;
                     ">
                         <t t-esc="company.name"/>
-                    </div>
+                    </div> -->
 
                     <!-- MAIN TITLE -->
                     <div style="font-size:36px; font-weight:800;">
                         <t t-esc="o.survey_id.display_name"/>
                     </div>
 
-                    <div style="
+                    <!-- <div style="
                         margin-top:10px;
                         font-size:26px;
                         font-weight:600;
@@ -1747,7 +1747,7 @@
                         margin-bottom:10px
                     ">
                         Installation / Removal of Shrinkwrap
-                    </div>
+                    </div> -->
 
                     <div style="height:60px;"></div>
 
@@ -1867,7 +1867,7 @@
             font-weight:700;
             color:#1c1c5a;
         ">
-            <t t-esc="o.project_id.name or ''"/>
+            <t t-esc="o.survey_id.display_name or ''"/>
         </div>
 
         <div style="
