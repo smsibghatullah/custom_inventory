@@ -86,7 +86,12 @@
                     </header>
                     <sheet>
                         <group>
+                        <group>
                             <field name="name" readonly="state != 'draft'" />
+                        </group>
+                        <group>
+                            <field name="id" readonly="1" />
+                        </group>
                         </group>
                          <group>
                             <div class="o_form_label">Date</div>

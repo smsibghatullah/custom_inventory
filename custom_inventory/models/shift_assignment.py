@@ -736,6 +736,32 @@ class Task(models.Model):
 
     survey_count = fields.Integer(string="Surveys", compute="_compute_survey_count")
     survey_form_count = fields.Integer(string="Surveys Forms", compute="_compute_survey_form_count")
+    main_shift_count = fields.Integer(
+        string="Main Shift Assignments",
+        compute="_compute_main_shift_count"
+    )
+
+    def _compute_main_shift_count(self):
+        for rec in self:
+            assignments = self.env['shift.assignment'].search([
+                ('task_id', '=', rec.id)
+            ])
+            main_ids = assignments.mapped('main_shift_assignment_id.id')
+            rec.main_shift_count = len(set(main_ids))
+
+    def action_open_main_shift(self):
+        assignments = self.env['shift.assignment'].search([
+            ('task_id', '=', self.id)
+        ])
+        main_ids = assignments.mapped('main_shift_assignment_id.id')
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Main Shift Assignments',
+            'res_model': 'shift.assignment.main',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', main_ids)],
+        }
 
     def _compute_survey_form_count(self):
         for project in self:

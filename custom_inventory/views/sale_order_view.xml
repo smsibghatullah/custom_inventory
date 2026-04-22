@@ -504,6 +504,13 @@
                             <span class="o_stat_text">Sales Order</span>
                         </div>
                 </button>
+                 <button name="action_open_main_shift"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-calendar">
+
+                <field name="main_shift_count" widget="statinfo" string="Main Shifts"/>
+            </button>
             </xpath>
             <!-- <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="invisible">not allow_billable</attribute>
