@@ -104,7 +104,9 @@
                         <field name="order_ids" widget="section_and_note_one2many" options="{'no_create': True}">
                             <tree string="Sale Orders" delete="false" editable="bottom" create="0">
                                 <field name="name" string="SO Number" readonly="1"/>
-                                <field name="amount_total" string="Revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>                                
+                                <field name="amount_total" string="Revenue" widget="monetary" options="{'currency_field': 'currency_id'}"/>  
+                                <field name="total_product_cost" string="Product Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>                              
+                                <field name="total_timesheet_cost" string="Labour Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="profitability_amount_cost_so" string="Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field 

@@ -377,6 +377,8 @@ class SaleOrderLead(models.Model):
     amount_paid_so = fields.Monetary(compute='_compute_amounts_so', string="Paid Amount", currency_field='currency_id')
     amount_cost_so = fields.Monetary(compute='_compute_cost_so', string="Total Cost", currency_field='currency_id')
     profitability_amount_cost_so = fields.Monetary(compute='_compute_cost_so', string="Total Cost", currency_field='currency_id')
+    total_product_cost = fields.Monetary(compute='_compute_cost_so', string="Total Product Cost", currency_field='currency_id')
+    total_timesheet_cost = fields.Monetary(compute='_compute_cost_so', string="Total Timesheet Cost", currency_field='currency_id')
     other_profitability_cost_so = fields.Monetary(
         string="Other Cost", 
         currency_field='currency_id', 
@@ -490,6 +492,8 @@ class SaleOrderLead(models.Model):
                 total_product_cost += cost * line.product_uom_qty
 
             order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost
+            order.total_product_cost = total_product_cost
+            order.total_timesheet_cost = total_timesheet_cost
             order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so
 
             revenue = order.amount_total or 0.0

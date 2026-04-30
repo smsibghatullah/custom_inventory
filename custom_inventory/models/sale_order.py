@@ -1138,3 +1138,21 @@ class ProjectProject(models.Model):
                 task.tag_ids = [(6, 0, project_tags)]
 
         return task
+
+class AccountAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+
+    currency_id = fields.Many2one(
+        'res.currency',
+        related='company_id.currency_id',
+        store=True,
+        readonly=True
+    )
+
+    user_hourly_rate = fields.Monetary(
+        string="Hourly Rate",
+        related='employee_id.hourly_cost',
+        currency_field='currency_id',
+        store=True,
+        readonly=True
+    )
