@@ -1156,3 +1156,15 @@ class AccountAnalyticLine(models.Model):
         store=True,
         readonly=True
     )
+
+    line_total_amount = fields.Monetary(
+        string="Calculated Cost",
+        compute="_compute_line_total_amount",
+        currency_field='currency_id',
+        store=True
+    )
+
+    @api.depends('unit_amount', 'user_hourly_rate')
+    def _compute_line_total_amount(self):
+        for rec in self:
+            rec.line_total_amount = rec.unit_amount * rec.user_hourly_rate
