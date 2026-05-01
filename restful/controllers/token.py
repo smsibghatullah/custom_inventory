@@ -352,6 +352,7 @@ class AccessToken(http.Controller):
         survey_names_list = []
         task_names_list = []
         project_names_list = []
+        shift_assignment_links = []
 
         for user_input in user_inputs:
 
@@ -366,6 +367,18 @@ class AccessToken(http.Controller):
                 project_names_list.append(user_input.project_id.name)
             elif user_input.task_id and user_input.task_id.project_id:
                 project_names_list.append(user_input.task_id.project_id.name)
+
+            if user_input.main_shift_assignment_id:
+                assignment = user_input.main_shift_assignment_id
+                assignment_name = assignment.display_name or getattr(assignment, 'name', False) or str(assignment.id)
+
+                shift_assignment_links.append(
+                    '<a href="#" data-oe-model="%s" data-oe-id="%s">%s</a>' % (
+                        assignment._name,
+                        assignment.id,
+                        assignment_name
+                    )
+                )
 
             if not company:
                 if user_input.project_id:
@@ -406,6 +419,7 @@ class AccessToken(http.Controller):
         survey_names = ', '.join(list(set(filter(None, survey_names_list)))) or 'Survey'
         task_names = ', '.join(list(set(filter(None, task_names_list)))) or ''
         project_names = ', '.join(list(set(filter(None, project_names_list)))) or ''
+        shift_assignments = ', '.join(list(set(filter(None, shift_assignment_links)))) or ''
         company_name = company.name if company else request.env.user.company_id.name
 
         email_to = ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids
@@ -421,6 +435,7 @@ class AccessToken(http.Controller):
             'survey_names': survey_names,
             'task_names': task_names,
             'project_names': project_names,
+            'shift_assignments': shift_assignments,
             'total_reports': len(user_inputs),
             'company_name': company_name,
             'email_from': email_from,
@@ -474,6 +489,7 @@ class AccessToken(http.Controller):
                     <li><b>Subject:</b> %s</li>
                     <li><b>Survey:</b> %s</li>
                     <li><b>Project:</b> %s</li>
+                    <li><b>Shift Assignment:</b> %s</li>
                     <li><b>Total Reports:</b> %s</li>
                 </ul>
                 <hr/>
@@ -485,6 +501,7 @@ class AccessToken(http.Controller):
                 subject or '',
                 survey_names or '',
                 project_names or '',
+                shift_assignments or '',
                 len(user_inputs),
                 body_html or ''
             )
@@ -501,7 +518,6 @@ class AccessToken(http.Controller):
             "success": True,
             "message": "Survey PDFs and attachments sent successfully"
         }
-
 
 
     @http.route('/api/survey/update_input/<int:record_id>', type='json', auth='user', methods=['POST'], csrf=False)
