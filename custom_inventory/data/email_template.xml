@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="email_template_survey_result_report" model="mail.template">
+            <field name="name">Survey Result Report Email</field>
+            <field name="model_id" ref="survey.model_survey_user_input"/>
+            <field name="subject">{{ ctx.get('survey_names') or 'Survey' }} - Survey Results</field>
+            <field name="email_from">{{ ctx.get('email_from') or user.email_formatted }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333;">
+                    <p>Dear <t t-out="ctx.get('partner_name') or 'User'"/>,</p>
+
+                    <p>Please find attached the survey result report(s).</p>
+
+                    <table style="border-collapse: collapse; margin-top: 10px; margin-bottom: 15px;">
+                        <tr>
+                            <td style="padding: 5px 10px;"><b>Survey</b></td>
+                            <td style="padding: 5px 10px;"><t t-out="ctx.get('survey_names') or ''"/></td>
+                        </tr>
+
+                        <t t-if="ctx.get('task_names')">
+                            <tr>
+                                <td style="padding: 5px 10px;"><b>Task</b></td>
+                                <td style="padding: 5px 10px;"><t t-out="ctx.get('task_names')"/></td>
+                            </tr>
+                        </t>
+
+                        <t t-if="ctx.get('project_names')">
+                            <tr>
+                                <td style="padding: 5px 10px;"><b>Project</b></td>
+                                <td style="padding: 5px 10px;"><t t-out="ctx.get('project_names')"/></td>
+                            </tr>
+                        </t>
+
+                        <tr>
+                            <td style="padding: 5px 10px;"><b>Total Reports</b></td>
+                            <td style="padding: 5px 10px;"><t t-out="ctx.get('total_reports') or 0"/></td>
+                        </tr>
+                    </table>
+
+                    <p>Regards,<br/>
+                    <b><t t-out="ctx.get('company_name') or user.company_id.name"/></b></p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

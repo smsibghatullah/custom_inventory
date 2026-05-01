@@ -12,6 +12,7 @@ import base64
 from odoo.service import db
 from datetime import date
 from datetime import datetime
+from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
 
@@ -328,26 +329,49 @@ class AccessToken(http.Controller):
         try:
             payload = json.loads(payload_str or "{}")
         except Exception as e:
-            return {"success": False, "error": f"Invalid JSON: {str(e)}"}
+            return {"success": False, "error": "Invalid JSON: %s" % str(e)}
 
         user_input_ids = payload.get("user_input_ids", [])
         recipient_ids = payload.get("recipients", [])
         cc_emails = payload.get("cc", []) or payload.get("ccEmail", [])
-        uploaded_files = payload.get("attachments", [])   # ⭐ NEW
+        uploaded_files = payload.get("attachments", [])
 
         if not user_input_ids:
             return {"success": False, "error": "No survey inputs provided"}
 
+        user_inputs = request.env['survey.user_input'].sudo().browse(user_input_ids).exists()
+        if not user_inputs:
+            return {"success": False, "error": "Invalid survey inputs"}
+
         report_action = request.env.ref('custom_inventory.action_report_employment_certificate')
 
         attachments = []
-        company = None
+        company = False
+        task = False
 
-        # ---------------- Survey PDF Attachments ----------------
-        for u_input_id in user_input_ids:
-            user_input = request.env['survey.user_input'].sudo().browse(u_input_id)
-            if not user_input.exists():
-                continue
+        survey_names_list = []
+        task_names_list = []
+        project_names_list = []
+
+        for user_input in user_inputs:
+
+            if user_input.survey_id and user_input.survey_id.title:
+                survey_names_list.append(user_input.survey_id.title)
+
+            if user_input.task_id:
+                task = task or user_input.task_id
+                task_names_list.append(user_input.task_id.name or user_input.task_id.display_name)
+
+            if user_input.project_id:
+                project_names_list.append(user_input.project_id.name)
+            elif user_input.task_id and user_input.task_id.project_id:
+                project_names_list.append(user_input.task_id.project_id.name)
+
+            if not company:
+                if user_input.project_id:
+                    company = user_input.project_id.company_id
+                elif user_input.task_id and user_input.task_id.project_id:
+                    company = user_input.task_id.project_id.company_id
 
             pdf_content, _ = report_action._render_qweb_pdf(
                 report_action.report_name,
@@ -355,7 +379,7 @@ class AccessToken(http.Controller):
             )
 
             attachment = request.env['ir.attachment'].sudo().create({
-                'name': f"{user_input.survey_id.title or 'Survey'}_{user_input.id}.pdf",
+                'name': "%s_%s.pdf" % (user_input.survey_id.title or 'Survey', user_input.id),
                 'type': 'binary',
                 'datas': base64.b64encode(pdf_content),
                 'res_model': 'survey.user_input',
@@ -365,43 +389,113 @@ class AccessToken(http.Controller):
 
             attachments.append(attachment.id)
 
-            if not company:
-                if user_input.project_id:
-                    company = user_input.project_id.company_id
-                elif user_input.task_id and user_input.task_id.project_id:
-                    company = user_input.task_id.project_id.company_id
+        company = company or request.env.user.company_id
 
-        # ---------------- Mobile Uploaded Attachments ----------------
-        print(company,"uploaded_files===========================")
-        
         for file in uploaded_files:
             try:
                 new_attachment = request.env['ir.attachment'].sudo().create({
                     'name': file.get('name'),
                     'type': 'binary',
-                    'datas': file.get('data'),   # base64
+                    'datas': file.get('data'),
                     'mimetype': file.get('type'),
                 })
                 attachments.append(new_attachment.id)
             except Exception as e:
-                _logger.error(f"Attachment error: {str(e)}")
+                _logger.error("Attachment error: %s", str(e))
 
-        # ---------------- Send Email ----------------
-        mail_values = {
-            'subject': "Survey Results",
-            'body_html': f"""
+        survey_names = ', '.join(list(set(filter(None, survey_names_list)))) or 'Survey'
+        task_names = ', '.join(list(set(filter(None, task_names_list)))) or ''
+        project_names = ', '.join(list(set(filter(None, project_names_list)))) or ''
+        company_name = company.name if company else request.env.user.company_id.name
+
+        email_to = ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids
+        email_cc = ','.join(cc_emails) if cc_emails else False
+        email_from = company.brand_email if company and company.brand_email else request.env.user.email_formatted
+
+        template = request.env.ref(
+            'custom_inventory.email_template_survey_result_report',
+            raise_if_not_found=False
+        )
+
+        ctx = {
+            'survey_names': survey_names,
+            'task_names': task_names,
+            'project_names': project_names,
+            'total_reports': len(user_inputs),
+            'company_name': company_name,
+            'email_from': email_from,
+            'partner_name': 'User',
+        }
+
+        if template:
+            template_ctx = template.sudo().with_context(ctx)
+
+            rendered_subject = template_ctx._render_field(
+                'subject',
+                [user_inputs[0].id],
+                compute_lang=True
+            )
+
+            rendered_body = template_ctx._render_field(
+                'body_html',
+                [user_inputs[0].id],
+                compute_lang=True
+            )
+
+            subject = rendered_subject.get(user_inputs[0].id) or "%s - Survey Results" % survey_names
+            body_html = rendered_body.get(user_inputs[0].id) or ""
+        else:
+            subject = "%s - Survey Results" % survey_names
+            body_html = """
                 <p>Dear User,</p>
-                <p>Please find attached your survey result report(s).</p>
-                <p>Best regards,<br/>{company.name}</p>
-            """,
-            'email_to': ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids,
-            'email_cc': ','.join(cc_emails) if cc_emails else False,
-            'email_from': company.brand_email or request.env.user.email_formatted,
+                <p>Please find attached the survey result report(s).</p>
+                <p>Best regards,<br/>%s</p>
+            """ % company_name
+
+        mail_values = {
+            'subject': subject,
+            'body_html': body_html,
+            'email_to': email_to,
+            'email_cc': email_cc,
+            'email_from': email_from,
             'attachment_ids': [(6, 0, attachments)],
         }
 
         mail = request.env['mail.mail'].sudo().create(mail_values)
-        mail.send()
+        mail.sudo().send()
+
+        if task:
+            log_body = """
+            <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333;">
+                <p><b>Survey Email Sent</b></p>
+                <ul>
+                    <li><b>To:</b> %s</li>
+                    <li><b>CC:</b> %s</li>
+                    <li><b>Subject:</b> %s</li>
+                    <li><b>Survey:</b> %s</li>
+                    <li><b>Project:</b> %s</li>
+                    <li><b>Total Reports:</b> %s</li>
+                </ul>
+                <hr/>
+                %s
+            </div>
+            """ % (
+                email_to or '',
+                email_cc or '',
+                subject or '',
+                survey_names or '',
+                project_names or '',
+                len(user_inputs),
+                body_html or ''
+            )
+
+            task.sudo().message_post(
+                body=Markup(log_body),
+                subject=subject,
+                message_type='comment',
+                subtype_xmlid='mail.mt_comment',
+                attachment_ids=attachments
+            )
 
         return {
             "success": True,

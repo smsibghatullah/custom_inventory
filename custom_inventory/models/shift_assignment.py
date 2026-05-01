@@ -94,7 +94,8 @@ class ShiftRole(models.Model):
                                 "state": "in_progress",
                                 "partner_id":self.env.user.partner_id.id,
                                 "project_id": assigned_form.project_id.id,
-                                "deadline": assignments.date
+                                "deadline": assignments.date,
+                                "main_shift_assignment_id":self.id
                             })
 
                             for question in assigned_form.survey_id.question_ids:
@@ -213,7 +214,8 @@ class ShiftRole(models.Model):
                                     "state": "in_progress",
                                     "partner_id":self.env.user.partner_id.id,
                                     "task_id": assigned_form.task_id.id,
-                                    "deadline": assignments.date
+                                    "deadline": assignments.date,
+                                    "main_shift_assignment_id":self.id
                                 })
 
                                 for question in assigned_form.survey_id.question_ids:
@@ -638,6 +640,7 @@ class SurveyUserInput(models.Model):
         'project.task', 
         string="Task", 
     )
+    main_shift_assignment_id = fields.Many2one('shift.assignment.main', string="Shift Assignment")
 
     def action_open_send_pdf_wizard(self):
         self.ensure_one()

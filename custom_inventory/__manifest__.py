@@ -31,6 +31,7 @@ Developed by DSM (Dynamic Solution Maker). For more details, visit:
     'data': [
         
         'data/data.xml',
+        'data/email_template.xml',
         'security/ir.model.access.csv',
         'views/survey_report.xml',
         'views/brand_view.xml',
