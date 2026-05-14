@@ -491,7 +491,7 @@ class SaleOrderLead(models.Model):
                 cost = line.product_id.standard_price
                 total_product_cost += cost * line.product_uom_qty
 
-            order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost
+            order.profitability_amount_cost_so = total_timesheet_cost + total_product_cost + order.other_profitability_cost_so
             order.total_product_cost = total_product_cost
             order.total_timesheet_cost = total_timesheet_cost
             order.amount_cost_so = order.profitability_amount_cost_so + order.other_profitability_cost_so

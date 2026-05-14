@@ -907,49 +907,206 @@
 
         <br/>
 
-        <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
-        <!-- Product and Order line table -->
-        <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-            <tr>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">#</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Product</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Item / Description</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Tax</th>
-                <t t-if="o.discount_amount">
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Discount(%)</th>
-                </t>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Qty</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Rate</th>
-                <th  style="background-color: #666; color: white; padding: 10px; border: 1px solid black; font-weight: bold;">Amount</th>
-            </tr>
-        </thead>
-        <tbody class="sale_tbody">
-           <t t-set="index" t-value="0"/> 
-           <t t-set="lines" t-value="o.invoice_line_ids.sorted(key=lambda l: (-l.sequence, l.date, l.move_name, -l.id), reverse=True)"/>
-           <t t-foreach="lines" t-as="line">
-           <t t-set="index" t-value="index + 1"/>
-                <tr>
-                    <td style="border: 1px solid black; padding: 10px;"><t t-out="index"/></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.product_id.name'>-</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field='line.name'>-</span></td>
-                    <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
-                    <td style="border: 1px solid black; padding: 10px;" name="td_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }} {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
-                        <span t-out="taxes if taxes else 'N/A'" id="line_tax_ids">Tax 15%</span>
-                    </td>
-                    <t t-if="o.discount_amount">
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.discount">0.00</span></td>
-                    </t>
-                    <td style="border: 1px solid black; padding: 10px;">
-                            <span t-field="line.quantity">0.00</span>
-                            <span t-field="line.product_uom_id">units</span>
-                    </td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_unit">0.00</span></td>
-                    <td style="border: 1px solid black; padding: 10px;"><span t-field="line.price_subtotal">0.00</span></td>
-                </tr>
+     <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+
+<!-- Product and Invoice Line Table -->
+<table style="border-collapse: collapse; width: 100%;">
+
+    <!-- ================= HEADER ================= -->
+    <thead>
+        <tr>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                #
+            </th>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Product
+            </th>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Item / Description
+            </th>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Tax
+            </th>
+
+            <!-- DISCOUNT COLUMN -->
+            <t t-if="o.discount_amount">
+                <th style="background-color:#666;
+                           color:white;
+                           padding:10px;
+                           border:1px solid black;
+                           font-weight:bold;">
+                    Discount(%)
+                </th>
             </t>
-        </tbody>
-        </table>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Qty
+            </th>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Rate
+            </th>
+
+            <th style="background-color:#666;
+                       color:white;
+                       padding:10px;
+                       border:1px solid black;
+                       font-weight:bold;">
+                Amount
+            </th>
+
+        </tr>
+    </thead>
+
+    <!-- ================= BODY ================= -->
+    <tbody class="sale_tbody">
+
+        <!-- Dynamic colspan -->
+        <t t-set="colspan"
+           t-value="8 + (1 if o.discount_amount else 0)"/>
+
+        <!-- Product index -->
+        <t t-set="index" t-value="0"/>
+
+        <!-- Sort Lines -->
+        <t t-set="lines"
+           t-value="o.invoice_line_ids.sorted(
+                key=lambda l: (-l.sequence, l.date, l.move_name, -l.id),
+                reverse=True
+           )"/>
+
+        <!-- LOOP -->
+        <t t-foreach="lines" t-as="line">
+
+            <!-- ================= SECTION ================= -->
+            <t t-if="line.display_type == 'line_section'">
+
+                <tr>
+                    <td t-att-colspan="colspan"
+                        style="background-color:#f2f2f2;
+                               font-weight:bold;
+                               font-size:15px;
+                               padding:10px;
+                               border:1px solid black;">
+
+                        <span t-field="line.name"/>
+
+                    </td>
+                </tr>
+
+            </t>
+
+            <!-- ================= NORMAL PRODUCT ================= -->
+            <t t-if="line.display_type == 'product' or not line.display_type">
+
+                <t t-set="index" t-value="index + 1"/>
+
+                <tr>
+
+                    <!-- SERIAL -->
+                    <td style="border:1px solid black; padding:10px;">
+                        <t t-out="index"/>
+                    </td>
+
+                    <!-- PRODUCT -->
+                    <td style="border:1px solid black; padding:10px;">
+                        <span t-field="line.product_id.name"/>
+                    </td>
+
+                    <!-- DESCRIPTION -->
+                    <td style="border:1px solid black; padding:10px;">
+                        <span t-field="line.name"/>
+                    </td>
+
+                    <!-- TAX -->
+                    <t t-set="taxes"
+                       t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
+
+                    <td style="border:1px solid black; padding:10px;">
+                        <span t-out="taxes if taxes else 'N/A'"/>
+                    </td>
+
+                    <!-- DISCOUNT -->
+                    <t t-if="o.discount_amount">
+                        <td style="border:1px solid black; padding:10px;">
+                            <span t-field="line.discount"/>
+                        </td>
+                    </t>
+
+                    <!-- QUANTITY -->
+                    <td style="border:1px solid black; padding:10px;">
+
+                        <span t-field="line.quantity"/>
+                        <span t-field="line.product_uom_id"/>
+
+                    </td>
+
+                    <!-- RATE -->
+                    <td style="border:1px solid black; padding:10px;">
+                        <span t-field="line.price_unit"/>
+                    </td>
+
+                    <!-- SUBTOTAL -->
+                    <td style="border:1px solid black; padding:10px;">
+                        <span t-field="line.price_subtotal"/>
+                    </td>
+
+                </tr>
+
+            </t>
+
+            <!-- ================= NOTE ================= -->
+            <t t-if="line.display_type == 'line_note'">
+
+                <tr>
+
+                    <td t-att-colspan="colspan"
+                        style="font-style:italic;
+                               padding:10px;
+                               border:1px solid black;
+                               background-color:#fafafa;">
+
+                        <span t-field="line.name"/>
+
+                    </td>
+
+                </tr>
+
+            </t>
+
+        </t>
+
+    </tbody>
+
+</table>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; width: 100%;">
     
