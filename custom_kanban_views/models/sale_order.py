@@ -3,7 +3,7 @@ from odoo import models, fields, api
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    is_manual_conversion = fields.Boolean(string="Converted Manually", default=False)
+    is_manual_conversion = fields.Boolean(string="Converted Manually", default=False, copy=False)
     total_product_qty = fields.Float(string="Total Quantity", compute="_compute_total_product_qty", store=True)
 
     # ✅ Override state field to support group_expand for Kanban

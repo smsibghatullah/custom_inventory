@@ -81,7 +81,7 @@ class SaleOrder(models.Model):
     )
     bci_project = fields.Char(string='BCI Project')
     customer_description = fields.Text(string="Customer Description") 
-    is_email_conversion = fields.Boolean(string="Converted Email", default=False)
+    is_email_conversion = fields.Boolean(string="Converted Email", default=False, copy=False)
     project_id = fields.Many2one(
         'project.project',
         string='Project',
