@@ -72,7 +72,7 @@
                 <field name="immigration_submitted_hrs" widget="float_time"
                     groups="attendance_immigration.group_show_immigration,!base.group_system"/>
 
-            </xpath>
+            </xpath>  
 
             <!-- Approved Hours -->
             <xpath expr="//field[@name='approved_hours']" position="replace">
