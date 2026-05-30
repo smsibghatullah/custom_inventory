@@ -11,7 +11,16 @@ class SurveyQuestion(models.Model):
         ('pcbu1_detail', 'PCBU1 Detail'),
         ('pcbu2_detail', 'PCBU2 Detail'),
         ('site_name', 'Site Name'),
+        ('attachment', 'Attachment'),
     ])
+
+    attachment = fields.Binary(
+        string="Attachment"
+    )
+
+    attachment_filename = fields.Char(
+        string="Attachment Filename"
+    )
     sequence = fields.Integer(default=1)
 
     heading_id = fields.Many2one(

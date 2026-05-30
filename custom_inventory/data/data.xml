@@ -85,8 +85,7 @@
             <field name="report_ids" eval="False"/>
         </record>
 
-        
+      
 
-         
     </data>
 </odoo>

@@ -72,4 +72,49 @@
 
     </field>
   </record>
+
+
+
+    <!-- Search View -->
+    <record id="view_my_employee_attendance_search" model="ir.ui.view">
+        <field name="name">hr.attendance.my.employee.search</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <search string="My Employees Attendance">
+                <field name="employee_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="status"/>
+
+                <filter name="today"
+                        string="Today"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')),
+                                 ('check_in', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+
+                <filter name="submitted"
+                        string="Submitted"
+                        domain="[('status', '=', 'submitted')]"/>
+
+                <filter name="approved"
+                        string="Approved"
+                        domain="[('status', '=', 'approved')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_employee"
+                            string="Employee"
+                            context="{'group_by': 'employee_id'}"/>
+
+                    <filter name="group_status"
+                            string="Status"
+                            context="{'group_by': 'status'}"/>
+
+                    <filter name="group_check_in"
+                            string="Check In Date"
+                            context="{'group_by': 'check_in'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
 </odoo>

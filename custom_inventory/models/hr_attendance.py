@@ -54,6 +54,35 @@ class HrAttendance(models.Model):
     comment = fields.Text(string="Comments")
     notes = fields.Text(string="Notes")
 
+    is_my_selected_employee = fields.Boolean(
+        string='My Selected Employee',
+        compute='_compute_is_my_selected_employee',
+        search='_search_is_my_selected_employee'
+    )
+
+    @api.depends('employee_id')
+    def _compute_is_my_selected_employee(self):
+        current_employee_ids = self.env.user.employee_ids.ids
+
+        for attendance in self:
+            attendance.is_my_selected_employee = (
+                attendance.employee_id.id in current_employee_ids
+            )
+
+    def _search_is_my_selected_employee(self, operator, value):
+        employee_ids = self.env.user.employee_ids.ids
+
+        if not employee_ids:
+            return [('id', '=', 0)]
+
+        if operator in ('=', '==') and value:
+            return [('employee_id', 'in', employee_ids)]
+
+        if operator in ('!=', '<>') and value:
+            return [('employee_id', 'not in', employee_ids)]
+
+        return [('employee_id', 'in', employee_ids)]
+
 
     def _break_to_float(self, break_time):
         """

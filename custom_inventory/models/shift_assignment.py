@@ -101,7 +101,7 @@ class ShiftRole(models.Model):
                             for question in assigned_form.survey_id.question_ids:
                                 if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                     answer_type = 'suggestion'
-                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table']:
+                                elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table','attachment']:
                                     answer_type = question.question_type
                                 else:
                                     answer_type = 'text_box'
@@ -221,7 +221,7 @@ class ShiftRole(models.Model):
                                 for question in assigned_form.survey_id.question_ids:
                                     if question.question_type in ['simple_choice', 'multiple_choice', 'matrix']:
                                         answer_type = 'suggestion'
-                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table']:
+                                    elif question.question_type in ['text_box', 'char_box', 'numerical_box', 'date', 'datetime','digital_signature','static_content','risk','table','attachment']:
                                         answer_type = question.question_type
                                     else:
                                         answer_type = 'text_box'

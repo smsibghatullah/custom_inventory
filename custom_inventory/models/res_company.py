@@ -31,6 +31,8 @@ class ResCompany(models.Model):
         help='Select the Categories associated with this company'
     )
 
+    
+
     brand_email = fields.Char(string='Brand Email')
 
     primary_partner = fields.Many2one(

@@ -120,6 +120,13 @@
                                />
                         </tree>
                     </field>
+
+                    <group string="Attachment" invisible="question_type != 'attachment'">
+                    
+                   </group>
+
+                    <field name="attachment" filename="attachment_filename" invisible="question_type != 'attachment'"/>
+                        <field name="attachment_filename" colspan='2'  invisible="1"/>
                    
 
             </xpath>
@@ -154,6 +161,8 @@
                          <field name="value_text_box" colspan='2' invisible="answer_type != 'text_box'"/>
                         <field name="pcbu_1_details" colspan='2'  invisible="answer_type != 'pcbu1_detail'"/>
                         <field name="pcbu_2_details" colspan='2'  invisible="answer_type != 'pcbu2_detail'"/>
+                        <field name="attachment" filename="attachment_filename" colspan='2'  invisible="answer_type != 'attachment'"/>
+                        <field name="attachment_filename" colspan='2'  invisible="1"/>
                          <field name="site_name" colspan='2'  invisible="answer_type != 'site_name'"/>
                         <field name="matrix_row_id" colspan='2' />
                         <field name="suggested_answer_id" colspan='2' invisible="answer_type != 'suggestion'"/>

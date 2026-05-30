@@ -15,7 +15,15 @@ class SurveyUserInputLine(models.Model):
         ('pcbu1_detail', 'PCBU1 Detail'),
         ('pcbu2_detail', 'PCBU2 Detail'),
         ('site_name', 'Site Name'),
+        ('attachment', 'Attachment'),
     ])
+    attachment = fields.Binary(
+        string="Attachment"
+    )
+
+    attachment_filename = fields.Char(
+        string="Attachment Filename"
+    )
     hazard_ids = fields.Many2many(
         'survey.potential_hazard',
         relation='survey_input_assessment_hazard_rel', 
@@ -55,6 +63,7 @@ class SurveyUserInputLine(models.Model):
     pcbu_1_details = fields.Text(
         string="PCBU-1 Details",
     )
+
     pcbu_2_details = fields.Text(
         string="PCBU-2 Details"
     )
@@ -88,7 +97,9 @@ class SurveyUserInputLine(models.Model):
             elif line.answer_type == 'pcbu2_detail':
                 line.display_name = line.pcbu_2_details  
             elif line.answer_type == 'site_name':
-                line.display_name = line.site_name                         
+                line.display_name = line.site_name    
+            elif line.answer_type == 'attachment':
+                line.display_name = "Attachment"                          
             elif line.answer_type == 'suggestion':
                 if line.matrix_row_id:
                     line.display_name = f'{line.suggested_answer_id.value}: {line.matrix_row_id.value}'
