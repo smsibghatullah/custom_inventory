@@ -28,6 +28,7 @@
                             <field name="so_email"/>
                             <field name="po_email"/>
                             <field name="inv_email"/>
+                            <field name="survey_form_email"/>
                         </group>
                     </group>
 
@@ -136,6 +137,9 @@
                                     </group>
                                      <group string="Customer Statement Templates">
                                        <field name="mail_customer_statement_template_id" />
+                                    </group>
+                                     <group string="Survey Form Templates">
+                                       <field name="mail_survey_form_template_id" />
                                     </group>
                         </page>
                     </notebook>

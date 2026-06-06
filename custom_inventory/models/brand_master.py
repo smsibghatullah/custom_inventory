@@ -12,6 +12,7 @@ class BrandMaster(models.Model):
     so_email = fields.Char(string='Sale Order Email', required=True)
     po_email = fields.Char(string='Purchase Order Email')
     inv_email = fields.Char(string='Invoice Email')
+    survey_form_email = fields.Char(string='Survey Email')
     terms_conditions = fields.Text(string='Terms & Conditions')
     terms_conditions_invoice = fields.Text(string='Terms & Conditions')
     terms_conditions_purchase = fields.Text(string='Terms & Conditions')
@@ -68,6 +69,10 @@ class BrandMaster(models.Model):
     mail_customer_statement_template_id = fields.Many2one(
         comodel_name='mail.template',
         string="Use Customer Statement template",
+    )
+    mail_survey_form_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        string="Use Survey Form template",
     )
 
 

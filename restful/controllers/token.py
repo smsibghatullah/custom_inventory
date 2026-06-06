@@ -343,7 +343,9 @@ class AccessToken(http.Controller):
         if not user_inputs:
             return {"success": False, "error": "Invalid survey inputs"}
 
-        report_action = request.env.ref('custom_inventory.action_report_employment_certificate')
+        report_action = request.env.ref(
+            'custom_inventory.action_report_employment_certificate'
+        )
 
         attachments = []
         company = False
@@ -361,16 +363,25 @@ class AccessToken(http.Controller):
 
             if user_input.task_id:
                 task = task or user_input.task_id
-                task_names_list.append(user_input.task_id.name or user_input.task_id.display_name)
+                task_names_list.append(
+                    user_input.task_id.name or user_input.task_id.display_name
+                )
 
             if user_input.project_id:
                 project_names_list.append(user_input.project_id.name)
             elif user_input.task_id and user_input.task_id.project_id:
-                project_names_list.append(user_input.task_id.project_id.name)
+                project_names_list.append(
+                    user_input.task_id.project_id.name
+                )
 
             if user_input.main_shift_assignment_id:
                 assignment = user_input.main_shift_assignment_id
-                assignment_name = assignment.display_name or getattr(assignment, 'name', False) or str(assignment.id)
+
+                assignment_name = (
+                    assignment.display_name
+                    or getattr(assignment, 'name', False)
+                    or str(assignment.id)
+                )
 
                 shift_assignment_links.append(
                     '<a href="#" data-oe-model="%s" data-oe-id="%s">%s</a>' % (
@@ -383,7 +394,10 @@ class AccessToken(http.Controller):
             if not company:
                 if user_input.project_id:
                     company = user_input.project_id.company_id
-                elif user_input.task_id and user_input.task_id.project_id:
+                elif (
+                    user_input.task_id
+                    and user_input.task_id.project_id
+                ):
                     company = user_input.task_id.project_id.company_id
 
             pdf_content, _ = report_action._render_qweb_pdf(
@@ -392,7 +406,10 @@ class AccessToken(http.Controller):
             )
 
             attachment = request.env['ir.attachment'].sudo().create({
-                'name': "%s_%s.pdf" % (user_input.survey_id.title or 'Survey', user_input.id),
+                'name': "%s_%s.pdf" % (
+                    user_input.survey_id.title or 'Survey',
+                    user_input.id
+                ),
                 'type': 'binary',
                 'datas': base64.b64encode(pdf_content),
                 'res_model': 'survey.user_input',
@@ -404,6 +421,9 @@ class AccessToken(http.Controller):
 
         company = company or request.env.user.company_id
 
+        # ==========================================================
+        # Upload Extra Attachments
+        # ==========================================================
         for file in uploaded_files:
             try:
                 new_attachment = request.env['ir.attachment'].sudo().create({
@@ -413,22 +433,62 @@ class AccessToken(http.Controller):
                     'mimetype': file.get('type'),
                 })
                 attachments.append(new_attachment.id)
+
             except Exception as e:
-                _logger.error("Attachment error: %s", str(e))
+                _logger.error(
+                    "Attachment error: %s",
+                    str(e)
+                )
 
-        survey_names = ', '.join(list(set(filter(None, survey_names_list)))) or 'Survey'
-        task_names = ', '.join(list(set(filter(None, task_names_list)))) or ''
-        project_names = ', '.join(list(set(filter(None, project_names_list)))) or ''
-        shift_assignments = ', '.join(list(set(filter(None, shift_assignment_links)))) or ''
-        company_name = company.name if company else request.env.user.company_id.name
+        survey_names = ', '.join(
+            list(set(filter(None, survey_names_list)))
+        ) or 'Survey'
 
-        email_to = ','.join(recipient_ids) if isinstance(recipient_ids, list) else recipient_ids
-        email_cc = ','.join(cc_emails) if cc_emails else False
-        email_from = company.brand_email if company and company.brand_email else request.env.user.email_formatted
+        task_names = ', '.join(
+            list(set(filter(None, task_names_list)))
+        ) or ''
 
-        template = request.env.ref(
-            'custom_inventory.email_template_survey_result_report',
-            raise_if_not_found=False
+        project_names = ', '.join(
+            list(set(filter(None, project_names_list)))
+        ) or ''
+
+        shift_assignments = ', '.join(
+            list(set(filter(None, shift_assignment_links)))
+        ) or ''
+
+        company_name = (
+            company.name
+            if company
+            else request.env.user.company_id.name
+        )
+
+        # ==========================================================
+        # Brand Configuration
+        # ==========================================================
+        brand = company.brand_ids[:1] if company.brand_ids else False
+
+        email_to = (
+            ','.join(recipient_ids)
+            if isinstance(recipient_ids, list)
+            else recipient_ids
+        )
+
+        email_cc = (
+            ','.join(cc_emails)
+            if cc_emails
+            else False
+        )
+
+        email_from = (
+            brand.survey_form_email
+            if brand and brand.survey_form_email
+            else request.env.user.email_formatted
+        )
+
+        template = (
+            brand.mail_survey_form_template_id
+            if brand and brand.mail_survey_form_template_id
+            else False
         )
 
         ctx = {
@@ -443,6 +503,7 @@ class AccessToken(http.Controller):
         }
 
         if template:
+
             template_ctx = template.sudo().with_context(ctx)
 
             rendered_subject = template_ctx._render_field(
@@ -457,10 +518,20 @@ class AccessToken(http.Controller):
                 compute_lang=True
             )
 
-            subject = rendered_subject.get(user_inputs[0].id) or "%s - Survey Results" % survey_names
-            body_html = rendered_body.get(user_inputs[0].id) or ""
+            subject = (
+                rendered_subject.get(user_inputs[0].id)
+                or "%s - Survey Results" % survey_names
+            )
+
+            body_html = (
+                rendered_body.get(user_inputs[0].id)
+                or ""
+            )
+
         else:
+
             subject = "%s - Survey Results" % survey_names
+
             body_html = """
                 <p>Dear User,</p>
                 <p>Please find attached the survey result report(s).</p>
@@ -480,6 +551,7 @@ class AccessToken(http.Controller):
         mail.sudo().send()
 
         if task:
+
             log_body = """
             <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333;">
                 <p><b>Survey Email Sent</b></p>

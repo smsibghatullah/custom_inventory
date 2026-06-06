@@ -59,7 +59,9 @@ class SurveySendPDFWizard(models.TransientModel):
         project_names_list = []
         shift_assignment_links = []
 
-        # ========= GENERATE PDF FOR EACH USER INPUT =========
+        # ==========================================================
+        # GENERATE PDFs
+        # ==========================================================
         for user_input in user_inputs:
 
             if user_input.survey_id and user_input.survey_id.title:
@@ -67,7 +69,9 @@ class SurveySendPDFWizard(models.TransientModel):
 
             if user_input.task_id:
                 task = task or user_input.task_id
-                task_names_list.append(user_input.task_id.name or user_input.task_id.display_name)
+                task_names_list.append(
+                    user_input.task_id.name or user_input.task_id.display_name
+                )
 
             if user_input.project_id:
                 project_names_list.append(user_input.project_id.name)
@@ -102,20 +106,36 @@ class SurveySendPDFWizard(models.TransientModel):
 
             attachment_ids.append(attachment.id)
 
+        # ==========================================================
+        # DATA CLEANUP
+        # ==========================================================
         survey_names = ', '.join(list(set(filter(None, survey_names_list)))) or 'Survey'
         task_names = ', '.join(list(set(filter(None, task_names_list)))) or ''
         project_names = ', '.join(list(set(filter(None, project_names_list)))) or ''
         shift_assignments = ', '.join(list(set(filter(None, shift_assignment_links)))) or ''
 
         company_name = company.name if company else self.env.user.company_id.name
-        email_from = company.brand_email if company and company.brand_email else self.env.user.email_formatted
 
-        template = self.env.ref(
-            'custom_inventory.email_template_survey_result_report',
-            raise_if_not_found=False
+        # ==========================================================
+        # BRAND CONFIGURATION (IMPORTANT PART)
+        # ==========================================================
+        brand = company.brand_ids[:1] if company and company.brand_ids else False
+
+        email_from = (
+            brand.survey_form_email
+            if brand and brand.survey_form_email
+            else self.env.user.email_formatted
         )
 
-        # ========= SEND EMAIL =========
+        template = (
+            brand.mail_survey_form_template_id
+            if brand and brand.mail_survey_form_template_id
+            else False
+        )
+
+        # ==========================================================
+        # SEND EMAIL LOOP
+        # ==========================================================
         for partner in self.recipient_ids:
             if not partner.email:
                 continue
@@ -148,6 +168,7 @@ class SurveySendPDFWizard(models.TransientModel):
 
                 subject = rendered_subject.get(user_inputs[0].id) or "%s - Survey Report" % survey_names
                 body_html = rendered_body.get(user_inputs[0].id) or ""
+
             else:
                 subject = "%s - Survey Report" % survey_names
                 body_html = """
@@ -168,10 +189,12 @@ class SurveySendPDFWizard(models.TransientModel):
             mail = self.env['mail.mail'].sudo().create(mail_values)
             mail.sudo().send()
 
-            # ========= TASK LOG / CHATTER =========
+            # ======================================================
+            # TASK CHATTER LOG
+            # ======================================================
             if task:
                 log_body = """
-                <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333;">
+                <div style="font-family: Arial; font-size: 13px; color: #333;">
                     <p><b>Survey Email Sent</b></p>
                     <ul>
                         <li><b>To:</b> %s</li>
