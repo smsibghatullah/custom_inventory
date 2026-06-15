@@ -108,7 +108,7 @@
                                 <field name="total_product_cost" string="Product Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>                              
                                 <field name="total_timesheet_cost" string="Labour Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field name="other_profitability_cost_so" string="Other Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                <field name="profitability_amount_cost_so" string="Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="profitability_amount_cost_so" string="Total Cost" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 <field 
                                     name="total_profitability_so" 
                                     string="Profitability" 
