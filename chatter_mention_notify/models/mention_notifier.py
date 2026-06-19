@@ -408,5 +408,5 @@ class MirChatterMentionNotifier(models.AbstractModel):
             if send_discuss:
                 self._send_discuss_message(message, partner)
 
-            if send_email:
-                self._send_email_message(message, partner)
+            # if send_email:
+            #     self._send_email_message(message, partner)
