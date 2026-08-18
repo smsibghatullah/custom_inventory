@@ -109,11 +109,12 @@ class AccountJournal(models.Model):
                 accounts_data = response.json()
 
                 for acc_data in accounts_data.get('items', []):
-                    account_id = acc_data.get('_id')
+                    account_id = acc_data.get('_migrated')
                     matched_account = AkahuAccount.search([('formatted_account', '=', self.bank_account_id.acc_number)], limit=1)
-                    if not matched_account or acc_data.get('_id') != matched_account.akahu_account_id:
+                    print(acc_data.get('_migrated') ,"====================================western",matched_account.akahu_account_id)            
+                    if not matched_account or acc_data.get('_migrated') != matched_account.akahu_account_id:
                         continue 
-                    
+                    print(matched_account.akahu_account_id,"===============================================1234545666")
                     transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions?start=2025-09-01:00:00Z", headers=headers)
                     pending_transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions/pending", headers=headers)
                     if pending_transection_response.status_code == 200:
@@ -251,9 +252,9 @@ class ResPartnerBank(models.Model):
                 accounts_data = response.json()
 
                 for acc_data in accounts_data.get('items', []):
-                    account_id = acc_data.get('_id')
+                    account_id = acc_data.get('_migrated')
                     matched_account = AkahuAccount.search([('formatted_account', '=', self.acc_number)], limit=1)
-                    if not matched_account or acc_data.get('_id') != matched_account.akahu_account_id:
+                    if not matched_account or acc_data.get('_migrated') != matched_account.akahu_account_id:
                         continue 
                     
                     transection_response = requests.get(f"https://api.akahu.io/v1/accounts/{acc_data.get('_id')}/transactions?start=2025-09-01:00:00Z", headers=headers)
